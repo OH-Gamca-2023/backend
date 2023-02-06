@@ -31,10 +31,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'backend.users.apps.UsersConfig',
-    'backend.disciplines.apps.DisciplinesConfig',
-    'backend.posts.apps.PostsConfig',
-    'backend.ciphers.apps.CiphersConfig',
+    'users.apps.UsersConfig',
+    'disciplines.apps.DisciplinesConfig',
+    'posts.apps.PostsConfig',
+    'ciphers.apps.CiphersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

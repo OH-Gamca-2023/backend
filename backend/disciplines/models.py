@@ -1,6 +1,6 @@
 from django.db import models
 
-from backend.users.models import Category, Clazz
+from users.models import Category, Clazz
 
 
 class Tag(models.Model):
