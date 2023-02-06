@@ -1,4 +1,5 @@
 from django.db import models
+
 from backend.users.models import Category, Clazz
 
 

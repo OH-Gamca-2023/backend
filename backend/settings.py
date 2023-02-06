@@ -31,8 +31,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'backend.users',
-    'backend.disciplines',
+    'backend.users.apps.UsersConfig',
+    'backend.disciplines.apps.DisciplinesConfig',
+    'backend.posts.apps.PostsConfig',
+    'backend.ciphers.apps.CiphersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -122,6 +124,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+MEDIA_ROOT = BASE_DIR.parent / 'uploads'
+MEDIA_URL = '/uploads/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

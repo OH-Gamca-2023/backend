@@ -1,13 +1,13 @@
 from django.db import models
 
 from backend.disciplines.models import Discipline, Tag
-from backend.users.models import Category
+from backend.users.models import User, Category
 
 
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.CharField(max_length=1000)
-    author = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
 
     related_disciplines = models.ManyToManyField(Discipline, blank=True)
@@ -19,7 +19,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    author = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     content = models.CharField(max_length=1000)
     date = models.DateTimeField(auto_now_add=True)
 
