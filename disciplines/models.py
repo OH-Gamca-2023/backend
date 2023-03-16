@@ -1,9 +1,13 @@
 from django.db import models
 
-from users.models import Category, Clazz
+from users.models import Grade, Clazz
 
 
 class Tag(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Category(models.Model):
     name = models.CharField(max_length=100)
 
 
@@ -16,7 +20,8 @@ class Discipline(models.Model):
     time = models.TimeField(blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
 
-    target_categories = models.ManyToManyField(Category, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    target_grades = models.ManyToManyField(Grade, blank=True)
 
     date_published = models.BooleanField(default=False)
     description_published = models.BooleanField(default=False)
