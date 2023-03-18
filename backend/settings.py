@@ -143,3 +143,10 @@ MEDIA_URL = '/uploads/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://localhost:5173",
+    "https://2023.oh.gamca.sk",
+    "https://oh.gamca.sk",
+]

@@ -38,6 +38,7 @@ class BearerMiddleware:
             token = UserToken.objects.filter(token=raw_token, invalid=False, expires__gt=timezone.now()).first()
             if token:
                 login(request, token.user)
+                request.token = token
             else:
                 request.user = None
         else:

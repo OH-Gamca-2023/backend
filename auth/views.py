@@ -4,8 +4,9 @@ from urllib.parse import urlencode
 from django.contrib.auth import logout, login
 from django.core import serializers
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from auth.oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, get_token, \
     settings
@@ -76,3 +77,19 @@ def callback(request):
         url_params = '?status=error&error=' + str(e)
         return HttpResponseRedirect(settings['fe_redirect'] + url_params)
 
+
+@csrf_exempt
+def invalidate(request):
+    if not request.method == 'DELETE':
+        return HttpResponse(status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'not authenticated'}, status=401)
+
+    token = request.token
+    if token:
+        token.invalid = True
+        token.save()
+        return HttpResponse(status=204)
+    else:
+        return JsonResponse({'error': 'no token present'}, status=400)
