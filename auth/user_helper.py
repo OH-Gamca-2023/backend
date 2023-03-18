@@ -45,9 +45,19 @@ def handle_user_login(request, user):
     return django_user
 
 
+MAX_TOKENS_PER_USER = 5
+
+
 def create_user_token(request, user):
     token_string = get_random_string(length=64)
     expiry_date = timezone.now() + timedelta(days=7)
+
+    tokens = UserToken.objects.filter(user=user, invalid=False, expires__gt=timezone.now()).order_by('-created')
+    print(tokens.count(), tokens)
+    if tokens.count() >= MAX_TOKENS_PER_USER:
+        last_token = tokens.last()
+        last_token.invalid = True
+        last_token.save()
 
     token = UserToken.objects.create(
         token=token_string,

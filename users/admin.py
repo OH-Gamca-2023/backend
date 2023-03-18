@@ -102,9 +102,3 @@ class UserTokenAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'created', 'expires', 'token')
 
     list_filter = ('invalid',)
-
-    def is_expired(self, obj):
-        return timezone.now() > obj.expires
-
-    def token_censored(self, obj):
-        return re.sub(r'(?<=.{7}).(?=.{7})', '*', obj.token)

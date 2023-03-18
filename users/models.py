@@ -1,7 +1,10 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Grade(models.Model):
@@ -89,3 +92,13 @@ class UserToken(models.Model):
     expires = models.DateTimeField()
 
     invalid = models.BooleanField(default=False)
+
+    def token_censored(self):
+        return re.sub(r'(?<=.{7}).(?=.{7})', '*', self.token)
+
+    def is_expired(self):
+        return timezone.now() > self.expires
+
+    def __str__(self):
+        return self.user.username + ' - ' + self.token_censored() + (
+            '(invalid)' if self.invalid else ('(expired)' if self.is_expired() else ''))
