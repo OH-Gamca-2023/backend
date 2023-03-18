@@ -2,7 +2,7 @@ from django.db import models
 
 from backend import settings
 from disciplines.models import Discipline, Tag
-from users.models import Category
+from users.models import Grade
 
 
 class Post(models.Model):
@@ -14,10 +14,13 @@ class Post(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     related_disciplines = models.ManyToManyField(Discipline, blank=True, related_name='posts_for_discipline')
-    affected_categories = models.ManyToManyField(Category, blank=True, related_name='posts_for_category')
+    affected_grades = models.ManyToManyField(Grade, blank=True, related_name='posts_for_category')
     tags = models.ManyToManyField(Tag, blank=True)
 
     disable_comments = models.BooleanField(default=False)
+
+    def discipline_categories(self):
+        return self.related_disciplines.all().values_list('category', flat=True).distinct()
 
 
 class Comment(models.Model):
