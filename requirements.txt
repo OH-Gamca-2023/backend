@@ -10,3 +10,4 @@ markdown==3.4.1
 django-filter==22.1
 msal==1.21.0
 PyYAML==6.0
+django-admin-logs==1.0.2
