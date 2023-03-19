@@ -24,8 +24,9 @@ def handle_user_login(request, user):
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
         user_clazz = msft_user.get_clazz()
+        permission_group = user_clazz.grade.permission_group
 
-        User.objects.create(
+        user = User.objects.create(
             microsoft_user=msft_user,
             clazz=user_clazz,
 
@@ -39,6 +40,10 @@ def handle_user_login(request, user):
             is_staff=user_clazz.grade.name == 'Organizátori',
             is_superuser=False,
         )
+
+        if permission_group:
+            user.groups.add(permission_group)
+            user.save()
 
     django_user = User.objects.get(microsoft_user=msft_user)
 

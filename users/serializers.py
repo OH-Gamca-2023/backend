@@ -18,5 +18,5 @@ class ClazzSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'clazz', 'microsoft_user', 'type')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'clazz', 'microsoft_user', 'type', 'has_password')
         extra_kwargs = {'password': {'write_only': True}}
