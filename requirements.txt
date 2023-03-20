@@ -4,7 +4,7 @@ pip==23.0.1
 setuptools==66.0.0
 sqlparse==0.4.3
 tzdata==2022.7
-wheel==0.38.4
+wheel==0.40.0
 djangorestframework==3.14.0
 markdown==3.4.1
 django-filter==22.1
