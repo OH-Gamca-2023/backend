@@ -105,18 +105,6 @@ class User(AbstractUser):
         return self.password != ''
 
 
-@receiver(pre_save, sender=User)
-def edit_user(sender, instance, **kwargs):
-    # run if password, clazz or microsoft_user is changed
-    # also run if any of is_superuser, is_staff, is_active is changed and when user groups are changed
-    if instance.pk is None:
-        return
-    old_user = User.objects.get(pk=instance.pk)
-    if old_user.password != instance.password or old_user.clazz != instance.clazz or old_user.microsoft_user != instance.microsoft_user or \
-            old_user.is_superuser != instance.is_superuser or old_user.is_staff != instance.is_staff or old_user.is_active != instance.is_active or \
-            old_user.groups != instance.groups:
-        UserToken.objects.filter(user=instance).update(invalid=True)
-
 
 class UserToken(models.Model):
     token = models.CharField(max_length=150, primary_key=True)
