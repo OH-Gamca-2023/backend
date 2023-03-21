@@ -25,12 +25,19 @@ class UserChangeForm(forms.ModelForm):
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
-    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'clazz', 'date_joined')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'clazz')
+    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_filter = ('is_staff', 'is_admin', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'clazz')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superuser')}),
+        ('Advanced permissions', {
+            'classes': ('collapse',),
+            'description': '<h3 style="color: red;"><b>Advanced permission settings. Only change these if you know '
+                           'what you are doing ('
+                           'preferably not at all).</b></h3>',
+            'fields': ('groups', 'user_permissions')
+        }),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
@@ -38,7 +45,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'password1', 'password2', 'microsoft_user')}
          ),
         ('Personal info', {'fields': ('first_name', 'last_name', 'clazz')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superuser')}),
     )
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('email',)

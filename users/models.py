@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -17,7 +17,6 @@ class Grade(models.Model):
         ('Alumni', 'Alumni')
     )
     name = models.CharField(max_length=100, choices=grade_options, unique=True)
-    permission_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'grades'
@@ -86,10 +85,14 @@ class User(AbstractUser):
         },
     )
 
+    is_admin = models.BooleanField(_("admin"), default=False,
+                                   help_text=_('Specifies whether the user has admin privileges. '
+                                               'Has more privileges than regular staff but not as much as superuser.'))
+
     microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def type(self):
-        if self.is_superuser:
+        if self.is_superuser or self.is_admin:
             return 'admin'
         elif self.clazz.grade.name == 'Organizátori':
             return 'organizer'
