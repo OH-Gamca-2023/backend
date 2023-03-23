@@ -63,6 +63,8 @@ class UserAdmin(BaseUserAdmin):
                 else:
                     return self.readonly_fields + (
                         'is_superuser', 'is_admin', 'groups', 'user_permissions', 'microsoft_user')
+            if request.user.is_superuser and request.user.id == obj.id:
+                return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser')
         return self.readonly_fields
 
 
