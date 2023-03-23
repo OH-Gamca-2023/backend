@@ -1,9 +1,4 @@
-import datetime
-import re
-
-from django.db import models
 from django.contrib import admin
-from django.utils import timezone
 
 from .models import Grade, Clazz, User, MicrosoftUser, UserToken
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -30,7 +25,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'clazz')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superuser')}),
+        ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_admin', 'is_superuser')}),
         ('Advanced permissions', {
             'classes': ('collapse',),
             'description': '<h3 style="color: red;"><b>Advanced permission settings. Only change these if you know '
@@ -51,7 +46,24 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
 
-    readonly_fields = ('last_login', 'date_joined')
+    readonly_fields = ('last_login', 'date_joined', 'type')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            if not request.user.is_superuser:
+                if obj.is_admin or obj.is_superuser:
+                    if request.user.id != obj.id:
+                        return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
+                                                       'user_permissions', 'microsoft_user', 'username', 'email',
+                                                       'password', 'first_name', 'last_name', 'clazz', 'groups',
+                                                       'user_permissions', 'last_login', 'date_joined', 'type')
+                    else:
+                        return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
+                                                       'user_permissions', 'microsoft_user')
+                else:
+                    return self.readonly_fields + (
+                        'is_superuser', 'is_admin', 'groups', 'user_permissions', 'microsoft_user')
+        return self.readonly_fields
 
 
 admin.site.register(User, UserAdmin)

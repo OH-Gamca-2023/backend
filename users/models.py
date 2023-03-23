@@ -2,7 +2,7 @@ import re
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -98,12 +98,44 @@ class User(AbstractUser):
             return 'organizer'
         elif self.clazz.grade.name == 'Učitelia':
             return 'teacher'
+        elif self.clazz.grade.name == 'Alumni':
+            return 'alumni'
         else:
             return 'student'
 
     def has_password(self):
         return self.password != ''
 
+    def has_perm(self, perm, obj=None):
+        if self.is_superuser:
+            return True
+
+        group, action = perm.split('.') if '.' in perm else (perm, '')
+        if self.is_admin:
+            if group == 'users':
+                if action.startswith('view'):
+                    return not action.endswith('usertoken')
+                else:
+                    if perm == 'users.change_user':
+                        return True
+
+        return super().has_perm(perm, obj)
+
+    def has_module_perms(self, app_label):
+        if self.is_superuser:
+            return True
+
+        if self.is_admin:
+            if app_label == 'users':
+                return True
+
+        return super().has_module_perms(app_label)
+
+    def has_perms(self, perm_list, obj=None):
+        for perm in perm_list:
+            if not self.has_perm(perm, obj):
+                return False
+        return True
 
 
 class UserToken(models.Model):
