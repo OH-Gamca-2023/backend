@@ -4,7 +4,7 @@ from django.contrib.auth import login
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from users.models import MicrosoftUser, User, UserToken
+from users.models import MicrosoftUser, User, UserToken, Clazz, Grade
 
 
 def handle_user_login(request, user):
@@ -23,9 +23,10 @@ def handle_user_login(request, user):
 
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
+        user_clazz = process_clazz(msft_user)
         User.objects.create(
             microsoft_user=msft_user,
-            clazz=msft_user.get_clazz(),
+            clazz=user_clazz,
 
             username=f"{msft_user.given_name} {msft_user.surname}",
             email=msft_user.mail,
@@ -64,3 +65,48 @@ def create_user_token(request, user):
     )
 
     return token
+
+
+def process_clazz(msft_user):
+    if msft_user.get_clazz() is not None:
+        return msft_user.get_clazz()
+    else:
+        if msft_user.department == 'alumni':
+            return Clazz.objects.create(
+                name='Alumni',
+                grade=Grade.objects.get(name='Alumni'),
+                is_fake=True,
+                microsoft_department='alumni'
+            )
+        elif msft_user.department == 'zamestnanci':
+            return Clazz.objects.create(
+                name='Učitelia',
+                grade=Grade.objects.get(name='Učitelia'),
+                is_fake=True,
+                microsoft_department='zamestnanci'
+            )
+        else:
+            if '.' in msft_user.department:
+                year, clazz = msft_user.department.split('.')
+                return Clazz.objects.create(
+                    name=year+". "+clazz,
+                    grade=Grade.objects.get(name="3. Stupeň"),
+                    is_fake=False,
+                    microsoft_department=msft_user.department
+                )
+            else:
+                clazz = msft_user.department
+
+                grade = Grade.objects.get(name="3. Stupeň")
+                if clazz[:-1] in ['Prima', 'Sekunda', 'Tercia', 'Kvarta']:
+                    grade = Grade.objects.get(name="2. Stupeň")
+
+                if clazz[-1] == 'A' or clazz[-1] == 'B':
+                    clazz = clazz[:-1] + ' ' + clazz[-1]
+
+                return Clazz.objects.create(
+                    name=clazz,
+                    grade=grade,
+                    is_fake=False,
+                    microsoft_department=msft_user.department
+                )

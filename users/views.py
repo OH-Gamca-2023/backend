@@ -1,17 +1,69 @@
 import json
+import re
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from messages.error import not_authenticated, invalid_method, client_error
+from users.models import profile_edit_permission
 from users.serializers import *
 
 
+@csrf_exempt
 def current_user(request):
     if not request.user.is_authenticated:
         return not_authenticated()
-    user = UserSerializer(request.user)
-    return JsonResponse(user.data)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(request.user)
+        return JsonResponse(serializer.data)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        # validate that the user is allowed to edit all the fields present in the request
+        for field in data:
+            if field not in profile_edit_permission[request.user.type()]:
+                return client_error(403, 'no_permission.change', field)
+            if data[field] == '':
+                return client_error(400, 'non_empty', field)
+
+        if 'email' in data and re.match(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$', data['email']) is None:
+            return client_error(400, 'invalid', 'email')
+
+        user = User.objects.get(pk=request.user.pk)
+        user.first_name = data['first_name'] if 'first_name' in data else user.first_name
+        user.last_name = data['last_name'] if 'last_name' in data else user.last_name
+        user.email = data['email'] if 'email' in data else user.email
+        user.username = data['username'] if 'username' in data else user.username
+        user.save()
+
+        serializer = UserSerializer(user)
+        return JsonResponse(serializer.data)
+
+
+def user_permissions(request):
+    if not request.user.is_authenticated:
+        return not_authenticated()
+
+    user_type = request.user.type()
+
+    response = {
+        'user_type': user_type,
+        'staff': request.user.is_staff,
+        'admin': request.user.is_admin,
+        'superuser': request.user.is_superuser,
+        'permissions': [perm for perm in request.user.get_all_permissions()],
+    }
+
+    if not request.user.is_superuser:
+        response['details'] = 'For your account type there might be additional permissions available that are not ' \
+                              'listed here.'
+
+    if user_type in profile_edit_permission:
+        response['profile_edit'] = profile_edit_permission[user_type]
+    else:
+        response['profile_edit'] = []
+
+    return JsonResponse(response)
 
 
 @csrf_exempt

@@ -138,6 +138,15 @@ class User(AbstractUser):
         return True
 
 
+profile_edit_permission = {
+    'student': [],
+    'alumni': ['email'],
+    'teacher': ['email'],
+    'organizer': ['email', 'username', 'password'],
+    'admin': ['first_name', 'last_name', 'email', 'username', 'password'],
+}
+
+
 class UserToken(models.Model):
     token = models.CharField(max_length=150, primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

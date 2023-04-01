@@ -29,3 +29,4 @@ urlpatterns = [
     path('api/', include(api_urls)),
     path('', home, name='home'),
 ]
+
