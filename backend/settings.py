@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-huk^v&ovy(+tta08ki#@n4+vfozyqhdhgfr%^s31o9%7tm^okf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    'oh.gamca.sk',
+    '2023.oh.gamca.sk',
+]
 
 
 # Application definition
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_admin_logs',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -135,8 +140,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
-MEDIA_ROOT = BASE_DIR.parent / 'uploads'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_ROOT = BASE_DIR / 'uploads'
 MEDIA_URL = '/uploads/'
 
 # Default primary key field type
