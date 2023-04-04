@@ -26,6 +26,7 @@ api_urls = [
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    #  path('jet/', include('jet.urls', 'jet')),
     path('api/', include(api_urls)),
     path('', home, name='home'),
 ]

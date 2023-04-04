@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
 
 class Grade(models.Model):
@@ -16,11 +15,16 @@ class Grade(models.Model):
         ('Učitelia', 'Učitelia'),
         ('Alumni', 'Alumni')
     )
-    name = models.CharField(max_length=100, choices=grade_options, unique=True)
+    name = models.CharField("Názov", max_length=100, choices=grade_options, unique=True)
+
+    @property
+    def competing(self):
+        return self.name in ['2. Stupeň', '3. Stupeň']
+    competing.fget.short_description = 'Súťažná?'
 
     class Meta:
-        verbose_name_plural = 'grades'
-        verbose_name = 'grade'
+        verbose_name_plural = 'stupne'
+        verbose_name = 'stupeň'
 
     def __str__(self):
         return self.name
@@ -38,21 +42,21 @@ def create_grades(sender, instance, created, **kwargs):
 
 
 class Clazz(models.Model):
-    name = models.CharField(max_length=100)
-    grade = models.ForeignKey(Grade, on_delete=models.CASCADE)
-    is_fake = models.BooleanField(default=False)
+    name = models.CharField("Názov", max_length=100)
+    grade = models.ForeignKey(Grade, on_delete=models.CASCADE, verbose_name="Stupeň")
+    is_fake = models.BooleanField("Je nesúťažná", default=False)
     microsoft_department = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = 'classes'
-        verbose_name = 'class'
+        verbose_name_plural = 'triedy'
+        verbose_name = 'trieda'
 
     def __str__(self):
         return self.name
 
 
 class MicrosoftUser(models.Model):
-    id = models.CharField(max_length=150, primary_key=True)
+    id = models.CharField("Microsoft ID", max_length=150, primary_key=True)
     mail = models.CharField(max_length=150)
 
     display_name = models.CharField(max_length=150)
@@ -69,27 +73,30 @@ class MicrosoftUser(models.Model):
     def __str__(self):
         return self.display_name + ' (' + self.id + ')'
 
+    class Meta:
+        verbose_name_plural = 'Microsoft používatelia'
+        verbose_name = 'Microsoft používateľ'
+
 
 class User(AbstractUser):
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, null=True, blank=True)
 
     username = models.CharField(
-        _("username"),
+        "Používateľské meno",
         max_length=150,
         unique=True,
-        help_text=_(
-            "Required. 150 characters or fewer."
-        ),
+        help_text="Vyžadované. Max. 150 znakov.",
         error_messages={
-            "unique": _("A user with that username already exists."),
+            "unique": "Používateľ s týmto používateľským menom už existuje."
         },
     )
 
-    is_admin = models.BooleanField(_("admin"), default=False,
-                                   help_text=_('Specifies whether the user has admin privileges. '
-                                               'Has more privileges than regular staff but not as much as superuser.'))
+    is_admin = models.BooleanField("Administátor", default=False,
+                                      help_text="Používateľ je administrátorom. Administrátori majú viac práv ako "
+                                                "štandardní organizátori.")
 
-    microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True)
+    microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True,
+                                          verbose_name="Microsoft používateľ")
 
     def type(self):
         if self.is_superuser or self.is_admin:
@@ -148,24 +155,26 @@ profile_edit_permission = {
 
 
 class UserToken(models.Model):
-    token = models.CharField(max_length=150, primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField("Kód", max_length=150, primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Používateľ")
 
-    created = models.DateTimeField(auto_now_add=True)
-    expires = models.DateTimeField()
+    created = models.DateTimeField("Vytvorený", auto_now_add=True)
+    expires = models.DateTimeField("Platný do")
 
-    invalid = models.BooleanField(default=False)
+    invalid = models.BooleanField("Neplatný", default=False)
 
     def token_censored(self):
         return re.sub(r'(?<=.{7}).(?=.{7})', '*', self.token)
+    token_censored.short_description = 'Cenzurovaný kód'
 
     def is_expired(self):
         return timezone.now() > self.expires
+    is_expired.short_description = 'Vypršal?'
 
     def __str__(self):
         return self.user.username + ' - ' + self.token_censored() + (
             '(invalid)' if self.invalid else ('(expired)' if self.is_expired() else ''))
 
     class Meta:
-        verbose_name_plural = 'user tokens'
-        verbose_name = 'user token'
+        verbose_name_plural = 'prístupové kódy'
+        verbose_name = 'prístupový kód'

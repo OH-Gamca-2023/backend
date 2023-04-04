@@ -73,8 +73,8 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
+    list_display = ('name', 'competing')
+    search_fields = ('name', 'competing')
     ordering = ('name',)
     filter_horizontal = ()
 
