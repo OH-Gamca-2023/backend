@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from messages.error import not_authenticated, invalid_method, client_error
-from users.models import profile_edit_permission
+from users.permissions import profile_edit_permission
 from users.serializers import *
 
 
@@ -76,7 +76,7 @@ def change_password(request):
     if not request.user.is_staff:
         return client_error(403, 'no_permission.change', 'your password')
 
-    data = request.POST if request.method == 'POST' else json.loads(request.body)
+    data = json.loads(request.body)
 
     if 'new_password' not in data:
         return client_error(400, 'required', 'New password')
