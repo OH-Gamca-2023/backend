@@ -51,12 +51,8 @@ def user_permissions(request):
         'staff': request.user.is_staff,
         'admin': request.user.is_admin,
         'superuser': request.user.is_superuser,
-        'permissions': [perm for perm in request.user.get_all_permissions()],
+        'permissions': [(perm.content_type.app_label + '.' + perm.codename) for perm in request.user.get_all_permissions()],
     }
-
-    if not request.user.is_superuser:
-        response['details'] = 'For your account type there might be additional permissions available that are not ' \
-                              'listed here.'
 
     if user_type in profile_edit_permission:
         response['profile_edit'] = profile_edit_permission[user_type]

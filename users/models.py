@@ -1,6 +1,6 @@
 import re
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -119,6 +119,9 @@ class User(AbstractUser):
         if not self.is_active:
             return False
 
+        if isinstance(perm, Permission):
+            perm = perm.content_type.app_label + '.' + perm.codename
+
         if matches(force_blacklist, perm):
             return False
 
@@ -155,6 +158,12 @@ class User(AbstractUser):
 
     def has_perms(self, perm_list, obj=None):
         return all(self.has_perm(perm, obj) for perm in perm_list)
+
+    def get_user_permissions(self, obj=None):
+        return set(filter(self.has_perm, Permission.objects.all()))
+
+    def get_all_permissions(self, obj=None):
+        return self.get_user_permissions(obj).union(self.get_user_permissions(obj))
 
 
 class UserToken(models.Model):

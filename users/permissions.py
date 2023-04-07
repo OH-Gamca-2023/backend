@@ -1,4 +1,5 @@
 # all permissions are treated as regexes
+# as module splitter always use \\. (otherwise module permissions will not work)
 #
 # please use comments to explain why each permission or group of permissions is used
 # can be omitted if the permission is self-explanatory
@@ -30,15 +31,20 @@ admin = [
 ]
 
 # Organizer - permissions that organizers have by default
-organizer = []
+organizer = [
+    'disciplines\\.(.*)',
+    'posts\\.(.*)',
+    'users\\.view_grade',
+    'users\\.view_clazz',
+]
 
 # Default - permissions that all users (students, alumni, teachers) have by default
 default = []
 
 
-default_module_permissions = set(map(lambda x: x.split('.')[0], default))
-organizer_module_permissions = set(map(lambda x: x.split('.')[0], default + organizer))
-admin_module_permissions = set(map(lambda x: x.split('.')[0], default + organizer + admin))
+default_module_permissions = set(map(lambda x: x.split('\\.')[0], default))
+organizer_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organizer))
+admin_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organizer + admin))
 
 
 def matches(p_set, permission):
