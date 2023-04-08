@@ -21,6 +21,7 @@ api_urls = [
     path('auth/', include('auth.urls')),
     path('user/', include('users.urls')),
     path('status/', status, name='status'),
+    path('disciplines/', include('disciplines.urls')),
 ]
 
 

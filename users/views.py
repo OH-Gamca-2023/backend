@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from messages.error import not_authenticated, invalid_method, client_error
-from users.models import profile_edit_permission
+from users.permissions import profile_edit_permission
 from users.serializers import *
 
 
@@ -51,12 +51,8 @@ def user_permissions(request):
         'staff': request.user.is_staff,
         'admin': request.user.is_admin,
         'superuser': request.user.is_superuser,
-        'permissions': [perm for perm in request.user.get_all_permissions()],
+        'permissions': [(perm.content_type.app_label + '.' + perm.codename) for perm in request.user.get_all_permissions()],
     }
-
-    if not request.user.is_superuser:
-        response['details'] = 'For your account type there might be additional permissions available that are not ' \
-                              'listed here.'
 
     if user_type in profile_edit_permission:
         response['profile_edit'] = profile_edit_permission[user_type]
@@ -76,7 +72,7 @@ def change_password(request):
     if not request.user.is_staff:
         return client_error(403, 'no_permission.change', 'your password')
 
-    data = request.POST if request.method == 'POST' else json.loads(request.body)
+    data = json.loads(request.body)
 
     if 'new_password' not in data:
         return client_error(400, 'required', 'New password')

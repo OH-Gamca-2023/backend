@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from django.http import JsonResponse
 
-# Create your views here.
+from disciplines.models import Category
+from disciplines.serializers import CategorySerializer
+
+
+def categories(request):
+    serializer = CategorySerializer(Category.objects.all(), many=True)
+
+    return JsonResponse(serializer.data, safe=False)
