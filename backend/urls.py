@@ -15,8 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from backend.views import *
+
+api_urls = [
+    path('auth/', include('auth.urls')),
+    path('user/', include('users.urls')),
+    path('status/', status, name='status'),
+    path('disciplines/', include('disciplines.urls')),
+]
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
+    #  path('jet/', include('jet.urls', 'jet')),
+    path('api/', include(api_urls)),
+    path('', home, name='home'),
 ]
+
