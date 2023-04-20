@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from disciplines.models import *
-
+from kalendar.generator import generate
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -29,10 +29,10 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'description')
+            'fields': ('name', 'details')
         }),
         ('Categorisation', {
-            'fields': ('category', 'tags', 'target_grades')
+            'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
             'fields': ('date', 'time', 'location', 'volatile_date')
@@ -64,6 +64,10 @@ class DisciplineAdmin(admin.ModelAdmin):
     @admin.display(description='Target grades')
     def target_grades_str(self, obj):
         return ", ".join([str(grade) for grade in obj.target_grades.all()])
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        generate(request, "Discipline " + str(obj.id) + " was updated")
 
 
 @admin.register(Result)
