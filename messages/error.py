@@ -14,9 +14,9 @@ def client_error(status: int, message_code: str, *args):
     return JsonResponse({
         "status": status,
         "error": True,
-        "internalError": False,
-        "errorCode": message_code,
-        "errorMessage": message
+        "internal": False,
+        "error_code": message_code,
+        "error_message": message
     }, status=status)
 
 

@@ -1,10 +1,12 @@
 import re
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+
+from users.permissions import *
 
 
 class Grade(models.Model):
@@ -114,44 +116,54 @@ class User(AbstractUser):
         return self.password != ''
 
     def has_perm(self, perm, obj=None):
+        if not self.is_active:
+            return False
+
+        if isinstance(perm, Permission):
+            perm = perm.content_type.app_label + '.' + perm.codename
+
+        if matches(force_blacklist, perm):
+            return False
+
         if self.is_superuser:
             return True
+        elif super().has_perm(perm, obj):
+            return True
 
-        group, action = perm.split('.') if '.' in perm else (perm, '')
+        if matches(blacklist, perm):
+            return False
+
         if self.is_admin:
-            if group == 'users':
-                if action.startswith('view'):
-                    return not action.endswith('usertoken')
-                else:
-                    if perm == 'users.change_user':
-                        return True
+            if matches(admin, perm):
+                return True
 
-        return super().has_perm(perm, obj)
+        if self.is_staff:
+            if matches(organizer, perm):
+                return True
+
+        return matches(default, perm)
 
     def has_module_perms(self, app_label):
         if self.is_superuser:
             return True
+        elif not self.is_active:
+            return False
 
         if self.is_admin:
-            if app_label == 'users':
-                return True
-
-        return super().has_module_perms(app_label)
+            return app_label in admin_module_permissions
+        elif self.is_staff:
+            return app_label in organizer_module_permissions
+        else:
+            return app_label in default_module_permissions or super().has_module_perms(app_label)
 
     def has_perms(self, perm_list, obj=None):
-        for perm in perm_list:
-            if not self.has_perm(perm, obj):
-                return False
-        return True
+        return all(self.has_perm(perm, obj) for perm in perm_list)
 
+    def get_user_permissions(self, obj=None):
+        return set(filter(self.has_perm, Permission.objects.all()))
 
-profile_edit_permission = {
-    'student': [],
-    'alumni': ['email'],
-    'teacher': ['email'],
-    'organizer': ['email', 'username', 'password'],
-    'admin': ['first_name', 'last_name', 'email', 'username', 'password'],
-}
+    def get_all_permissions(self, obj=None):
+        return self.get_user_permissions(obj).union(self.get_user_permissions(obj))
 
 
 class UserToken(models.Model):
