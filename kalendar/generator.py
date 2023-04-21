@@ -1,10 +1,12 @@
 import json
 import random
 from datetime import datetime, date, time
+import time as time_p
 
 from disciplines.models import Discipline, Category
 from users.models import Grade
 from .models import GenerationEvent, Calendar
+
 
 
 def generate(request, cause):
@@ -96,6 +98,15 @@ def generate(request, cause):
             defaults={
                 "content_type": "text/calendar",
                 "content": ical_serialized_all,
+                "is_current": True,
+                "id": cal_id
+            }
+        )
+        Calendar.objects.update_or_create(
+            key="current",
+            defaults={
+                "content_type": "text/plain",
+                "content": time_p.time(),
                 "is_current": True,
                 "id": cal_id
             }
