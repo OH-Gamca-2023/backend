@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'disciplines.apps.DisciplinesConfig',
     'posts.apps.PostsConfig',
     'ciphers.apps.CiphersConfig',
+    'kalendar.apps.CalendarConfig',
     'jet.dashboard',
     'jet',
     'django.contrib.admin',
