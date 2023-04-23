@@ -1,0 +1,6 @@
+app_id: "b4c732ad-f922-452d-8515-633faccca296"
+redirect: "http://localhost:8000/api/auth/callback"
+fe_redirect: "http://localhost:5173/auth/login"
+scopes:
+  - user.read
+authority: "https://login.microsoftonline.com/b5df9d6f-f2dc-492a-ba67-7afdfa5eef57"

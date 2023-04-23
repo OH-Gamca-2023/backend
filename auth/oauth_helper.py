@@ -21,11 +21,12 @@ def save_cache(request, cache):
 
 
 def get_msal_app(cache=None):
+    secret = settings['app_secret'] if 'app_secret' in settings else os.environ.get('app_secret')
     # Initialize the MSAL confidential client
     auth_app = msal.ConfidentialClientApplication(
         settings['app_id'],
         authority=settings['authority'],
-        client_credential=settings['app_secret'],
+        client_credential=secret,
         token_cache=cache)
     return auth_app
 
