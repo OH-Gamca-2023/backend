@@ -22,9 +22,6 @@ ENV PYTHONUNBUFFERED=1
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Apply database migrations
-RUN python manage.py migrate --noinput
-
 # Add gunicorn to the PATH
 ENV PATH="/usr/local/bin:$PATH"
 
@@ -32,5 +29,4 @@ ENV PATH="/usr/local/bin:$PATH"
 EXPOSE 8000
 
 # Start the Django development server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi", "--access-logfile", "-", "--error-logfile", "-", \
-    "--workers", "4", "--timeout", "120"]
+CMD python manage.py migrate && gunicorn --bind 0.0.0.0:8000 backend.wsgi --access-logfile - --error-logfile - --workers 4 --timeout 120
