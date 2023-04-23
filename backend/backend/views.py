@@ -1,5 +1,4 @@
 from django.http import JsonResponse, HttpResponse
-from django.utils import timezone
 
 from messages.error import client_error, server_error
 

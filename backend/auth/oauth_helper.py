@@ -1,9 +1,17 @@
 import yaml
 import msal
+import os
 
 # Load the oauth_settings.yml file located in your app DIR
 stream = open('oauth_settings.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
+
+if 'redirect' in os.environ:
+    settings['redirect'] = os.environ.get('redirect')
+if 'fe_redirect' in os.environ:
+    settings['fe_redirect'] = os.environ.get('fe_redirect')
+if 'app_secret' in os.environ:
+    settings['app_secret'] = os.environ.get('app_secret')
 
 
 def load_cache(request):

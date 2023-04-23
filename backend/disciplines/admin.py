@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from disciplines.models import *
+from .models import *
 from kalendar.generator import generate
 
 @admin.register(Tag)

@@ -5,8 +5,10 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from messages.error import not_authenticated, invalid_method, client_error
-from users.permissions import profile_edit_permission
-from users.serializers import *
+
+from .models import User
+from .permissions import profile_edit_permission
+from .serializers import *
 
 
 @csrf_exempt

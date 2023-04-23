@@ -1,9 +1,8 @@
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.utils import timezone
 
 from kalendar.models import Calendar
-from messages.error import client_error, server_error, not_authenticated
+from messages.error import server_error
 
 
 def http_cache_date(millis):

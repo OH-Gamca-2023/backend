@@ -1,6 +1,6 @@
 import json
 import random
-from datetime import datetime, date, time
+from datetime import datetime, time
 import time as time_p
 
 from disciplines.models import Discipline, Category

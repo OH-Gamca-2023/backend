@@ -1,7 +1,6 @@
 from django.urls import path
 
-from auth.views import *
-
+from .views import *
 
 urlpatterns = [
     path('callback/', callback, name='callback'),

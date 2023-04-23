@@ -53,18 +53,27 @@ class UserAdmin(BaseUserAdmin):
             if not request.user.is_superuser:
                 if obj.is_admin or obj.is_superuser:
                     if request.user.id != obj.id:
+                        # user is not superuser and is editing an admin or superuser
+                        # disable all fields
                         return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
                                                        'user_permissions', 'microsoft_user', 'username', 'email',
                                                        'password', 'first_name', 'last_name', 'clazz', 'groups',
                                                        'user_permissions', 'last_login', 'date_joined', 'type')
                     else:
+                        # user is not superuser and is editing himself
+                        # disable permission fields and microsoft user
                         return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
                                                        'user_permissions', 'microsoft_user')
                 else:
+                    # user is not superuser and is editing a normal user or organizer
+                    # disable permission fields and microsoft user
                     return self.readonly_fields + (
                         'is_superuser', 'is_admin', 'groups', 'user_permissions', 'microsoft_user')
+
+            # user is superuser and is editing himself
             if request.user.is_superuser and request.user.id == obj.id:
-                return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser')
+                return self.readonly_fields + ('is_active', 'is_staff', 'is_superuser')
+
         return self.readonly_fields
 
 

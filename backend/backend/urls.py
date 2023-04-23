@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from backend.views import *
+from .views import *
 
 api_urls = [
     path('auth/', include('auth.urls')),

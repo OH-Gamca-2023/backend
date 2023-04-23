@@ -1,6 +1,6 @@
 from django.urls import path
 
-from kalendar.views import *
+from .views import *
 
 urlpatterns = [
     path('json.json', json_default, name='JSON Calendar'),
