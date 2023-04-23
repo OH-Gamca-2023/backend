@@ -14,6 +14,7 @@ error:
 
     no_permission:
         generic: "You do not have permission to do that."
+        access: "You do not have permission to access %s."
         change: "You do not have permission to change %s."
 
     too_short: "%s must be at least %s characters long."
@@ -27,3 +28,4 @@ error:
 
     server:
         internal_unknown: "An internal error occurred. Please try again later."
+        not_ready: "The server is not ready yet. Please try again later."

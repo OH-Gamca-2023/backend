@@ -137,4 +137,4 @@ GitHub.sublime-settings
 .history
 
 
-!/oauth_settings.yml
+oauth_settings.yml
