@@ -6,6 +6,13 @@ import os
 stream = open('oauth_settings.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
 
+if 'redirect' in os.environ:
+    settings['redirect'] = os.environ.get('redirect')
+if 'fe_redirect' in os.environ:
+    settings['fe_redirect'] = os.environ.get('fe_redirect')
+if 'app_secret' in os.environ:
+    settings['app_secret'] = os.environ.get('app_secret')
+
 
 def load_cache(request):
     # Check for a token cache in the session
@@ -22,12 +29,11 @@ def save_cache(request, cache):
 
 
 def get_msal_app(cache=None):
-    secret = settings['app_secret'] if 'app_secret' in settings else os.environ.get('app_secret')
     # Initialize the MSAL confidential client
     auth_app = msal.ConfidentialClientApplication(
         settings['app_id'],
         authority=settings['authority'],
-        client_credential=secret,
+        client_credential=settings['app_secret'],
         token_cache=cache)
     return auth_app
 

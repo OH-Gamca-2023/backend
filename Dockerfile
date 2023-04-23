@@ -22,7 +22,8 @@ ENV PYTHONUNBUFFERED=1
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-VOLUME static_files:/app/admin_static
+# Apply database migrations
+RUN python manage.py migrate --noinput
 
 # Add gunicorn to the PATH
 ENV PATH="/usr/local/bin:$PATH"
