@@ -6,6 +6,17 @@ from django.utils.crypto import get_random_string
 from users.models import MicrosoftUser, User, UserToken, Clazz, Grade
 
 
+REGISTRATION = {
+    'allowed': False,
+    'bypass_departments': ['SextaA', 'II.A']
+}
+
+LOGIN = {
+    'allowed': True,
+    'bypass_departments': ['SextaA', 'II.A']
+}
+
+
 def handle_user_login(request, user):
     id = user['id']
     if not MicrosoftUser.objects.filter(id=id).exists():
@@ -22,6 +33,11 @@ def handle_user_login(request, user):
 
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
+        if not REGISTRATION['allowed']:
+            if msft_user.department not in REGISTRATION['bypass_departments']:
+                raise Exception('STRERROR: Registrácia nie je povolená.')
+            else:
+                print('Bypassing registration restriction for user', id, msft_user.department)
         user_clazz = process_clazz(msft_user)
         User.objects.create(
             microsoft_user=msft_user,
@@ -37,6 +53,12 @@ def handle_user_login(request, user):
             is_staff=user_clazz.grade.name == 'Organizátori',
             is_superuser=False,
         )
+    else:
+        if not LOGIN['allowed']:
+            if msft_user.department not in LOGIN['bypass_departments']:
+                raise Exception('STRERROR: Prihlásenie nie je povolené.')
+            else:
+                print('Bypassing login restriction for user', id, msft_user.department)
 
     django_user = User.objects.get(microsoft_user=msft_user)
 
@@ -51,7 +73,7 @@ def create_user_token(request, user):
     expiry_date = timezone.now() + timedelta(days=7)
 
     tokens = UserToken.objects.filter(user=user, invalid=False, expires__gt=timezone.now()).order_by('-created')
-    print(tokens.count(), tokens)
+
     if tokens.count() >= MAX_TOKENS_PER_USER:
         last_token = tokens.last()
         last_token.invalid = True
