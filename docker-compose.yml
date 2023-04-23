@@ -9,11 +9,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  web:
-    build:
-      context: .
+  backend:
+    build: .
     ports:
-      - "3500:3500"
+      - "8000:8000"
     volumes:
       - ./backend/:/app/backend/
     environment:

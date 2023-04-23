@@ -18,7 +18,7 @@ RUN pip install --upgrade pipenv
 COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --dev --deploy
 
-COPY backend ./backend
+COPY backend/backend ./backend
 
 WORKDIR /app/backend
 CMD ["gunicorn", "backend.wsgi", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--log-file", "-", "--workers", "4"]
