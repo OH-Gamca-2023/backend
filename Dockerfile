@@ -1,24 +1,14 @@
 FROM python:3.10-slim-bullseye
-WORKDIR /app
-RUN useradd --create-home appuser
 
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONFAULTHANDLER 1
-ENV PATH=/home/appuser/.local/bin:$PATH
 
-RUN export DEBIAN_FRONTEND=noninteractive \
-    && apt update \
-    && apt -y upgrade \
-    && apt -y clean \
-    && rm -rf /var/lib/apt/lists/*
-
-USER appuser
+WORKDIR /app
 
 RUN pip install --upgrade pipenv
 COPY Pipfile Pipfile.lock ./
-RUN pipenv install --system --dev --deploy
+RUN pipenv install --system --deploy
 
-COPY backend/backend ./backend
+COPY backend ./backend
 
 WORKDIR /app/backend
 CMD ["gunicorn", "backend.wsgi", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--log-file", "-", "--workers", "4"]
