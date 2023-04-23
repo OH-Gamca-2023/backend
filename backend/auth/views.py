@@ -4,10 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from backend.auth.oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, \
+from auth.oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, \
     settings
-from backend.auth.graph_helper import *
-from backend.auth.user_helper import handle_user_login, create_user_token
+from auth.graph_helper import *
+from auth.user_helper import handle_user_login, create_user_token
 
 
 def initialize_context(request):

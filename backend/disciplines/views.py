@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
-from backend.disciplines.models import Category
-from backend.disciplines.serializers import CategorySerializer
+from disciplines.models import Category
+from disciplines.serializers import CategorySerializer
 
 
 def categories(request):

@@ -4,9 +4,9 @@ import re
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from backend.messages.error import not_authenticated, invalid_method, client_error
-from backend.users.permissions import profile_edit_permission
-from backend.users.serializers import *
+from messages.error import not_authenticated, invalid_method, client_error
+from users.permissions import profile_edit_permission
+from users.serializers import *
 
 
 @csrf_exempt

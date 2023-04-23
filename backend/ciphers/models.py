@@ -1,6 +1,6 @@
 from django.db import models
 
-from backend.users.models import Clazz
+from users.models import Clazz
 
 
 class Cipher(models.Model):

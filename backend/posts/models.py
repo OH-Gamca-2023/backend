@@ -1,8 +1,8 @@
 from django.db import models
 
-from backend.backend import settings
-from backend.disciplines.models import Discipline, Tag
-from backend.users.models import Grade
+from backend import settings
+from disciplines.models import Discipline, Tag
+from users.models import Grade
 
 
 class Post(models.Model):

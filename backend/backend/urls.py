@@ -15,14 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from backend.backend.views import *
+from .views import *
 
 api_urls = [
-    path('auth/', include('backend2.auth.urls')),
-    path('user/', include('backend2.users.urls')),
+    path('auth/', include('auth.urls')),
+    path('user/', include('users.urls')),
     path('status/', status, name='status'),
-    path('disciplines/', include('backend2.disciplines.urls')),
-    path('calendar/', include('backend2.kalendar.urls')),
+    path('disciplines/', include('disciplines.urls')),
+    path('calendar/', include('kalendar.urls')),
 ]
 
 

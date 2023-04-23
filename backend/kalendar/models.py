@@ -1,6 +1,6 @@
 from django.db import models
 
-from backend.backend import settings
+from backend import settings
 
 
 class Calendar(models.Model):

@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from backend.messages.common import get_message
+from messages.common import get_message
 
 
 def client_error(status: int, message_code: str, *args):

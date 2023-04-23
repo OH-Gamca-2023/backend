@@ -2,7 +2,7 @@ from django.contrib.auth import login
 from django.http import HttpResponse
 from django.utils import timezone
 
-from backend.users.models import UserToken
+from users.models import UserToken
 
 
 class HeadersMiddleware:

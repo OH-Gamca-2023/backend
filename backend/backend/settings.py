@@ -33,11 +33,11 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'backend2.users.apps.UsersConfig',
-    'backend2.disciplines.apps.DisciplinesConfig',
-    'backend2.posts.apps.PostsConfig',
-    'backend2.ciphers.apps.CiphersConfig',
-    'backend2.kalendar.apps.CalendarConfig',
+    'users.apps.UsersConfig',
+    'disciplines.apps.DisciplinesConfig',
+    'posts.apps.PostsConfig',
+    'ciphers.apps.CiphersConfig',
+    'kalendar.apps.CalendarConfig',
     'jet.dashboard',
     'jet',
     'django.contrib.admin',

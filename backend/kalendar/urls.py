@@ -1,5 +1,7 @@
 from django.urls import path
 
+from .views import *
+
 urlpatterns = [
     path('json.json', json_default, name='JSON Calendar'),
     path('json_staff.json', json_staff, name='JSON Not published events'),

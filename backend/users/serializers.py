@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from backend.users.models import User, Clazz, Grade
+from users.models import User, Clazz, Grade
 
 
 class GradeSerializer(serializers.ModelSerializer):

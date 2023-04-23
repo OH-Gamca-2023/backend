@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from backend.users.models import MicrosoftUser, User, UserToken, Clazz, Grade
+from users.models import MicrosoftUser, User, UserToken, Clazz, Grade
 
 
 def handle_user_login(request, user):

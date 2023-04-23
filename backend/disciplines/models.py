@@ -2,7 +2,7 @@ import random
 
 from django.db import models
 
-from backend.users.models import Grade, Clazz
+from users.models import Grade, Clazz
 
 
 class Tag(models.Model):

@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 
-from backend.messages.error import client_error, server_error
+from messages.error import client_error, server_error
 
 
 def status(request):

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from backend.disciplines.models import *
-from backend.kalendar.generator import generate
+from disciplines.models import *
+from kalendar.generator import generate
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

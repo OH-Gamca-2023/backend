@@ -3,8 +3,8 @@ import random
 from datetime import datetime, time
 import time as time_p
 
-from backend.disciplines.models import Discipline, Category
-from backend.users.models import Grade
+from disciplines.models import Discipline, Category
+from users.models import Grade
 from .models import GenerationEvent, Calendar
 
 
