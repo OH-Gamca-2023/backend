@@ -22,6 +22,8 @@ ENV PYTHONUNBUFFERED=1
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+VOLUME static_files:/app/admin_static
+
 # Add gunicorn to the PATH
 ENV PATH="/usr/local/bin:$PATH"
 
