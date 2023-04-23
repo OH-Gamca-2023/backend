@@ -9,8 +9,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  backend:
-    build: .
+  web:
+    build:
+        context: .
     ports:
       - "8000:8000"
     volumes:

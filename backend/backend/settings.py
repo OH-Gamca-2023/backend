@@ -23,12 +23,9 @@ SECRET_KEY = os.environ.get(
 )
 DEBUG = os.environ.get("DEBUG", False)
 
-
-ALLOWED_HOSTS = [
-    'localhost',
-    'oh.gamca.sk',
-    '2023.oh.gamca.sk',
-]
+hosts = os.environ.get("ALLOWED_HOSTS", "")
+if hosts:
+    ALLOWED_HOSTS = hosts.split(",")
 
 # Application definition
 
@@ -99,13 +96,6 @@ DATABASES = {
     }
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8000",
-    "https://2023.oh.gamca.sk",
-    "https://oh.gamca.sk",
-]
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -139,7 +129,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'backend/static']
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = BASE_DIR / 'uploads'
