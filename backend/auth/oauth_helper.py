@@ -1,5 +1,6 @@
 import yaml
 import msal
+import os
 
 # Load the oauth_settings.yml file located in your app DIR
 stream = open('oauth_settings.yml', 'r')

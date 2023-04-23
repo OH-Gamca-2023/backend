@@ -4,10 +4,9 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from auth.oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, \
-    settings
-from auth.graph_helper import *
-from auth.user_helper import handle_user_login, create_user_token
+from .oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, settings
+from .graph_helper import *
+from .user_helper import handle_user_login, create_user_token
 
 
 def initialize_context(request):
@@ -65,6 +64,7 @@ def callback(request):
         return HttpResponseRedirect(settings['fe_redirect'] + url_params)
     except Exception as e:
         print(e)
+
         # If something goes wrong, logout the user
         remove_user_and_token(request)
         logout(request)
