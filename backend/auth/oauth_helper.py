@@ -3,7 +3,7 @@ import msal
 import os
 
 # Load the oauth_settings.yml file located in your app DIR
-stream = open('oauth_settings.yml', 'r')
+stream = open('data/oauth_settings.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
 
 if 'redirect' in os.environ:

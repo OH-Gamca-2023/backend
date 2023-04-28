@@ -3,22 +3,12 @@ from datetime import timedelta
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
+from auth.restriction_helper import is_allowed
 from users.models import MicrosoftUser, User, UserToken, Clazz, Grade
-
-
-REGISTRATION = {
-    'allowed': False,
-    'bypass_departments': ['SextaA', 'II.A']
-}
-
-LOGIN = {
-    'allowed': True,
-    'bypass_departments': ['SextaA', 'II.A']
-}
-
 
 def handle_user_login(request, user):
     id = user['id']
+
     if not MicrosoftUser.objects.filter(id=id).exists():
         MicrosoftUser.objects.create(
             id=id,
@@ -30,14 +20,23 @@ def handle_user_login(request, user):
             office_location=user['officeLocation'],
             department=user['department'],
         )
-
+    else:
+        # check if all information is up to date and update if necessary
+        msft_user = MicrosoftUser.objects.get(id=id)
+        changed = False
+        for key in ['mail', 'display_Name', 'given_Name', 'surname', 'job_Title', 'office_Location', 'department']:
+            key1, key2 = key.lower(), key.replace('_', '')
+            if getattr(msft_user, key1) != user[key2]:
+                setattr(msft_user, key1, user[key2])
+                changed = True
+        if changed:
+            msft_user.save()
+        
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
-        if not REGISTRATION['allowed']:
-            if msft_user.department not in REGISTRATION['bypass_departments']:
-                raise Exception('STRERROR: Registrácia nie je povolená.')
-            else:
-                print('Bypassing registration restriction for user', id, msft_user.department)
+        allowed, message = is_allowed(request, 'registration', None, msft_user.department)
+        if not allowed:
+            raise Exception(f'STRERROR: {message}')
         user_clazz = process_clazz(msft_user)
         User.objects.create(
             microsoft_user=msft_user,
@@ -54,11 +53,9 @@ def handle_user_login(request, user):
             is_superuser=False,
         )
     else:
-        if not LOGIN['allowed']:
-            if msft_user.department not in LOGIN['bypass_departments']:
-                raise Exception('STRERROR: Prihlásenie nie je povolené.')
-            else:
-                print('Bypassing login restriction for user', id, msft_user.department)
+        allowed, message = is_allowed(request, 'login', User.objects.get(microsoft_user=msft_user), msft_user.department)
+        if not allowed:
+            raise Exception(f'STRERROR: {message}')
 
     django_user = User.objects.get(microsoft_user=msft_user)
 
