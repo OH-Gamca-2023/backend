@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from .permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
+from data.permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
     blacklist, organizer, admin, default, force_blacklist
 
 

@@ -6,8 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from messages.error import not_authenticated, invalid_method, client_error
 
-from .models import User
-from .permissions import profile_edit_permission
+from data.permissions import profile_edit_permission
 from .serializers import *
 
 

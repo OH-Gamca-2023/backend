@@ -3,7 +3,7 @@ from functools import reduce
 
 import yaml
 
-lang_file = "lang.yml"
+lang_file = "data/lang.yml"
 lang = yaml.load(open(lang_file, "r"), Loader=yaml.FullLoader)
 
 
