@@ -19,6 +19,7 @@ LOGIN = {
 
 def handle_user_login(request, user):
     id = user['id']
+
     if not MicrosoftUser.objects.filter(id=id).exists():
         MicrosoftUser.objects.create(
             id=id,
@@ -30,7 +31,17 @@ def handle_user_login(request, user):
             office_location=user['officeLocation'],
             department=user['department'],
         )
-
+    else:
+        # check if all information is up to date and update if necessary
+        msft_user = MicrosoftUser.objects.get(id=id)
+        changed = False
+        for key in ['mail', 'displayName', 'givenName', 'surname', 'jobTitle', 'officeLocation', 'department']:
+            if getattr(msft_user, key) != user[key]:
+                setattr(msft_user, key, user[key])
+                changed = True
+        if changed:
+            msft_user.save()
+        
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
         if not REGISTRATION['allowed']:
