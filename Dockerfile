@@ -1,32 +1,30 @@
-# Start with a Python 3.10 image as a base
 FROM python:3.10
-
-# Set the working directory inside the container
 WORKDIR /app
+RUN useradd --create-home appuser
 
-# Copy the Pipfile and Pipfile.lock into the container
-COPY Pipfile Pipfile.lock /app/
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONFAULTHANDLER 1
+ENV PATH=/home/appuser/.local/bin:$PATH
 
-# Install pipenv
-RUN pip install pipenv
+RUN apt update \
+    && apt -y upgrade \
+    && apt -y clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install the dependencies from Pipfile.lock
-RUN pipenv install --system --deploy --ignore-pipfile
+RUN mkdir -p ./backend \
+    && chown -R appuser:appuser ./backend \
+    && chmod -R 755 ./backend
 
-# Copy the application code into the container
-COPY ./backend /app/
+USER appuser
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
+RUN pip install --upgrade pipenv
+COPY Pipfile Pipfile.lock ./
+RUN pipenv install --system --dev --deploy
 
-# Collect static files
+COPY backend ./backend
+
+WORKDIR /app/backend
+
 RUN python manage.py collectstatic --noinput
 
-# Add gunicorn to the PATH
-ENV PATH="/usr/local/bin:$PATH"
-
-# Expose port 8000
-EXPOSE 8000
-
-# Start the Django development server
-CMD python manage.py migrate && gunicorn --bind 0.0.0.0:8000 backend.wsgi --access-logfile - --error-logfile - --workers 4 --timeout 120
+CMD gunicorn backend.wsgi --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4
