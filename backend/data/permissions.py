@@ -12,6 +12,7 @@ force_blacklist = [
     'kalendar\\.change_(.*)',
     'kalendar\\.delete_generationevent',
     'kalendar\\.add_generationevent',
+    'data\\.delete_authrestriction',
 ]
 
 # Blacklist - permissions that are not allowed to be assigned to users
@@ -23,12 +24,14 @@ blacklist = [
     'users\\.delete_usertoken',
     # prevent removing calendars for everyone but superusers
     'kalendar\\.delete_calendar',
+    'data\\.delete_setting',
 ]
 
 # Admin - permissions that admins have by default
 admin = [
     'users\\.(.*)',
     'kalendar\\.(.*)',
+    'data\\.(.*)',
 ]
 
 # Organizer - permissions that organizers have by default

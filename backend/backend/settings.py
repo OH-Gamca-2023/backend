@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'posts.apps.PostsConfig',
     'ciphers.apps.CiphersConfig',
     'kalendar.apps.CalendarConfig',
+    'data.apps.DataConfig',
     'jet.dashboard',
     'jet',
     'django.contrib.admin',
@@ -66,7 +67,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'backend2/templates']
+        'DIRS': [BASE_DIR / 'backend/templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
