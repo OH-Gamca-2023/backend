@@ -68,8 +68,8 @@ class AuthRestriction(models.Model):
     restricted = models.BooleanField(default=True, help_text='Whether this restriction is enabled.')
 
     bypass_ip = models.CharField(max_length=1000, blank=True,
-                                 help_text='Specific IP address or a IP range which can bypass this restriction. '
-                                           'Multiple ranges can be separated by commas.')
+                                 help_text='Specific IP address which can bypass this restriction. '
+                                           'Multiple can be separated by commas.')
     bypass_staff = models.BooleanField(default=False,
                                        help_text='Whether staff members can bypass this restriction.')
     bypass_admin = models.BooleanField(default=True,
@@ -81,6 +81,8 @@ class AuthRestriction(models.Model):
                                                    'Multiple departments can be separated by commas.',
                                          default='SextaA,II.A')
 
+    message = models.CharField(max_length=1000, blank=True,
+                               help_text='Message to be displayed when this restriction is active.')
+
     def __str__(self):
         return self.type + (' (enabled)' if self.restricted else ' (disabled)')
-
