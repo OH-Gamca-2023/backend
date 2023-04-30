@@ -46,11 +46,12 @@ class Discipline(models.Model):
                                                   "zmeniť.")
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
-    target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne")
+    target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne",
+                                           limit_choices_to={'competing': True})
 
-    date_published = models.BooleanField(default=False)
-    description_published = models.BooleanField(default=False)
-    results_published = models.BooleanField(default=False)
+    date_published = models.BooleanField(default=False, verbose_name="Dátum zverejnený")
+    details_published = models.BooleanField(default=False, verbose_name="Detaily zverejnené")
+    results_published = models.BooleanField(default=False, verbose_name="Výsledky zverejnené")
 
     details_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     results_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
@@ -69,8 +70,6 @@ class Result(models.Model):
     grades = models.ManyToManyField(Grade, blank=True, verbose_name="Stupne", help_text="Stupne z ktorých triedy sa "
                                                                                         "mali v disciplíne zúčastniť.",
                                     limit_choices_to={'competing': True})
-    placements = models.ManyToManyField(Clazz, through='Placement', verbose_name="Umiestnenia")
-    # TODO: Malo by sa predvolene naplniť triedami, z vybraných stupňov s hodnotou -1 (nezúčastnili sa)
 
     class Meta:
         verbose_name_plural = 'výsledkovky'
@@ -78,9 +77,9 @@ class Result(models.Model):
 
 
 class Placement(models.Model):
-    result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka")
+    result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka", related_name="placements")
 
-    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda")
+    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
     place = models.SmallIntegerField("Pozícia", default=-1)
     # TODO: indexujeme od 1, -1 znamená, že sa nezúčastnili
 

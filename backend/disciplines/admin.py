@@ -22,13 +22,15 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class ResultInline(admin.TabularInline):
     model = Result
+    extra = 0
+    show_change_link = True
 
 
 @admin.register(Discipline)
 class DisciplineAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'target_grades_str', 'date', 'time', 'date_published', 'description_published',
+    list_display = ('name', 'category', 'target_grades_str', 'date', 'time', 'date_published', 'details_published',
                     'results_published', 'result_sets')
-    list_filter = ('date_published', 'description_published', 'category', 'target_grades')
+    list_filter = ('date_published', 'details_published', 'category', 'target_grades')
     search_fields = ('name', 'description')
     date_hierarchy = 'date'
 
@@ -43,7 +45,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('date', 'time', 'location', 'volatile_date')
         }),
         ('Publishing', {
-            'fields': ('date_published', 'description_published')
+            'fields': ('date_published', 'details_published')
         }),
         ('Results', {
             'fields': ('results_published',)
