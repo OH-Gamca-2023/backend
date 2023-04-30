@@ -31,6 +31,11 @@ class BearerMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # don't run if path is /status
+        if request.path == '/status':
+            response = self.get_response(request)
+            return response
+
         auth_header = request.headers.get('Authorization')
         if auth_header:
             raw_token = auth_header.split(' ')[1]
