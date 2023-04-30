@@ -26,7 +26,7 @@ def is_allowed(request, type, user=None, department=None):
 
         return False, restriction.message
     except AuthRestriction.DoesNotExist:
-        return (True, )
+        return True, ""
     except Exception as e:
         print(e)
         return False, 'Nastala chyba pri overovaní prihlasovania.'
