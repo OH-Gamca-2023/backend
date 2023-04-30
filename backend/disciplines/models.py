@@ -81,7 +81,7 @@ class Placement(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka")
 
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda")
-    place = models.PositiveSmallIntegerField("Pozícia", default=-1)
+    place = models.SmallIntegerField("Pozícia", default=-1)
     # TODO: indexujeme od 1, -1 znamená, že sa nezúčastnili
 
     class Meta:
