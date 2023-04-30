@@ -19,11 +19,7 @@ class Grade(models.Model):
         ('Alumni', 'Alumni')
     )
     name = models.CharField("Názov", max_length=100, choices=grade_options, unique=True)
-
-    @property
-    def competing(self):
-        return self.name in ['2. Stupeň', '3. Stupeň']
-    competing.fget.short_description = 'Súťažná?'
+    competing = models.BooleanField("Súťažná?", default=True)
 
     class Meta:
         verbose_name_plural = 'stupne'
@@ -34,14 +30,6 @@ class Grade(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         raise Exception('Grade objects cannot be deleted.')
-
-
-@receiver(post_save, sender=Grade)
-def create_grades(sender, instance, created, **kwargs):
-    if not created:
-        return
-    for name in Grade.grade_options:
-        Grade.objects.get_or_create(name=name[0])
 
 
 class Clazz(models.Model):

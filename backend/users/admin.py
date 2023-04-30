@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django_object_actions import action, DjangoObjectActions
 
 from .models import Grade, Clazz, User, MicrosoftUser, UserToken
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -81,11 +82,18 @@ admin.site.register(User, UserAdmin)
 
 
 @admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
+class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_display = ('name', 'competing')
     search_fields = ('name', 'competing')
     ordering = ('name',)
     filter_horizontal = ()
+
+    @action(description='Create grades', permissions=['add'])
+    def create_grades(self, request, queryset):
+        for name in Grade.grade_options:
+            Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'])
+
+    changelist_actions = ('create_grades',)
 
 
 @admin.register(Clazz)
