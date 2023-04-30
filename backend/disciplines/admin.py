@@ -78,7 +78,11 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        generate(request, "Discipline " + str(obj.id) + " was updated")
+        # check if anything date-related has changed
+        if change and (form.changed_data.__contains__('date') or form.changed_data.__contains__('time') or
+                       form.changed_data.__contains__('volatile_date') or form.changed_data.__contains__(
+                    'date_published')):
+            generate(request, f'Discipline {obj.name} ({obj.id}) has been updated')
 
 
 class PlacementInline(admin.TabularInline):
