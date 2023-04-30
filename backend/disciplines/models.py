@@ -52,6 +52,9 @@ class Discipline(models.Model):
     description_published = models.BooleanField(default=False)
     results_published = models.BooleanField(default=False)
 
+    details_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    results_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+
     def __str__(self):
         return self.name
 
@@ -64,7 +67,8 @@ class Result(models.Model):
                             null=True,
                             help_text="Zobrazí sa ak sú k disciplíne priradené viaceré výsledkovky.")
     grades = models.ManyToManyField(Grade, blank=True, verbose_name="Stupne", help_text="Stupne z ktorých triedy sa "
-                                                                                        "mali v disciplíne zúčastniť.")
+                                                                                        "mali v disciplíne zúčastniť.",
+                                    limit_choices_to={'competing': True})
     placements = models.ManyToManyField(Clazz, through='Placement', verbose_name="Umiestnenia")
     # TODO: Malo by sa predvolene naplniť triedami, z vybraných stupňov s hodnotou -1 (nezúčastnili sa)
 
@@ -75,6 +79,7 @@ class Result(models.Model):
 
 class Placement(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka")
+
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda")
     place = models.PositiveSmallIntegerField("Pozícia", default=-1)
     # TODO: indexujeme od 1, -1 znamená, že sa nezúčastnili

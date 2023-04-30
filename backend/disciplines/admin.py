@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import *
 from kalendar.generator import generate
 
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name',)
@@ -17,6 +18,10 @@ class CategoryAdmin(admin.ModelAdmin):
     @admin.display(description='Disciplines')
     def disciplines(self, obj):
         return obj.discipline_set.count()
+
+
+class ResultInline(admin.TabularInline):
+    model = Result
 
 
 @admin.register(Discipline)
@@ -45,6 +50,10 @@ class DisciplineAdmin(admin.ModelAdmin):
         }),
     )
 
+    inlines = [
+        ResultInline,
+    ]
+
     add_fieldsets = (
         (None, {
             'fields': ('name', 'description')
@@ -70,10 +79,19 @@ class DisciplineAdmin(admin.ModelAdmin):
         generate(request, "Discipline " + str(obj.id) + " was updated")
 
 
+class PlacementInline(admin.TabularInline):
+    model = Placement
+    extra = 1
+
+
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('name', 'discipline')
     search_fields = ('discipline__name',)
+
+    inlines = [
+        PlacementInline,
+    ]
 
     @admin.display(description='Placements')
     def placements(self, obj):
