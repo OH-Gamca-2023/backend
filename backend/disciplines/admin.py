@@ -6,13 +6,15 @@ from kalendar.generator import generate
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('id', 'name')
+    list_display_links = ('id', 'name')
     search_fields = ('name',)
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'disciplines')
+    list_display = ('id', 'name', 'disciplines')
+    list_display_links = ('id', 'name')
     search_fields = ('name',)
 
     @admin.display(description='Disciplines')

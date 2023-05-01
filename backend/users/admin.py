@@ -21,7 +21,8 @@ class UserChangeForm(forms.ModelForm):
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
-    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_admin', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
@@ -83,10 +84,10 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Grade)
 class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
-    list_display = ('name', 'competing')
+    list_display = ('id', 'name', 'competing')
+    list_display_links = ('id', 'name')
     search_fields = ('name', 'competing')
-    ordering = ('name',)
-    filter_horizontal = ()
+    ordering = ('id',)
 
     @action(description='Create grades', permissions=['add'])
     def create_grades(self, request, queryset):
@@ -98,7 +99,8 @@ class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
 
 @admin.register(Clazz)
 class ClazzAdmin(admin.ModelAdmin):
-    list_display = ('name', 'grade', 'is_fake')
+    list_display = ('id', 'name', 'grade', 'is_fake')
+    list_display_links = ('id', 'name')
     search_fields = ('name', 'grade__name')
     ordering = ('name',)
     filter_horizontal = ()
@@ -108,7 +110,9 @@ class ClazzAdmin(admin.ModelAdmin):
 
 @admin.register(MicrosoftUser)
 class MicrosoftUserAdmin(admin.ModelAdmin):
-    list_display = ('user', 'mail', 'display_name', 'job_title', 'department', 'id')
+    list_display = ('id', 'user', 'mail', 'display_name', 'job_title', 'department')
+    list_display_links = ('id',)
+
     search_fields = ('user__email', 'microsoft_id', 'mail', 'display_name')
     ordering = ('department', 'display_name')
     filter_horizontal = ()
@@ -132,6 +136,7 @@ class UserTokenChangeForm(forms.ModelForm):
 class UserTokenAdmin(admin.ModelAdmin):
     form = UserTokenChangeForm
     list_display = ('user', 'created', 'expires', 'token_censored', 'is_expired', 'invalid')
+    list_display_links = ('token_censored',)
     search_fields = ('user__email', 'user__name')
     ordering = ('-created',)
     filter_horizontal = ()
