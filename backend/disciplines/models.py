@@ -18,6 +18,9 @@ class Tag(models.Model):
 
 class Category(models.Model):
     name = models.CharField("Názov", max_length=100)
+    calendar_class = models.CharField("CSS trieda", max_length=100, blank=True, null=True,
+                                      help_text="CSS trieda, ktorá sa priradí k disciplínam tejto kategórie v "
+                                                "kalendári.")
 
     def __str__(self):
         return self.name
