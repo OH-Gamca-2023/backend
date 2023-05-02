@@ -135,7 +135,10 @@ def serialize_discipline(discipline, categories, grades):
         'date': discipline.date,
         'time': discipline.time,
         'location': discipline.location,
-        'category': categories[discipline.category.id],
+        'category': {
+            'id': discipline.category.id,
+            'name': discipline.category.name,
+        },
         'grades': [grades[grade.id] for grade in discipline.target_grades.all()],
     }
 
@@ -147,12 +150,12 @@ def serialize_json_calendar(disciplines, cal_id, description="Kalend√°r discipl√
         'description': description,
         'events': [],
     }
-    print(disciplines)
 
     for d in disciplines:
         d = d.copy()
         d['date'] = d['date'].strftime("%Y-%m-%d")
         d['time'] = d['time'].strftime("%H:%M") if d['time'] is not None else None
+        d['category'] = d['category']['id']
         cal['events'].append(d)
     return json.dumps(cal)
 
@@ -180,7 +183,7 @@ def serialize_ical_calendar(disciplines, cal_id, description="Kalend√°r discipl√
         if discipline['location'] is not None:
             event += "LOCATION:" + discipline['location'] + "\n"
 
-        event += "CLASS:" + discipline['category'] + "\n" \
+        event += "CLASS:" + discipline['category']['name'] + "\n" \
             "CATEGORIES:" + ",".join(discipline['grades']) + "\n" \
             "END:VEVENT\n"
 
