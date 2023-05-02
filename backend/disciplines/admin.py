@@ -38,7 +38,7 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'details')
+            'fields': ('name', 'short_name', 'details')
         }),
         ('Categorisation', {
             'fields': ('category', 'target_grades')
@@ -60,7 +60,7 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     add_fieldsets = (
         (None, {
-            'fields': ('name', 'description')
+            'fields': ('name', 'short_name', 'description')
         }),
         ('Categorisation', {
             'fields': ('category', 'tags', 'target_grades')

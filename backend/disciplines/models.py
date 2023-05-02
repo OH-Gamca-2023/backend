@@ -38,6 +38,8 @@ class Discipline(models.Model):
     id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
 
     name = models.CharField("Názov", max_length=100)
+    short_name = models.CharField("Krátky názov", max_length=12, blank=True, null=True)
+
     details = models.TextField("Detaily", blank=True, null=True)
 
     date = models.DateField("Dátum", blank=True, null=True)

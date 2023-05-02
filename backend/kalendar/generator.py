@@ -131,7 +131,10 @@ def generate(request, cause):
 def serialize_discipline(discipline, categories, grades):
     return {
         'id': discipline.id,
-        'name': discipline.name,
+        'name': {
+            'regular': discipline.name,
+            'short': discipline.short_name if discipline.short_name else discipline.name,
+        },
         'date': discipline.date,
         'time': discipline.time,
         'location': discipline.location,
@@ -173,7 +176,7 @@ def serialize_ical_calendar(disciplines, cal_id, description="Kalend√°r discipl√
     for discipline in disciplines:
         event = "BEGIN:VEVENT\n" \
                 "UID:" + str(discipline['id']) + "\n" \
-                "SUMMARY:" + discipline['name'] + "\n"
+                "SUMMARY:" + discipline['name']['regular'] + "\n"
 
         if discipline['time'] is not None:
             event += "DTSTAMP:" + discipline['date'].strftime("%Y%m%d") + "T" + discipline['time'].strftime("%H%M%S") + "\n"
