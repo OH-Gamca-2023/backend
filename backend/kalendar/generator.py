@@ -17,7 +17,7 @@ def generate(request, cause):
 
     generation_event.start = datetime.now()
     try:
-        cal_id = "".join(random.choices("0123456789abcdef", k=5))
+        cal_id = "".join(random.choices("0123456789abcdef", k=8))
 
         disciplines = Discipline.objects.filter(date__isnull=False).order_by('date', 'time')
         categories = {category.id: category.name for category in Category.objects.all()}
