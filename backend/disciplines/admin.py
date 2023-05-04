@@ -80,10 +80,15 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        # check if anything date-related has changed
-        if form.changed_data.__contains__('date') or form.changed_data.__contains__('time') or \
-                form.changed_data.__contains__('volatile_date') or form.changed_data.__contains__('date_published'):
-            generate(request, f'Discipline {obj.name} ({obj.id}) has been ' + ('created' if change else 'edited'))
+        if not change:
+            generate(request, f'Discipline {obj.name} ({obj.id}) has been created')
+        else:
+            # check if anything date-related has changed
+            listening = ['date', 'time', 'volatile_date', 'date_published', 'name', 'short_name']
+            modified = list(filter(lambda x: x in form.changed_data, listening))
+            if len(modified) > 0:
+                # if so, generate the calendar
+                generate(request, f'Discipline {obj.name} ({obj.id}) has been modified [{", ".join(modified)}]')
 
 
 class PlacementInline(admin.TabularInline):
