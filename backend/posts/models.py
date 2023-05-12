@@ -1,9 +1,19 @@
 from django.db import models
 
 from backend import settings
-from disciplines.models import Discipline, Tag
+from disciplines.models import Discipline
 from users.models import Grade
 
+
+class Tag(models.Model):
+    name = models.CharField("Názov", max_length=100)
+
+    def __str__(self):
+        return "[" + self.name + "]"
+
+    class Meta:
+        verbose_name_plural = 'tagy'
+        verbose_name = 'tag'
 
 class Post(models.Model):
     title = models.CharField("Nadpis", max_length=100)
