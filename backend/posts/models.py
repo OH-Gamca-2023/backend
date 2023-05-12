@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 
 from backend import settings
@@ -15,7 +17,12 @@ class Tag(models.Model):
         verbose_name_plural = 'tagy'
         verbose_name = 'tag'
 
+def gen_id():
+    return "".join(random.choices("0123456789abcdef", k=8))
+
 class Post(models.Model):
+    id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
+
     title = models.CharField("Nadpis", max_length=100)
     content = models.CharField("Obsah", max_length=10000, help_text="Obsah príspevku bude prehnaný cez Markdown.")
     author = models.ForeignKey(
