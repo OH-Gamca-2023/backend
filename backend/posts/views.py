@@ -19,3 +19,10 @@ class PostListAPIView(APIView):
     def get(self, request):
         serializer = PostSerializer(Post.objects.all(), many=True)
         return JsonResponse(serializer.data, safe=False)
+
+
+class PostDetailAPIView(APIView):
+
+    def get(self, request, pk):
+        serializer = PostSerializer(Post.objects.get(pk=pk))
+        return JsonResponse(serializer.data, safe=False)
