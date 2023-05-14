@@ -22,6 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
         if hide_confidential:
             self.fields.pop('microsoft_user')
             self.fields.pop('has_password')
+            self.fields.pop('email')
+            self.fields.pop('clazz')
 
     class Meta:
         model = User
