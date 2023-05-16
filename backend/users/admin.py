@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django_object_actions import action, DjangoObjectActions
 
-from .models import Grade, Clazz, User, MicrosoftUser, UserToken
+from .models import Grade, Clazz, User, MicrosoftUser
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
@@ -122,26 +122,3 @@ class MicrosoftUserAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'mail', 'display_name', 'given_name', 'surname', 'job_title', 'office_location', 'department')
 
-
-class UserTokenChangeForm(forms.ModelForm):
-    class Meta:
-        model = UserToken
-        fields = ('invalid',)
-
-    def clean_token(self):
-        return self.initial["token"]
-
-
-@admin.register(UserToken)
-class UserTokenAdmin(admin.ModelAdmin):
-    form = UserTokenChangeForm
-    list_display = ('user', 'created', 'expires', 'token_censored', 'is_expired', 'invalid')
-    list_display_links = ('token_censored',)
-    search_fields = ('user__email', 'user__name')
-    ordering = ('-created',)
-    filter_horizontal = ()
-    exclude = ('token',)
-
-    readonly_fields = ('user', 'created', 'expires', 'token')
-
-    list_filter = ('invalid',)

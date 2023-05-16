@@ -2,6 +2,7 @@ import json
 import re
 
 from django.http import JsonResponse, HttpResponse
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
 from messages.error import not_authenticated, invalid_method, client_error
@@ -11,17 +12,13 @@ from .serializers import *
 
 
 class CurrentUserAPIView(APIView):
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return not_authenticated()
+    permission_classes = (IsAuthenticated,)
 
+    def get(self, request):
         serializer = UserSerializer(request.user)
         return JsonResponse(serializer.data)
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return not_authenticated()
-
         data = json.loads(request.body)
         # validate that the user is allowed to edit all the fields present in the request
         for field in data:
@@ -45,6 +42,8 @@ class CurrentUserAPIView(APIView):
 
 
 class UserPermissionAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         if not request.user.is_authenticated:
             return not_authenticated()
@@ -66,14 +65,9 @@ class UserPermissionAPIView(APIView):
 
 
 class PasswordChangeAPIView(APIView):
+    permission_classes = (IsAdminUser,)
 
     def post(self, request):
-        if not request.user.is_authenticated:
-            return not_authenticated()
-
-        if not request.user.is_staff:
-            return client_error(403, 'no_permission.change', 'your password')
-
         data = json.loads(request.body)
 
         error = self.validate(request, data)

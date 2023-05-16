@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,8 @@ DEBUG = os.environ.get("DEBUG", False)
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
     ALLOWED_HOSTS = hosts.split(",")
+elif DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'knox',
     'django_admin_logs',
     'mdeditor',
 ]
@@ -54,7 +58,6 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'backend.middleware.HeadersMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'backend.middleware.BearerMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -180,4 +183,14 @@ MDEDITOR_CONFIGS = {
         'lineNumbers': True,  # lineNumbers
         'language': 'en'  # zh / en / es
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+}
+
+REST_KNOX = {
+    'TOKEN_TTL': timedelta(days=7),
+    'AUTO_REFRESH': False,
+    'AUTH_HEADER_PREFIX': 'Bearer',
 }

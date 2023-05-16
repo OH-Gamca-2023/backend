@@ -1,12 +1,14 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 from django.core import serializers
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseRedirect
+from rest_framework import permissions
+from rest_framework.views import APIView
+from knox.views import LoginView as KnoxLoginView
 
+from users.serializers import UserSerializer
 from .oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, settings
 from .graph_helper import *
-from .user_helper import handle_user_login, create_user_token
+from .user_helper import handle_user_login
 
 
 def initialize_context(request):
@@ -21,70 +23,56 @@ def initialize_context(request):
     return context
 
 
-def sign_in(request):
-    # Get the sign-in flow
-    flow = get_sign_in_flow()
-    # Save the expected flow so we can use it in the callback
-    try:
-        request.session['auth_flow'] = flow
-    except Exception as e:
-        print(e)
-    # Redirect to the Azure sign-in page
-    response = HttpResponseRedirect(flow['auth_uri'])
-    response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
-    return response
+class OauthStartView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        # Get the sign-in flow
+        flow = get_sign_in_flow()
+        # Save the expected flow so we can use it in the callback
+        try:
+            request.session['auth_flow'] = flow
+        except Exception as e:
+            print(e)
+        # Redirect to the Azure sign-in page
+        response = HttpResponseRedirect(flow['auth_uri'])
+        response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+        return response
 
 
-def sign_out(request):
-    # Clear out the user and token
-    remove_user_and_token(request)
-    response = HttpResponseRedirect(reverse('home'))
-    response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
-    return response
+class OauthCallbackView(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
 
 
-def callback(request):
-    try:
-        # Make the token request
-        result = get_token_from_code(request)
-        # Get the user's profile from graph_helper.py script
-        user = get_user(result['access_token'])
-        # Store user from auth_helper.py script
-        store_user(request, user)
+    def get(self, request):
+        try:
+            # Make the token request
+            result = get_token_from_code(request)
+            # Get the user's profile from graph_helper.py script
+            user = get_user(result['access_token'])
+            # Store user from auth_helper.py script
+            store_user(request, user)
 
-        logged_user = handle_user_login(request, user)
+            logged_user = handle_user_login(request, user)
+            login(request, logged_user)
 
-        user_token = create_user_token(request, logged_user)
+            response = super(OauthCallbackView, self).post(request, format=None)
+            print(response)
+            if response.status_code == 200:
+                serialized_user_token = json.dumps(response.data)
+                serialized_logged_user = json.dumps(UserSerializer(logged_user).data)
 
-        # serialize user_token and logged_user to json and send to frontend
-        serialized_user_token = serializers.serialize('json', [user_token])
-        serialized_logged_user = serializers.serialize('json', [logged_user])
+                url_params = '?status=success&user_token=' + serialized_user_token + '&logged_user=' + serialized_logged_user
+                return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+            else:
+                url_params = '?status=error&error=' + str(response.data)
+                return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+        except Exception as e:
+            print(e)
 
-        url_params = '?status=success&user_token=' + serialized_user_token + '&logged_user=' + serialized_logged_user
-        return HttpResponseRedirect(settings['fe_redirect'] + url_params)
-    except Exception as e:
-        print(e)
+            # If something goes wrong, logout the user
+            remove_user_and_token(request)
+            logout(request)
 
-        # If something goes wrong, logout the user
-        remove_user_and_token(request)
-        logout(request)
-
-        url_params = '?status=error&error=' + str(e)
-        return HttpResponseRedirect(settings['fe_redirect'] + url_params)
-
-
-@csrf_exempt
-def invalidate(request):
-    if not request.method == 'DELETE':
-        return HttpResponse(status=405)
-
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'not authenticated'}, status=401)
-
-    token = request.token
-    if token:
-        token.invalid = True
-        token.save()
-        return HttpResponse(status=204)
-    else:
-        return JsonResponse({'error': 'no token present'}, status=400)
+            url_params = '?status=error&error=' + str(e)
+            return HttpResponseRedirect(settings['fe_redirect'] + url_params)

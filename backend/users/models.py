@@ -2,8 +2,6 @@ import re
 
 from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 from data.permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
@@ -153,29 +151,3 @@ class User(AbstractUser):
 
     def get_all_permissions(self, obj=None):
         return self.get_user_permissions(obj).union(self.get_user_permissions(obj))
-
-
-class UserToken(models.Model):
-    token = models.CharField("Kód", max_length=150, primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Používateľ")
-
-    created = models.DateTimeField("Vytvorený", auto_now_add=True)
-    expires = models.DateTimeField("Platný do")
-
-    invalid = models.BooleanField("Neplatný", default=False)
-
-    def token_censored(self):
-        return re.sub(r'(?<=.{7}).(?=.{7})', '*', self.token)
-    token_censored.short_description = 'Cenzurovaný kód'
-
-    def is_expired(self):
-        return timezone.now() > self.expires
-    is_expired.short_description = 'Vypršal?'
-
-    def __str__(self):
-        return self.user.username + ' - ' + self.token_censored() + (
-            '(invalid)' if self.invalid else ('(expired)' if self.is_expired() else ''))
-
-    class Meta:
-        verbose_name_plural = 'prístupové kódy'
-        verbose_name = 'prístupový kód'

@@ -4,7 +4,6 @@ from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 
 from messages.error import client_error, server_error
-from users.models import UserToken
 
 
 def status(request):
@@ -21,25 +20,11 @@ def status(request):
         raw_token = auth_header.split(' ')[1]
         response['token']['present'] = True
 
-        token = UserToken.objects.filter(token=raw_token).first()
-        if token:
-            response['token']['found'] = True
-            response['token']['valid'] = not token.invalid
-            response['token']['expires'] = token.expires.isoformat()
-            response['token']['expired'] = token.expires < timezone.now()
-            if not token.invalid and token.expires > timezone.now():
-                response['token']['user'] = {
-                    "id": token.user.id,
-                    "username": token.user.username,
-                    "email": token.user.email,
-                    "type": token.user.type(),
-                }
-        else:
-            response['token']['found'] = False
-            response['token']['valid'] = False
-            response['token']['expires'] = None
-            response['token']['expired'] = False
-            response['token']['user'] = None
+        response['token']['found'] = False
+        response['token']['valid'] = False
+        response['token']['expires'] = None
+        response['token']['expired'] = False
+        response['token']['user'] = None
 
     return JsonResponse(response)
 

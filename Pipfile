@@ -20,6 +20,7 @@ psycopg2-binary = "==2.9.6"
 gunicorn = "*"
 django-object-actions = "==4.1.0"
 django-mdeditor = "*"
+django-rest-knox = "*"
 
 [dev-packages]
 
