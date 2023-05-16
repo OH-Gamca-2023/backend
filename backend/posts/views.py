@@ -1,28 +1,26 @@
-from django.http import JsonResponse
-from rest_framework.views import APIView
+from rest_framework import generics
+from rest_framework.pagination import LimitOffsetPagination
 
 from posts.models import Tag, Post
 from posts.serializers import TagSerializer, PostSerializer
 
 
-# Create your views here.
-
-class TagListAPIView(APIView):
-
-    def get(self, request):
-        serializer = TagSerializer(Tag.objects.all(), many=True)
-        return JsonResponse(serializer.data, safe=False)
+class TagsView(generics.ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 
 
-class PostListAPIView(APIView):
-
-    def get(self, request):
-        serializer = PostSerializer(Post.objects.all(), many=True)
-        return JsonResponse(serializer.data, safe=False)
+class TagDetailView(generics.RetrieveAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 
 
-class PostDetailAPIView(APIView):
+class PostsView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    pagination_class = LimitOffsetPagination
 
-    def get(self, request, pk):
-        serializer = PostSerializer(Post.objects.get(pk=pk))
-        return JsonResponse(serializer.data, safe=False)
+
+class PostDetailView(generics.RetrieveAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer

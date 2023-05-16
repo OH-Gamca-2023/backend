@@ -2,6 +2,7 @@ import json
 import re
 
 from django.http import JsonResponse, HttpResponse
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
@@ -9,6 +10,7 @@ from messages.error import not_authenticated, invalid_method, client_error
 
 from data.permissions import profile_edit_permission
 from .serializers import *
+from backend.utils import ViewModelPermissions
 
 
 class CurrentUserAPIView(APIView):
@@ -124,29 +126,27 @@ class PasswordChangeAPIView(APIView):
         return None
 
 
-class ClassListAPIView(APIView):
-    def get(self, request):
-        serializer = ClazzSerializer(Clazz.objects.all(), many=True)
-
-        return JsonResponse(serializer.data, safe=False)
+class ClassesView(generics.ListAPIView):
+    serializer_class = ClazzSerializer
+    queryset = Clazz.objects.all()
 
 
-class ClassDetailAPIView(APIView):
-    def get(self, request, pk):
-        serializer = ClazzSerializer(Clazz.objects.get(pk=pk))
-
-        return JsonResponse(serializer.data, safe=False)
+class ClassDetailView(generics.RetrieveAPIView):
+    serializer_class = ClazzSerializer
+    queryset = Clazz.objects.all()
 
 
-class GradeListAPIView(APIView):
-    def get(self, request):
-        serializer = GradeSerializer(Grade.objects.all(), many=True)
-
-        return JsonResponse(serializer.data, safe=False)
+class GradesView(generics.ListAPIView):
+    serializer_class = GradeSerializer
+    queryset = Grade.objects.all()
 
 
-class GradeDetailAPIView(APIView):
-    def get(self, request, pk):
-        serializer = GradeSerializer(Grade.objects.get(pk=pk))
+class GradeDetailView(generics.RetrieveAPIView):
+    serializer_class = GradeSerializer
+    queryset = Grade.objects.all()
 
-        return JsonResponse(serializer.data, safe=False)
+
+class UserDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = (ViewModelPermissions,)
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
