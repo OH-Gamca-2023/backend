@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'knox',
+    'django_filters',
     'django_admin_logs',
     'mdeditor',
 ]
@@ -186,6 +187,7 @@ MDEDITOR_CONFIGS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_PAGINATION_CLASS': None,
     'PAGE_SIZE': 10
 }
 
