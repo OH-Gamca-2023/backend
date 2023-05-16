@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django_object_actions import action, DjangoObjectActions
 
-from .models import Grade, Clazz, User, MicrosoftUser, UserToken
+from .models import Grade, Clazz, User, MicrosoftUser
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
@@ -20,7 +21,8 @@ class UserChangeForm(forms.ModelForm):
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
-    list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_admin', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
@@ -81,16 +83,24 @@ admin.site.register(User, UserAdmin)
 
 
 @admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'competing')
+class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
+    list_display = ('id', 'name', 'competing')
+    list_display_links = ('id', 'name')
     search_fields = ('name', 'competing')
-    ordering = ('name',)
-    filter_horizontal = ()
+    ordering = ('id',)
+
+    @action(description='Create grades', permissions=['add'])
+    def create_grades(self, request, queryset):
+        for name in Grade.grade_options:
+            Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'])
+
+    changelist_actions = ('create_grades',)
 
 
 @admin.register(Clazz)
 class ClazzAdmin(admin.ModelAdmin):
-    list_display = ('name', 'grade', 'is_fake')
+    list_display = ('id', 'name', 'grade', 'is_fake')
+    list_display_links = ('id', 'name')
     search_fields = ('name', 'grade__name')
     ordering = ('name',)
     filter_horizontal = ()
@@ -100,7 +110,9 @@ class ClazzAdmin(admin.ModelAdmin):
 
 @admin.register(MicrosoftUser)
 class MicrosoftUserAdmin(admin.ModelAdmin):
-    list_display = ('user', 'mail', 'display_name', 'job_title', 'department', 'id')
+    list_display = ('id', 'user', 'mail', 'display_name', 'job_title', 'department')
+    list_display_links = ('id',)
+
     search_fields = ('user__email', 'microsoft_id', 'mail', 'display_name')
     ordering = ('department', 'display_name')
     filter_horizontal = ()
@@ -110,25 +122,3 @@ class MicrosoftUserAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'mail', 'display_name', 'given_name', 'surname', 'job_title', 'office_location', 'department')
 
-
-class UserTokenChangeForm(forms.ModelForm):
-    class Meta:
-        model = UserToken
-        fields = ('invalid',)
-
-    def clean_token(self):
-        return self.initial["token"]
-
-
-@admin.register(UserToken)
-class UserTokenAdmin(admin.ModelAdmin):
-    form = UserTokenChangeForm
-    list_display = ('user', 'created', 'expires', 'token_censored', 'is_expired', 'invalid')
-    search_fields = ('user__email', 'user__name')
-    ordering = ('-created',)
-    filter_horizontal = ()
-    exclude = ('token',)
-
-    readonly_fields = ('user', 'created', 'expires', 'token')
-
-    list_filter = ('invalid',)

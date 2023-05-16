@@ -1,5 +1,6 @@
 error:
     endpoint_not_found: "Endpoint not found."
+    custom: "%s"
 
     required: "%s is required."
     invalid: "%s is in invalid format."

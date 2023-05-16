@@ -1,6 +1,8 @@
 import json
 
+from django.contrib.sessions.models import Session
 from django.db import models
+
 
 
 class Setting(models.Model):
@@ -86,3 +88,12 @@ class AuthRestriction(models.Model):
 
     def __str__(self):
         return self.type + (' (enabled)' if self.restricted else ' (disabled)')
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if self.type == 'login':
+            # Log out all users when login restriction is changed (for security reasons)
+            Session.objects.all().delete()
+
+        super().save(force_insert, force_update, using, update_fields)

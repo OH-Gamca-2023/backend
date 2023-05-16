@@ -1,10 +1,32 @@
+from datetime import datetime
+
 from django.http import JsonResponse, HttpResponse
+from django.utils import timezone
 
 from messages.error import client_error, server_error
 
 
 def status(request):
-    return JsonResponse({'status': 'ok'})
+    response = {
+        "status": "ok",
+        "time": datetime.now().isoformat(),
+        "token": {
+            "present": False
+        }
+    }
+
+    auth_header = request.headers.get('Authorization')
+    if auth_header:
+        raw_token = auth_header.split(' ')[1]
+        response['token']['present'] = True
+
+        response['token']['found'] = False
+        response['token']['valid'] = False
+        response['token']['expires'] = None
+        response['token']['expired'] = False
+        response['token']['user'] = None
+
+    return JsonResponse(response)
 
 
 def home(request):

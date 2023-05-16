@@ -16,7 +16,16 @@ class ClazzSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+
+    def __init__(self, *args, hide_confidential=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hide_confidential:
+            self.fields.pop('microsoft_user')
+            self.fields.pop('has_password')
+            self.fields.pop('email')
+            self.fields.pop('clazz')
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'clazz', 'microsoft_user', 'type', 'has_password')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'clazz', 'type', 'microsoft_user', 'has_password')
         extra_kwargs = {'password': {'write_only': True}}

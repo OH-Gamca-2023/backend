@@ -1,13 +1,33 @@
+import random
+
 from django.db import models
+from mdeditor.fields import MDTextField
 
 from backend import settings
-from disciplines.models import Discipline, Tag
+from disciplines.models import Discipline
 from users.models import Grade
 
 
+class Tag(models.Model):
+    name = models.CharField("Názov", max_length=100)
+
+    def __str__(self):
+        return "[" + self.name + "]"
+
+    class Meta:
+        verbose_name_plural = 'tagy'
+        verbose_name = 'tag'
+
+
+def gen_id():
+    return "".join(random.choices("0123456789abcdef", k=8))
+
+
 class Post(models.Model):
+    id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
+
     title = models.CharField("Nadpis", max_length=100)
-    content = models.CharField("Obsah", max_length=10000, help_text="Obsah príspevku bude prehnaný cez Markdown.")
+    content = MDTextField("Obsah", max_length=10000)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL
         , on_delete=models.SET_NULL, null=True, blank=True, related_name='posts', verbose_name="Autor")

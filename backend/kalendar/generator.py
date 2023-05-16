@@ -17,7 +17,7 @@ def generate(request, cause):
 
     generation_event.start = datetime.now()
     try:
-        cal_id = "".join(random.choices("0123456789abcdef", k=5))
+        cal_id = "".join(random.choices("0123456789abcdef", k=8))
 
         disciplines = Discipline.objects.filter(date__isnull=False).order_by('date', 'time')
         categories = {category.id: category.name for category in Category.objects.all()}
@@ -131,11 +131,17 @@ def generate(request, cause):
 def serialize_discipline(discipline, categories, grades):
     return {
         'id': discipline.id,
-        'name': discipline.name,
+        'name': {
+            'regular': discipline.name,
+            'short': discipline.short_name if discipline.short_name else discipline.name,
+        },
         'date': discipline.date,
         'time': discipline.time,
         'location': discipline.location,
-        'category': categories[discipline.category.id],
+        'category': {
+            'id': discipline.category.id,
+            'name': discipline.category.name,
+        },
         'grades': [grades[grade.id] for grade in discipline.target_grades.all()],
     }
 
@@ -147,12 +153,12 @@ def serialize_json_calendar(disciplines, cal_id, description="Kalend√°r discipl√
         'description': description,
         'events': [],
     }
-    print(disciplines)
 
     for d in disciplines:
         d = d.copy()
         d['date'] = d['date'].strftime("%Y-%m-%d")
         d['time'] = d['time'].strftime("%H:%M") if d['time'] is not None else None
+        d['category'] = d['category']['id']
         cal['events'].append(d)
     return json.dumps(cal)
 
@@ -170,7 +176,7 @@ def serialize_ical_calendar(disciplines, cal_id, description="Kalend√°r discipl√
     for discipline in disciplines:
         event = "BEGIN:VEVENT\n" \
                 "UID:" + str(discipline['id']) + "\n" \
-                "SUMMARY:" + discipline['name'] + "\n"
+                "SUMMARY:" + discipline['name']['regular'] + "\n"
 
         if discipline['time'] is not None:
             event += "DTSTAMP:" + discipline['date'].strftime("%Y%m%d") + "T" + discipline['time'].strftime("%H%M%S") + "\n"
@@ -180,7 +186,7 @@ def serialize_ical_calendar(disciplines, cal_id, description="Kalend√°r discipl√
         if discipline['location'] is not None:
             event += "LOCATION:" + discipline['location'] + "\n"
 
-        event += "CLASS:" + discipline['category'] + "\n" \
+        event += "CLASS:" + discipline['category']['name'] + "\n" \
             "CATEGORIES:" + ",".join(discipline['grades']) + "\n" \
             "END:VEVENT\n"
 

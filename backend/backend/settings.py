@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,8 @@ DEBUG = os.environ.get("DEBUG", False)
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
     ALLOWED_HOSTS = hosts.split(",")
+elif DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -45,15 +48,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'knox',
+    'django_filters',
     'django_admin_logs',
+    'mdeditor',
 ]
 
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
-    'backend.middleware.HeadersMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'backend.middleware.BearerMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,7 +71,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'backend/templates']
+        'DIRS': [BASE_DIR / 'templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -147,3 +151,48 @@ CSRF_TRUSTED_ORIGINS = [
     "https://2023.oh.gamca.sk",
     "https://oh.gamca.sk",
 ]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+MDEDITOR_CONFIGS = {
+    'default': {
+        'width': '100% ',  # Custom edit box width
+        'height': 700,  # Custom edit box height
+        'toolbar': ["undo", "redo", "|",
+                    "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|",
+                    "h1", "h2", "h3", "h5", "h6", "|",
+                    "list-ul", "list-ol", "hr", "|",
+                    "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime",
+                    "emoji", "html-entities", "pagebreak", "goto-line", "|",
+                    "help", "info",
+                    "||", "preview", "watch", "fullscreen"],  # custom edit box toolbar
+        # image upload format type
+        'upload_image_formats': ["jpg", "jpeg", "gif", "png", "bmp", "webp", "svg"],
+        'image_folder': 'editor',  # image save the folder name
+        'theme': 'default',  # edit box theme, dark / default
+        'preview_theme': 'default',  # Preview area theme, dark / default
+        'editor_theme': 'default',  # edit area theme, pastel-on-dark / default
+        'toolbar_autofixed': False,  # Whether the toolbar capitals
+        'search_replace': True,  # Whether to open the search for replacement
+        'emoji': True,  # whether to open the expression function
+        'tex': True,  # whether to open the tex chart function
+        'flow_chart': True,  # whether to open the flow chart function
+        'sequence': True,  # Whether to open the sequence diagram function
+        'watch': True,  # Live preview
+        'lineWrapping': True,  # lineWrapping
+        'lineNumbers': True,  # lineNumbers
+        'language': 'en'  # zh / en / es
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_PAGINATION_CLASS': None,
+    'PAGE_SIZE': 10
+}
+
+REST_KNOX = {
+    'TOKEN_TTL': timedelta(days=7),
+    'AUTO_REFRESH': False,
+    'AUTH_HEADER_PREFIX': 'Bearer',
+}

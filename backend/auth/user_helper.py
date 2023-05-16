@@ -1,10 +1,5 @@
-from datetime import timedelta
-
-from django.utils import timezone
-from django.utils.crypto import get_random_string
-
 from auth.restriction_helper import is_allowed
-from users.models import MicrosoftUser, User, UserToken, Clazz, Grade
+from users.models import MicrosoftUser, User, Clazz, Grade
 
 def handle_user_login(request, user):
     id = user['id']
@@ -60,29 +55,6 @@ def handle_user_login(request, user):
     django_user = User.objects.get(microsoft_user=msft_user)
 
     return django_user
-
-
-MAX_TOKENS_PER_USER = 5
-
-
-def create_user_token(request, user):
-    token_string = get_random_string(length=64)
-    expiry_date = timezone.now() + timedelta(days=7)
-
-    tokens = UserToken.objects.filter(user=user, invalid=False, expires__gt=timezone.now()).order_by('-created')
-
-    if tokens.count() >= MAX_TOKENS_PER_USER:
-        last_token = tokens.last()
-        last_token.invalid = True
-        last_token.save()
-
-    token = UserToken.objects.create(
-        token=token_string,
-        user=user,
-        expires=expiry_date,
-    )
-
-    return token
 
 
 def process_clazz(msft_user):
