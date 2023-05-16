@@ -50,6 +50,10 @@ class Discipline(models.Model):
     details_published = models.BooleanField(default=False, verbose_name="Detaily zverejnené")
     results_published = models.BooleanField(default=False, verbose_name="Výsledky zverejnené")
 
+    @property
+    def is_public(self):
+        return self.date_published or self.details_published or self.results_published
+
     details_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     results_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
 
