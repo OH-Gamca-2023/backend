@@ -18,26 +18,36 @@ force_blacklist = [
 # Blacklist - permissions that are not allowed to be assigned to users
 # can be overriden by assigning them to a user or a group directly
 blacklist = [
-    # prevent tampering with user tokens
-    'users\\.add_usertoken',
-    'users\\.change_usertoken',
-    'users\\.delete_usertoken',
-    # prevent removing calendars for everyone but superusers
+    # prevent removing calendars and settings for everyone but superusers
     'kalendar\\.delete_calendar',
-    'data\\.delete_setting',
+    'data\\.delete_(.*)',
+    # prevent unwanted user modifications
+    'users\\.delete_microsoftuser',
+    'users\\.delete_user',
+    'users\\.delete_grade',
 ]
 
 # Admin - permissions that admins have by default
 admin = [
+    'disciplines\\.(.*)',
+    'posts\\.(.*)',
     'users\\.(.*)',
     'kalendar\\.(.*)',
     'data\\.(.*)',
+    'ciphers\\.(.*)',
+    'knox\\.view_authtoken',
 ]
 
 # Organizer - permissions that organizers have by default
 organizer = [
-    'disciplines\\.(.*)',
-    'posts\\.(.*)',
+    'disciplines\\.(.*)_discipline',
+    'disciplines\\.view_category',
+    'disciplines\\.(.*)_result',
+    'posts\\.(.*)_post',
+    'posts\\.(view|add)_comment',
+    'posts\\.(view|add)_tag',
+    'ciphers\\.(.*)_cipher',
+    'ciphers\\.(view)_submission',
     'users\\.view_grade',
     'users\\.view_clazz',
 ]

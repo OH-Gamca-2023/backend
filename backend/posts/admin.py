@@ -12,7 +12,7 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name', 'special')
 
     def get_readonly_fields(self, request, obj=None):
-        if request.user.is_superuser:
+        if request.user.has_perm('posts.change_special_tags'):
             return ()
         return ('special',)
 

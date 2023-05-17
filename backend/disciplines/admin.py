@@ -83,6 +83,17 @@ class DisciplineAdmin(admin.ModelAdmin):
                 # if so, generate the calendar
                 generate(request, f'Discipline {obj.name} ({obj.id}) has been modified [{", ".join(modified)}]')
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly = []
+        if obj:
+            if obj.date_published:
+                readonly.append('date_published')
+            if obj.details_published:
+                readonly.append('details_published')
+            if obj.results_published:
+                readonly.append('results_published')
+        return readonly
+
 
 class PlacementInline(admin.TabularInline):
     model = Placement
