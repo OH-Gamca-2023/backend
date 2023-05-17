@@ -36,6 +36,7 @@ admin = [
     'data\\.(.*)',
     'ciphers\\.(.*)',
     'knox\\.view_authtoken',
+    'admin\\.view_logentry',
 ]
 
 # Organizer - permissions that organizers have by default

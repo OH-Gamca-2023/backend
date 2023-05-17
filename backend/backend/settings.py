@@ -71,6 +71,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'backend.urls'
+DJANGO_ADMIN_LOGS_DELETABLE = True
 
 TEMPLATES = [
     {

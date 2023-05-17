@@ -47,10 +47,10 @@ def handle_user_login(request, user):
             is_staff=user_clazz.grade.name == 'Organizátori',
             is_superuser=False,
         )
-    else:
-        allowed, message = is_allowed(request, 'login', User.objects.get(microsoft_user=msft_user), msft_user.department)
-        if not allowed:
-            raise Exception(f'STRERROR: {message}')
+
+    allowed, message = is_allowed(request, 'login', User.objects.get(microsoft_user=msft_user), msft_user.department)
+    if not allowed:
+        raise Exception(f'STRERROR: {message}')
 
     django_user = User.objects.get(microsoft_user=msft_user)
 
