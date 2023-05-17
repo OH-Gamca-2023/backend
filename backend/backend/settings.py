@@ -27,8 +27,10 @@ DEBUG = os.environ.get("DEBUG", False)
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
     ALLOWED_HOSTS = hosts.split(",")
+    CORS_ALLOWED_ORIGINS = hosts.split(",")
 elif DEBUG:
     ALLOWED_HOSTS = ["*"]
+    CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_admin_logs',
     'mdeditor',
+    'corsheaders'
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -59,6 +62,7 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -187,7 +191,6 @@ MDEDITOR_CONFIGS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
-    'DEFAULT_PAGINATION_CLASS': None,
     'PAGE_SIZE': 10
 }
 
