@@ -7,9 +7,14 @@ admin.site.register(Comment)
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
+    list_display = ('id', 'name', 'special')
     list_display_links = ('id', 'name')
-    search_fields = ('name',)
+    search_fields = ('name', 'special')
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return ()
+        return ('special',)
 
 
 @admin.register(Post)
