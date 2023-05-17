@@ -22,6 +22,7 @@ django-object-actions = "==4.1.0"
 django-mdeditor = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
+uritemplate = "*"
 
 [dev-packages]
 

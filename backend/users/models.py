@@ -1,8 +1,5 @@
-import re
-
 from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
-from django.utils import timezone
 
 from data.permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
     blacklist, organizer, admin, default, force_blacklist
@@ -18,6 +15,7 @@ class Grade(models.Model):
     )
     name = models.CharField("Názov", max_length=100, choices=grade_options, unique=True)
     competing = models.BooleanField("Súťažná?", default=True)
+    cipher_competing = models.BooleanField("Súťaží v online šifrovačke?", default=False)
 
     class Meta:
         verbose_name_plural = 'stupne'
