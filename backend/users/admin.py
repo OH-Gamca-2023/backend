@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django_object_actions import action, DjangoObjectActions
 
 from .models import Grade, Clazz, User, MicrosoftUser
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
 
@@ -18,6 +19,7 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
@@ -77,9 +79,6 @@ class UserAdmin(BaseUserAdmin):
                 return self.readonly_fields + ('is_active', 'is_staff', 'is_superuser')
 
         return self.readonly_fields
-
-
-admin.site.register(User, UserAdmin)
 
 
 @admin.register(Grade)
