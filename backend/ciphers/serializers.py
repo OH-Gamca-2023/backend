@@ -32,6 +32,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This cipher is not visible yet.')
 
         if self.context['request'].user.is_authenticated:
+            if not self.context['request'].user.clazz.grade.cipher_competing:
+                raise serializers.ValidationError('Grade of your class is not competing in ciphers.')
+
             if data['cipher'].solved_by(self.context['request'].user.clazz):
                 raise serializers.ValidationError('You have already solved this cipher.')
 
