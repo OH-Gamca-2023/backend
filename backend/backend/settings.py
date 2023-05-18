@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import hashlib
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from django.utils import timezone
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -71,6 +74,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'backend.urls'
+DJANGO_ADMIN_LOGS_DELETABLE = True
 
 TEMPLATES = [
     {
@@ -191,7 +195,12 @@ MDEDITOR_CONFIGS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.AdminRenderer'
+    ]
 }
 
 REST_KNOX = {
@@ -199,3 +208,45 @@ REST_KNOX = {
     'AUTO_REFRESH': False,
     'AUTH_HEADER_PREFIX': 'Bearer',
 }
+
+# Add this to your settings.py to customize applications and models list
+JET_SIDE_MENU_ITEMS = [
+    {'label': 'Administrácia', 'app_label': 'data', 'items': [
+        {'name': 'authrestriction', 'label': 'Obmedzenia prihlasovania'},
+        {'name': 'setting', 'label': 'Nastavenia'},
+        {'name': 'admin.logentry', 'label': 'Logy', 'url': {
+            'type': 'reverse',
+            'name': 'admin:admin_logentry_changelist',
+        }}
+    ]},
+    {'label': 'Disciplíny', 'app_label': 'disciplines', 'items': [
+        {'name': 'discipline'},
+        {'name': 'result'},
+        {'name': 'category'},
+    ]},
+    {'label': 'Príspevky', 'app_label': 'posts', 'items': [
+        {'name': 'post'},
+        {'name': 'comment'},
+        {'name': 'tag'},
+    ]},
+    {'label': 'Šifry', 'app_label': 'ciphers', 'items': [
+        {'name': 'cipher'},
+        {'name': 'submission'},
+    ]},
+    {'label': 'Kalendár', 'app_label': 'kalendar', 'items': [
+        {'name': 'calendar', 'label': 'Dáta kalendára'},
+        {'name': 'generationevent', 'label': 'Záznamy generovania'},
+    ]},
+    {'label': 'Používatelia', 'app_label': 'users', 'items': [
+        {'name': 'user'},
+        {'name': 'microsoftuser'},
+        {'name': 'grade'},
+        {'name': 'clazz'},
+        {'name': 'knox.authtoken', 'label': 'Prístupové kľúče'},
+        {'name': 'auth.group', 'label': 'Skupiny'},
+    ]},
+]
+
+CIPHERS_DELAY = timezone.timedelta(minutes=15)
+CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
+CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']

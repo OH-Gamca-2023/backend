@@ -10,6 +10,8 @@ from users.models import Grade
 
 class Tag(models.Model):
     name = models.CharField("Názov", max_length=100)
+    special = models.CharField("Špeciálna funkcia", max_length=10, blank=True, null=True,
+                               help_text="Používané interne. NEUPRAVUJTE ak neviete čo robíte.")
 
     def __str__(self):
         return "[" + self.name + "]"

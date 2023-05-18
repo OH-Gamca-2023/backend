@@ -1,6 +1,7 @@
 import random
 
 from django.db import models
+from mdeditor.fields import MDTextField
 
 from users.models import Grade, Clazz
 
@@ -32,7 +33,7 @@ class Discipline(models.Model):
                                                 "správne zobrazí je 15 znakov. V prípade viac ako 3 disciplín "
                                                 "v jednom dni odporúčame maximálne 7 znakov.")
 
-    details = models.TextField("Detaily", blank=True, null=True)
+    details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
 
     date = models.DateField("Dátum", blank=True, null=True)
     time = models.TimeField("Čas", blank=True, null=True)
@@ -54,11 +55,20 @@ class Discipline(models.Model):
     def is_public(self):
         return self.date_published or self.details_published or self.results_published
 
-    details_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-    results_post = models.ForeignKey('posts.Post', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
-
     def __str__(self):
         return self.name
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        # don't allow to disable date_published, details_published or results_published
+        if self.pk:
+            old = Discipline.objects.get(pk=self.pk)
+            self.date_published = old.date_published or self.date_published
+            self.details_published = old.details_published or self.details_published
+            self.results_published = old.results_published or self.results_published
+
+        super().save(force_insert, force_update, using, update_fields)
 
 
 class Result(models.Model):

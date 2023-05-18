@@ -23,10 +23,11 @@ from .views import *
 api_urls = [
     path('auth/', include('auth.urls')),
     path('user/', include('users.urls')),
-    path('status/', status, name='status'),
+    path('status/', StatusView.as_view(), name='status'),
     path('disciplines/', include('disciplines.urls')),
     path('calendar/', include('kalendar.urls')),
     path('posts/', include('posts.urls')),
+    path('ciphers/', include('ciphers.urls')),
 ]
 
 

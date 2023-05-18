@@ -1,4 +1,6 @@
+from rest_framework import mixins
 from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.viewsets import GenericViewSet
 
 
 class ViewModelPermissions(DjangoModelPermissions):
@@ -11,3 +13,13 @@ class ViewModelPermissions(DjangoModelPermissions):
         'PATCH': ['%(app_label)s.change_%(model_name)s'],
         'DELETE': ['%(app_label)s.delete_%(model_name)s'],
     }
+
+
+class ReadCreateViewSet(mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet):
+    """
+    A viewset that provides default `create()`, `retrieve()` and `list()` actions.
+    """
+    pass

@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django_object_actions import action, DjangoObjectActions
 
 from .models import Grade, Clazz, User, MicrosoftUser
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
 
@@ -18,6 +19,7 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
@@ -79,20 +81,19 @@ class UserAdmin(BaseUserAdmin):
         return self.readonly_fields
 
 
-admin.site.register(User, UserAdmin)
-
-
 @admin.register(Grade)
 class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
-    list_display = ('id', 'name', 'competing')
+    list_display = ('id', 'name', 'competing', 'cipher_competing')
     list_display_links = ('id', 'name')
-    search_fields = ('name', 'competing')
+    search_fields = ('name',)
+    list_filter = ('competing', 'cipher_competing')
     ordering = ('id',)
 
     @action(description='Create grades', permissions=['add'])
     def create_grades(self, request, queryset):
         for name in Grade.grade_options:
-            Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'])
+            Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'],
+                                        cipher_competing=name[0] in ['2. Stupeň', 'Organizátori'])
 
     changelist_actions = ('create_grades',)
 
@@ -103,7 +104,6 @@ class ClazzAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'name')
     search_fields = ('name', 'grade__name')
     ordering = ('name',)
-    filter_horizontal = ()
 
     list_filter = ('grade', 'is_fake')
 
