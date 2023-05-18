@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from ciphers.models import Cipher, Submission
+from users.models import Clazz
 
 
 class CipherSerializer(serializers.ModelSerializer):
@@ -11,9 +12,22 @@ class CipherSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        ret['classes'] = {}
         if self.context['request'].user.is_authenticated:
-            ret['solved'] = instance.solved_by(self.context['request'].user.clazz)
-            ret['solved_after_hint'] = instance.solved_after_hint_by(self.context['request'].user.clazz)
+            if self.context['request'].user.is_staff:
+                for clazz in Clazz.objects.filter(grade__cipher_competing=True):
+                    ret['classes'][clazz.name] = {
+                        'solved': instance.solved_by(clazz),
+                        'after_hint': instance.solved_after_hint_by(clazz),
+                        'attempts': instance.attempts_by(clazz)
+                    }
+            else:
+                clazz = self.context['request'].user.clazz
+                ret['classes'][clazz.name] = {
+                    'solved': instance.solved_by(clazz),
+                    'after_hint': instance.solved_after_hint_by(clazz),
+                    'attempts': instance.attempts_by(clazz)
+                }
         return ret
 
 

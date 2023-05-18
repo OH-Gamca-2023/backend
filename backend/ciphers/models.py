@@ -48,6 +48,9 @@ class Cipher(models.Model):
             return self.submission_set.filter(clazz=clazz, correct=True).first().after_hint
         return False
 
+    def attempts_by(self, clazz):
+        return self.submission_set.filter(clazz=clazz).count()
+
 
 class Submission(models.Model):
     cipher = models.ForeignKey(Cipher, on_delete=models.CASCADE)
