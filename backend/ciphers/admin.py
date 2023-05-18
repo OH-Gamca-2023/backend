@@ -1,15 +1,26 @@
 from django.contrib import admin
+
 from .models import *
 
 
 @admin.register(Cipher)
 class CipherAdmin(admin.ModelAdmin):
-    list_display = ('name', 'start', 'end', 'visible', 'hint_visible', 'has_ended')
-    list_filter = ('start', 'end', 'visible', 'hint_visible', 'has_ended')
+    list_display = ('name', 'start', 'end', 'started', 'hint_visible', 'has_ended')
+    list_filter = ('start', 'end')
     search_fields = ('name',)
     ordering = ('start', 'end')
 
-    readonly_fields = ('visible', 'hint_visible', 'has_ended')
+    @admin.display(description='Started', boolean=True)
+    def started(self, obj):
+        return obj.started
+
+    @admin.display(description='Hint visible', boolean=True)
+    def hint_visible(self, obj):
+        return obj.hint_visible
+
+    @admin.display(description='Ended', boolean=True)
+    def has_ended(self, obj):
+        return obj.has_ended
 
 
 @admin.register(Submission)

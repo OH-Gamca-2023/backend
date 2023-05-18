@@ -1,4 +1,3 @@
-from django.utils import timezone
 from rest_framework import serializers
 
 from ciphers.models import Cipher, Submission
@@ -8,10 +7,17 @@ from users.models import Clazz
 class CipherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cipher
-        fields = '__all__'
+        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended']
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+
+        if instance.started:
+            ret['name'] = instance.name
+            ret['task_file'] = instance.task_file.url
+        if instance.hint_visible:
+            ret['hint_text'] = instance.hint_text
+
         ret['classes'] = {}
         if self.context['request'].user.is_authenticated:
             if self.context['request'].user.is_staff:
@@ -40,10 +46,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         data['cipher'] = Cipher.objects.get(pk=self.context['view'].kwargs['cipher_pk'])
 
-        if data['cipher'].has_ended or data['cipher'].end < timezone.now():
+        if data['cipher'].has_ended:
             raise serializers.ValidationError('This cipher has ended.')
-        if not data['cipher'].visible:
-            raise serializers.ValidationError('This cipher is not visible yet.')
+        if not data['cipher'].started:
+            raise serializers.ValidationError('This cipher has not started yet.')
 
         if self.context['request'].user.is_authenticated:
             if not self.context['request'].user.clazz.grade.cipher_competing:

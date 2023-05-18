@@ -8,7 +8,7 @@ from ciphers.serializers import CipherSerializer, SubmissionSerializer
 
 
 class CiphersViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cipher.objects.filter(visible=True)
+    queryset = Cipher.objects.filter()
     serializer_class = CipherSerializer
 
 
@@ -20,12 +20,12 @@ class SubmissionRateThrottle(throttling.BaseThrottle):
                 cipher_pk = view.kwargs['cipher_pk']
                 last_submission = Submission.objects.filter(clazz=request.user.clazz,
                                                             cipher_id=cipher_pk).order_by('-time').first()
-                if last_submission is not None and last_submission.time + settings.CIPHERS.DELAY > timezone.now():
+                if last_submission is not None and last_submission.time + settings.CIPHERS_DELAY > timezone.now():
                     return False
         return True
 
     def wait(self):
-        return settings.CIPHERS.DELAY.total_seconds()
+        return settings.CIPHERS_DELAY.total_seconds()
 
 
 class SubmissionViewSet(ReadCreateViewSet):

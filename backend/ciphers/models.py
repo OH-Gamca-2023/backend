@@ -1,3 +1,6 @@
+import hashlib
+import os
+
 from django.db import models
 from django.utils import timezone
 
@@ -6,14 +9,17 @@ from users.models import Clazz
 
 
 def file_path(instance, filename):
-    extension = filename.split('.')[-1]
-    return f'sifry/zadania/{instance.cipher.pk}.{extension}'
+    instance.task_file.open()
+    fname, ext = os.path.splitext(filename)
+    digest = hashlib.sha256(instance.task_file.read()).hexdigest()
+    return f'sifry/zadania/{instance.pk}/{digest}{ext}'
 
 
 def validate_file(file):
-    if file.size > settings.CIPHERS.MAX_FILE_SIZE:
+    if file.size > settings.CIPHERS_MAX_FILE_SIZE:
         raise Exception('File too large.')
-    if file.name.split('.')[-1] not in settings.CIPHERS.ALLOWED_FILE_TYPES:
+    fname, ext = os.path.splitext(file.name)
+    if ext not in settings.CIPHERS_ALLOWED_FILE_TYPES:
         raise Exception('Invalid file type.')
 
 
@@ -22,16 +28,27 @@ class Cipher(models.Model):
 
     start = models.DateTimeField()
     task_file = models.FileField(upload_to=file_path, validators=[validate_file])
-    visible = models.BooleanField(default=False)  # TODO: auto update on start
 
     hint_text = models.CharField(max_length=1000, blank=True, null=True)
     hint_publish_time = models.DateTimeField(blank=True, null=True)
-    hint_visible = models.BooleanField(default=False)  # TODO: auto update on hintPublishTime
 
-    correct_answer = models.CharField(max_length=20)  # TODO: ensure this is never sent to the client
+    correct_answer = models.CharField(max_length=20)
 
     end = models.DateTimeField()
-    has_ended = models.BooleanField(default=False)  # TODO: auto update on end
+
+    @property
+    def started(self):
+        return self.start < timezone.now()
+
+    @property
+    def hint_visible(self):
+        if not self.hint_publish_time:
+            return False
+        return self.hint_publish_time < timezone.now()
+
+    @property
+    def has_ended(self):
+        return self.end < timezone.now()
 
     def save(self, *args, **kwargs):
         if self.start and self.end and self.start > self.end:
@@ -41,12 +58,6 @@ class Cipher(models.Model):
         elif self.hint_publish_time and self.end and self.hint_publish_time > self.end:
             raise Exception('Hint publish date must be before end date.')
 
-        if self.start and self.start < timezone.now():
-            self.visible = True
-        if self.hint_publish_time and self.hint_publish_time < timezone.now():
-            self.hint_visible = True
-        if self.end and self.end < timezone.now():
-            self.has_ended = True
         super(Cipher, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -83,7 +94,7 @@ class Submission(models.Model):
             if self.cipher.has_ended:
                 raise Exception('Cipher has ended.')
             # refuse to create submissions before the cipher has started
-            if not self.cipher.visible:
+            if not self.cipher.started:
                 raise Exception('Cipher has not started.')
             # refuse to create submissions if the class has already solved the cipher
             if self.cipher.solved_by(self.clazz):

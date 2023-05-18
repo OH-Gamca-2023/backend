@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import hashlib
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -213,7 +214,7 @@ JET_SIDE_MENU_ITEMS = [
     {'label': 'Administrácia', 'app_label': 'data', 'items': [
         {'name': 'authrestriction', 'label': 'Obmedzenia prihlasovania'},
         {'name': 'setting', 'label': 'Nastavenia'},
-        {'name': 'admin.logentry', 'label': 'Logy', 'url':  {
+        {'name': 'admin.logentry', 'label': 'Logy', 'url': {
             'type': 'reverse',
             'name': 'admin:admin_logentry_changelist',
         }}
@@ -246,8 +247,6 @@ JET_SIDE_MENU_ITEMS = [
     ]},
 ]
 
-CIPHERS = {
-    'DELAY': timezone.timedelta(minutes=15),
-    'MAX_FILE_SIZE': 1024 * 1024 * 10,  # 10 MB
-    'ALLOWED_FILE_TYPES': ['pdf', 'txt', 'jpg', 'jpeg', 'png'],
-}
+CIPHERS_DELAY = timezone.timedelta(minutes=15)
+CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
+CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']
