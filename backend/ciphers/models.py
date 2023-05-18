@@ -5,11 +5,23 @@ from backend import settings
 from users.models import Clazz
 
 
+def file_path(instance, filename):
+    extension = filename.split('.')[-1]
+    return f'sifry/zadania/{instance.cipher.pk}.{extension}'
+
+
+def validate_file(file):
+    if file.size > settings.CIPHERS.MAX_FILE_SIZE:
+        raise Exception('File too large.')
+    if file.name.split('.')[-1] not in settings.CIPHERS.ALLOWED_FILE_TYPES:
+        raise Exception('Invalid file type.')
+
+
 class Cipher(models.Model):
     name = models.CharField(max_length=100)
 
     start = models.DateTimeField()
-    task_file = models.FileField(upload_to='ciphers/tasks/')  # TODO: Limit to .pdf
+    task_file = models.FileField(upload_to=file_path, validators=[validate_file])
     visible = models.BooleanField(default=False)  # TODO: auto update on start
 
     hint_text = models.CharField(max_length=1000, blank=True, null=True)

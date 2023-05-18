@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from django.utils import timezone
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -243,3 +245,9 @@ JET_SIDE_MENU_ITEMS = [
         {'name': 'auth.group', 'label': 'Skupiny'},
     ]},
 ]
+
+CIPHERS = {
+    'DELAY': timezone.timedelta(minutes=15),
+    'MAX_FILE_SIZE': 1024 * 1024 * 10,  # 10 MB
+    'ALLOWED_FILE_TYPES': ['pdf', 'txt', 'jpg', 'jpeg', 'png'],
+}
