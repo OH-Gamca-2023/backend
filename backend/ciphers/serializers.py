@@ -21,9 +21,11 @@ class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = '__all__'
-        read_only_fields = ['submitted_by', 'clazz', 'time', 'after_hint', 'correct']
+        read_only_fields = ['submitted_by', 'cipher', 'clazz', 'time', 'after_hint', 'correct']
 
     def validate(self, data):
+        data['cipher'] = Cipher.objects.get(pk=self.context['view'].kwargs['cipher_pk'])
+
         if data['cipher'].has_ended or data['cipher'].end < timezone.now():
             raise serializers.ValidationError('This cipher has ended.')
         if not data['cipher'].visible:

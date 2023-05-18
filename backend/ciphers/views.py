@@ -17,8 +17,9 @@ class SubmissionRateThrottle(throttling.BaseThrottle):
     def allow_request(self, request, view):
         if request.user.is_authenticated:
             if request.method == 'POST':
+                cipher_pk = view.kwargs['cipher_pk']
                 last_submission = Submission.objects.filter(clazz=request.user.clazz,
-                                                            cipher=request.data['cipher']).order_by('-time').first()
+                                                            cipher_id=cipher_pk).order_by('-time').first()
                 if last_submission is not None and last_submission.time + self.DELAY > timezone.now():
                     return False
         return True
