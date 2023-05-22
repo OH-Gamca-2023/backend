@@ -58,17 +58,12 @@ class Discipline(models.Model):
     def __str__(self):
         return self.name
 
-    def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
-        # don't allow to disable date_published, details_published or results_published
-        if self.pk:
-            old = Discipline.objects.get(pk=self.pk)
-            self.date_published = old.date_published or self.date_published
-            self.details_published = old.details_published or self.details_published
-            self.results_published = old.results_published or self.results_published
-
-        super().save(force_insert, force_update, using, update_fields)
+    class Meta:
+        permissions = [
+            ('publish_date', 'Can publish date'),
+            ('publish_details', 'Can publish details'),
+            ('publish_results', 'Can publish results'),
+        ]
 
 
 class Result(models.Model):
