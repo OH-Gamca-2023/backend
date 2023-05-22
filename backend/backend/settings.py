@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'django_filters',
     'django_admin_logs',
     'mdeditor',
-    'corsheaders'
+    'corsheaders',
+    'django_extensions',
 ]
 
 AUTH_USER_MODEL = 'users.User'
