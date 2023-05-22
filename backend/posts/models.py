@@ -20,6 +20,11 @@ class Tag(models.Model):
         verbose_name_plural = 'tagy'
         verbose_name = 'tag'
 
+    def delete(self, using=None, keep_parents=False):
+        if self.special is not None:
+            raise Exception("Cannot delete special tag.")
+        super().delete(using, keep_parents)
+
 
 def gen_id():
     return "".join(random.choices("0123456789abcdef", k=8))
@@ -46,6 +51,7 @@ class Post(models.Model):
     @property
     def discipline_categories(self):
         return self.related_disciplines.all().values_list('category', flat=True).distinct()
+
     discipline_categories.fget.short_description = "Kategórie disciplín"
 
     def __str__(self):
