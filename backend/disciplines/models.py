@@ -81,14 +81,29 @@ class Result(models.Model):
         verbose_name_plural = 'výsledkovky'
         verbose_name = 'výsledkovka'
 
+    def __str__(self):
+        if self.name is not None:
+            return self.name + ' (Výsledky)'
+        return self.discipline.name + ' (Výsledky)'
+
 
 class Placement(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka", related_name="placements")
 
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
     place = models.SmallIntegerField("Pozícia", default=-1)
-    # TODO: indexujeme od 1, -1 znamená, že sa nezúčastnili
+    participated = models.BooleanField("Zúčastnili sa", default=False)
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if self.place == 0 or self.place < -1:
+            self.place = -1
+        if not self.participated:
+            self.place = -1
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name_plural = 'umiestnenia'
         verbose_name = 'umiestnenie'
+        ordering = ['place']

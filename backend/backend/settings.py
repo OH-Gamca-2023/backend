@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django_admin_logs',
     'mdeditor',
     'corsheaders',
+    'adminsortable2',
     'django_extensions',
 ]
 

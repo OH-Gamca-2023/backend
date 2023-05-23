@@ -1,4 +1,6 @@
+from adminsortable2.admin import SortableTabularInline, SortableAdminBase
 from django.contrib import admin, messages
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse, path
 
@@ -143,20 +145,53 @@ class DisciplineAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
-class PlacementInline(admin.TabularInline):
+class PlacementInline(SortableTabularInline):
     model = Placement
-    extra = 1
+    extra = 0
+    fields = ('clazz', 'participated')
+    can_delete = False
+
+    # limit choices to classes in the grade of the results or fake classes
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'clazz':
+            if request.resolver_match.kwargs.get('object_id'):
+                results = Result.objects.get(id=request.resolver_match.kwargs.get('object_id'))
+                kwargs["queryset"] = Clazz.objects.filter(Q(grade__in=results.grades.all()) | Q(is_fake=True))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Result)
-class ResultAdmin(admin.ModelAdmin):
-    list_display = ('name', 'discipline')
+class ResultAdmin(admin.ModelAdmin, SortableAdminBase):
+    list_display = ('__str__', 'discipline')
     search_fields = ('discipline__name',)
-
-    inlines = [
-        PlacementInline,
-    ]
 
     @admin.display(description='Placements')
     def placements(self, obj):
         return obj.placement_set.count()
+
+    def get_inlines(self, request, obj):
+        if obj:
+            return [PlacementInline]
+        messages.warning(request, 'Pred pridaním umiestnení je potrebné vytvoriť výsledkovku')
+        return []
+
+    def response_add(self, request, obj, post_url_continue=None):
+        for grade in obj.grades.all():
+            for clazz in grade.classes.all():
+                Placement.objects.get_or_create(result=obj, clazz=clazz)
+        return super().response_add(request, obj, post_url_continue)
+
+    def response_change(self, request, obj):
+        for grade in obj.grades.all():
+            for clazz in grade.classes.all():
+                Placement.objects.get_or_create(result=obj, clazz=clazz)
+        for placement in obj.placements.all():
+            if placement.clazz not in [grade.classes for grade in obj.grades.all()] and not placement.clazz.is_fake:
+                placement.delete()
+        return super().response_change(request, obj)
+
+
+@admin.register(Placement)
+class PlacementAdmin(admin.ModelAdmin):
+    list_display = ('id', 'result', 'clazz', 'place', 'participated')
+    list_filter = ('result__discipline', 'clazz', 'participated')
