@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'data.apps.DataConfig',
     # 'jet.dashboard',
     # 'jet',
-    'django.contrib.admin',
+    'admin.apps.OHGamcaAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
