@@ -2,7 +2,7 @@ import json
 
 from django.contrib.sessions.models import Session
 from django.db import models
-
+from knox.models import AuthToken
 
 
 class Setting(models.Model):
@@ -26,7 +26,7 @@ class Setting(models.Model):
         Setting.objects.update_or_create(key=key, defaults={'value': value})
 
     @staticmethod
-    def delete(key):
+    def remove(key):
         Setting.objects.filter(key=key).delete()
 
     @staticmethod
@@ -95,5 +95,6 @@ class AuthRestriction(models.Model):
         if self.type == 'login':
             # Log out all users when login restriction is changed (for security reasons)
             Session.objects.all().delete()
+            AuthToken.objects.all().delete()
 
         super().save(force_insert, force_update, using, update_fields)
