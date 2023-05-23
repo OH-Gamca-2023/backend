@@ -1,11 +1,11 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 
-from disciplines.models import Category, Discipline
-from disciplines.serializers import CategorySerializer, DisciplineSerializer
+from disciplines.models import Category, Discipline, Result
+from disciplines.serializers import CategorySerializer, DisciplineSerializer, ResultSerializer
 
 
 class CategoriesView(generics.ListAPIView):
@@ -38,3 +38,10 @@ class DisciplineDetailView(generics.RetrieveAPIView):
         if self.request.user.is_authenticated and self.request.user.is_staff:
             return Discipline.objects.all()
         return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
+
+
+class ResultsViewSet(viewsets.ReadOnlyModelViewSet):
+    model = Result
+    serializer_class = ResultSerializer
+    pagination_class = LimitOffsetPagination
+    queryset = Result.objects.all()
