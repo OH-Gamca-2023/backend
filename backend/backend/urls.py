@@ -28,6 +28,7 @@ api_urls = [
     path('calendar/', include('kalendar.urls')),
     path('posts/', include('posts.urls')),
     path('ciphers/', include('ciphers.urls')),
+    path('data/', include('data.urls'))
 ]
 
 
