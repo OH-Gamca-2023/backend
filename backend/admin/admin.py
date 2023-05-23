@@ -12,5 +12,4 @@ class OHGamcaAdminSite(admin.AdminSite):
             .filter(Q(lasts_until__isnull=True) | Q(lasts_until__gte=timezone.now()))
         for alert in alerts:
             messages.add_message(request, alert.get_django_level(), alert.message)
-        print('each_context', alerts)
         return super().each_context(request)
