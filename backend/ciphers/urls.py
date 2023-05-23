@@ -1,8 +1,8 @@
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
 from ciphers.views import CiphersViewSet, SubmissionViewSet
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register('', CiphersViewSet, basename='ciphers')
 router.register(r'(?P<cipher_pk>\d+)/submissions', SubmissionViewSet, basename='cipher_submissions')
 urlpatterns = router.urls
