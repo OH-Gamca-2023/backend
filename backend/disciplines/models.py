@@ -86,6 +86,42 @@ class Result(models.Model):
             return self.name + ' (Výsledky)'
         return self.discipline.name + ' (Výsledky)'
 
+    @property
+    def markdown(self):
+        md = ""
+        if self.name is not None:
+            md += f"#### {self.name}\n"
+
+        placements = self.placements.all()
+        max_place = max([p.place for p in placements])
+        for place in range(1, max_place + 1):
+            md += f"**{place}. miesto** - "
+            l = []
+            for placement in placements.filter(place=place):
+                l.append(f"{placement.clazz.name}")
+            md += ", ".join(l) + "\n\n"
+
+        if len(placements.filter(place=-1)) > 0:
+            md += f"**Nezúčastnili sa:** "
+            l = []
+            for placement in placements.filter(place=-1):
+                l.append(f"{placement.clazz.name}")
+            md += ", ".join(l) + "\n\n"
+
+        return md
+
+
+class PlacementManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(
+            p=models.Case(
+                models.When(place__gt=0, then=True),
+                default=False,
+                output_field=models.BooleanField()
+            )
+        ).order_by('-p', 'place')
+
 
 class Placement(models.Model):
     objects = PlacementManager()
