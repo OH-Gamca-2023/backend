@@ -1,13 +1,17 @@
 import json
+import random
 
+from django.contrib import messages
 from django.contrib.sessions.models import Session
 from django.db import models
-
+from knox.models import AuthToken
 
 
 class Setting(models.Model):
     key = models.CharField(max_length=50, primary_key=True)
     value = models.CharField(max_length=5000)
+
+    exposed = models.BooleanField(default=False, help_text='Whether this setting is exposed to the API.')
 
     def __str__(self):
         return f'{self.key} = {self.value}'
@@ -26,7 +30,7 @@ class Setting(models.Model):
         Setting.objects.update_or_create(key=key, defaults={'value': value})
 
     @staticmethod
-    def delete(key):
+    def remove(key):
         Setting.objects.filter(key=key).delete()
 
     @staticmethod
@@ -95,5 +99,44 @@ class AuthRestriction(models.Model):
         if self.type == 'login':
             # Log out all users when login restriction is changed (for security reasons)
             Session.objects.all().delete()
+            AuthToken.objects.all().delete()
 
         super().save(force_insert, force_update, using, update_fields)
+
+
+def gen_id():
+    return "".join(random.choices("0123456789abcdef", k=4))
+
+
+class Alert(models.Model):
+    TYPE_CHOICES = (
+        ('success', 'Úspešné'),
+        ('info', 'Informácia'),
+        ('warning', 'Varovanie'),
+        ('error', 'Chyba')
+    )
+
+    def get_django_level(self):
+        if self.type == 'success':
+            return messages.SUCCESS
+        elif self.type == 'warning':
+            return messages.WARNING
+        elif self.type == 'error':
+            return messages.ERROR
+        else:
+            return messages.INFO
+
+    id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
+
+    message = models.CharField(max_length=200)
+    type = models.CharField(choices=TYPE_CHOICES)
+
+    show_on_site = models.BooleanField(default=True)
+    show_in_admin = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    lasts_until = models.DateTimeField(blank=True, null=True)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'{self.message} ({self.type})'

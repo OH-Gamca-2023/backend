@@ -58,17 +58,12 @@ class Discipline(models.Model):
     def __str__(self):
         return self.name
 
-    def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
-        # don't allow to disable date_published, details_published or results_published
-        if self.pk:
-            old = Discipline.objects.get(pk=self.pk)
-            self.date_published = old.date_published or self.date_published
-            self.details_published = old.details_published or self.details_published
-            self.results_published = old.results_published or self.results_published
-
-        super().save(force_insert, force_update, using, update_fields)
+    class Meta:
+        permissions = [
+            ('publish_date', 'Can publish date'),
+            ('publish_details', 'Can publish details'),
+            ('publish_results', 'Can publish results'),
+        ]
 
 
 class Result(models.Model):
@@ -86,13 +81,65 @@ class Result(models.Model):
         verbose_name_plural = 'výsledkovky'
         verbose_name = 'výsledkovka'
 
+    def __str__(self):
+        if self.name is not None:
+            return self.name + ' (Výsledky)'
+        return self.discipline.name + ' (Výsledky)'
+
+    @property
+    def markdown(self):
+        md = ""
+        if self.name is not None:
+            md += f"#### {self.name}  \n"
+
+        placements = self.placements.all()
+        max_place = max([p.place for p in placements])
+        for place in range(1, max_place + 1):
+            md += f"**{place}. miesto** - "
+            l = []
+            for placement in placements.filter(place=place):
+                l.append(f"{placement.clazz.name}")
+            md += ", ".join(l) + "  \n"
+
+        if len(placements.filter(place=-1)) > 0:
+            md += f"\n_Nezúčastnili sa: "
+            l = []
+            for placement in placements.filter(place=-1):
+                l.append(f"{placement.clazz.name}")
+            md += ", ".join(l) + "_  \n\n"
+
+        return md
+
+
+class PlacementManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(
+            p=models.Case(
+                models.When(place__gt=0, then=True),
+                default=False,
+                output_field=models.BooleanField()
+            )
+        ).order_by('-p', 'place')
+
 
 class Placement(models.Model):
+    objects = PlacementManager()
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka", related_name="placements")
 
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
-    place = models.SmallIntegerField("Pozícia", default=-1)
-    # TODO: indexujeme od 1, -1 znamená, že sa nezúčastnili
+    place = models.SmallIntegerField("Pozícia", default=-1, null=False, blank=False)
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        if self.place < 1:
+            self.place = -1
+        super().save(force_insert, force_update, using, update_fields)
+
+    @property
+    def participated(self):
+        return self.place > 0
 
     class Meta:
         verbose_name_plural = 'umiestnenia'

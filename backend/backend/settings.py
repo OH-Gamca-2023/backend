@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'data.apps.DataConfig',
     # 'jet.dashboard',
     # 'jet',
-    'django.contrib.admin',
+    'admin.apps.OHGamcaAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -57,7 +57,9 @@ INSTALLED_APPS = [
     'django_filters',
     'django_admin_logs',
     'mdeditor',
-    'corsheaders'
+    'corsheaders',
+    'adminsortable2',
+    'django_extensions',
 ]
 
 AUTH_USER_MODEL = 'users.User'
