@@ -1,4 +1,5 @@
 import random
+import re
 
 from django.db import models
 from mdeditor.fields import MDTextField
@@ -62,6 +63,36 @@ class Post(models.Model):
     class Meta:
         verbose_name_plural = 'príspevky'
         verbose_name = 'príspevok'
+
+    @property
+    def parsed_content(self):
+        # look for /%disciplines\[([^\]]+)\]\.([^\[]+)(?:\[([^\]]+)\])?%/g
+        # get the groups as discipline_id, property, property_args
+        content = self.content
+        regex = r"%disciplines\[([^]]+)]\.([^\[]+)(?:\[([^]]+)])?%"
+        match = re.search(regex, content)
+        while match is not None:
+            discipline_id = match.group(1)
+            property = match.group(2)
+            property_args = match.group(3)
+            discipline = Discipline.objects.get(id=discipline_id)
+            if property == "details":
+                # replace match with discipline.details
+                content = content[:match.start()] + discipline.details + content[match.end():]
+            elif property == "results":
+                results = ""
+                if property_args is None:
+                    l = []
+                    for result in discipline.result_set.all():
+                        l.append(result.markdown)
+                    results = "\n".join(l)
+                else:
+                    result = discipline.result_set.get(id=property_args)
+                    results = result.markdown
+                content = content[:match.start()] + results + content[match.end():]
+
+            match = re.search(regex, content)
+        return content
 
 
 class Comment(models.Model):

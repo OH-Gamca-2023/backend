@@ -12,7 +12,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(hide_confidential=True)
+    content = serializers.CharField(source='parsed_content', read_only=True, trim_whitespace=False)
 
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('id', 'title', 'content', 'author', 'date', 'related_disciplines', 'affected_grades', 'tags',
+                  'disable_comments')

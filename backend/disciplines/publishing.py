@@ -20,9 +20,9 @@ class PublishView(PermissionRequiredMixin, CreateView):
     fields = ['title', 'content', 'related_disciplines', 'affected_grades', 'tags']
     fieldsets = [
         ("Názov a obsah", {
-            'description': 'Použite <b>%discipline[{discipline.id}].details%</b> pre vloženie detailov o disciplíne, '
+            'description': 'Použite <b>%disciplines[{discipline.id}].details%</b> pre vloženie detailov o disciplíne, '
                            'nevkladajte ich ručne. Stránka sa potom postará o ich doplnenie.<br>Podobne viete vložiť '
-                           'aj výsledky disciplíny pomocou <b>%discipline[{discipline.id}].results%</b>.',
+                           'aj výsledky disciplíny pomocou <b>%disciplines[{discipline.id}].results%</b>.',
             'fields': ['title', 'content']
         }),
         ("Dodatočné údaje", {
@@ -118,7 +118,7 @@ class DetailsPublishView(PublishView):
         return f'{discipline.name}'
 
     def get_default_content(self, discipline):
-        return f"**Čaute, prinášame vám informácie ku {discipline.name}**\n\n%discipline[{discipline.id}].details%"
+        return f"**Čaute, prinášame vám informácie ku {discipline.name}.**  \n\n\n%disciplines[{discipline.id}].details%"
 
 
 class ResultsPublishView(PublishView):
@@ -132,4 +132,4 @@ class ResultsPublishView(PublishView):
         return f'Výsledky {discipline.name}'
 
     def get_default_content(self, discipline):
-        return f"**Čaute, prinášame vám výsledky {discipline.name}**\n\n%discipline[{discipline.id}].results%"
+        return f"**Čaute, tu sú výsledky {discipline.name}:**  \n\n\n%disciplines[{discipline.id}].results%"

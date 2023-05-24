@@ -90,7 +90,7 @@ class Result(models.Model):
     def markdown(self):
         md = ""
         if self.name is not None:
-            md += f"#### {self.name}\n"
+            md += f"#### {self.name}  \n"
 
         placements = self.placements.all()
         max_place = max([p.place for p in placements])
@@ -99,14 +99,14 @@ class Result(models.Model):
             l = []
             for placement in placements.filter(place=place):
                 l.append(f"{placement.clazz.name}")
-            md += ", ".join(l) + "\n\n"
+            md += ", ".join(l) + "  \n"
 
         if len(placements.filter(place=-1)) > 0:
-            md += f"**Nezúčastnili sa:** "
+            md += f"\n_Nezúčastnili sa: "
             l = []
             for placement in placements.filter(place=-1):
                 l.append(f"{placement.clazz.name}")
-            md += ", ".join(l) + "\n\n"
+            md += ", ".join(l) + "_  \n\n"
 
         return md
 
