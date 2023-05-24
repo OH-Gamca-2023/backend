@@ -1,5 +1,5 @@
-from adminsortable2.admin import SortableTabularInline, SortableAdminBase
 from django.contrib import admin, messages
+from django.contrib.admin import TabularInline
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse, path
@@ -145,11 +145,10 @@ class DisciplineAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
-class PlacementInline(SortableTabularInline):
+class PlacementInline(TabularInline):
     model = Placement
     extra = 0
-    fields = ('clazz', 'participated')
-    can_delete = False
+    fields = ('clazz', 'place')
 
     # limit choices to classes in the grade of the results or fake classes
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -161,7 +160,7 @@ class PlacementInline(SortableTabularInline):
 
 
 @admin.register(Result)
-class ResultAdmin(admin.ModelAdmin, SortableAdminBase):
+class ResultAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'discipline')
     search_fields = ('discipline__name',)
 
@@ -182,11 +181,11 @@ class ResultAdmin(admin.ModelAdmin, SortableAdminBase):
         return super().response_add(request, obj, post_url_continue)
 
     def response_change(self, request, obj):
-        for grade in obj.grades.all():
-            for clazz in grade.classes.all():
-                Placement.objects.get_or_create(result=obj, clazz=clazz)
+        all_classes = Clazz.objects.filter(grade__in=obj.grades.all())
+        for clazz in all_classes:
+            Placement.objects.get_or_create(result=obj, clazz=clazz)
         for placement in obj.placements.all():
-            if placement.clazz not in [grade.classes for grade in obj.grades.all()] and not placement.clazz.is_fake:
+            if placement.clazz not in all_classes and not placement.clazz.is_fake:
                 placement.delete()
         return super().response_change(request, obj)
 
@@ -194,4 +193,4 @@ class ResultAdmin(admin.ModelAdmin, SortableAdminBase):
 @admin.register(Placement)
 class PlacementAdmin(admin.ModelAdmin):
     list_display = ('id', 'result', 'clazz', 'place', 'participated')
-    list_filter = ('result__discipline', 'clazz', 'participated')
+    list_filter = ('result__discipline', 'clazz')

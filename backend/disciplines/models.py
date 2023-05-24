@@ -88,22 +88,23 @@ class Result(models.Model):
 
 
 class Placement(models.Model):
+    objects = PlacementManager()
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka", related_name="placements")
 
     clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
-    place = models.SmallIntegerField("Pozícia", default=-1)
-    participated = models.BooleanField("Zúčastnili sa", default=False)
+    place = models.SmallIntegerField("Pozícia", default=-1, null=False, blank=False)
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.place == 0 or self.place < -1:
-            self.place = -1
-        if not self.participated:
+        if self.place < 1:
             self.place = -1
         super().save(force_insert, force_update, using, update_fields)
+
+    @property
+    def participated(self):
+        return self.place > 0
 
     class Meta:
         verbose_name_plural = 'umiestnenia'
         verbose_name = 'umiestnenie'
-        ordering = ['place']
