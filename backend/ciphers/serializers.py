@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from ciphers.models import Cipher, Submission
@@ -22,14 +24,14 @@ class CipherSerializer(serializers.ModelSerializer):
         if self.context['request'].user.is_authenticated:
             if self.context['request'].user.is_staff:
                 for clazz in Clazz.objects.filter(grade__cipher_competing=True):
-                    ret['classes'][clazz.name] = {
+                    ret['classes'][clazz.id] = {
                         'solved': instance.solved_by(clazz),
                         'after_hint': instance.solved_after_hint_by(clazz),
                         'attempts': instance.attempts_by(clazz)
                     }
             else:
                 clazz = self.context['request'].user.clazz
-                ret['classes'][clazz.name] = {
+                ret['classes'][clazz.id] = {
                     'solved': instance.solved_by(clazz),
                     'after_hint': instance.solved_after_hint_by(clazz),
                     'attempts': instance.attempts_by(clazz)
