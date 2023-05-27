@@ -5,11 +5,12 @@ import yaml
 stream = open('data/oauth_settings.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
 keys = ['app_id', 'redirect', 'fe_redirect', 'authority', 'admin_redirect', 'admin_logout',
-        'admin_login_url', 'adin_login_redirect']
+        'admin_login_url', 'admin_login_redirect', 'app_secret']
 
 for key in keys:
     if os.environ.get(key):
         settings[key] = os.environ.get(key)
+
 
 def load_cache(request):
     # Check for a token cache in the session
