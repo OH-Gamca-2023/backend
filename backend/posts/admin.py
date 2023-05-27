@@ -37,6 +37,7 @@ class PostAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'title')
     search_fields = ('title', 'content', 'author__username')
     list_filter = ('date', 'disable_comments')
+    readonly_fields = ('id', 'disable_comments')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
