@@ -25,14 +25,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get(
     "SECRET_KEY", "django-insecure-g)d0f!f@6r&^e!y!)4rxosy=aczx1&)1+vt8ysevp7ajps#m14"
 )
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = bool(os.environ.get("DEBUG", False))
+
+
+hosts = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+if hosts:
+    CSRF_TRUSTED_ORIGINS = hosts.split(",")
+elif DEBUG:
+    CSRF_TRUSTED_ORIGINS = ["*"]
 
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
     ALLOWED_HOSTS = hosts.split(",")
-    CORS_ALLOWED_ORIGINS = hosts.split(",")
 elif DEBUG:
     ALLOWED_HOSTS = ["*"]
+
+hosts = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+if hosts:
+    CORS_ALLOWED_ORIGINS = hosts.split(",")
+elif DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
@@ -154,13 +165,6 @@ MEDIA_URL = '/uploads/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://localhost:5173",
-    "https://2023.oh.gamca.sk",
-    "https://oh.gamca.sk",
-]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
