@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import hashlib
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -32,7 +31,13 @@ hosts = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
 if hosts:
     CSRF_TRUSTED_ORIGINS = hosts.split(",")
 elif DEBUG:
-    CSRF_TRUSTED_ORIGINS = ["*"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8000",
+        "http://localhost:5173",
+        "https://2023.oh.gamca.sk",
+        "https://oh.gamca.sk",
+        "https://oh.jaksia.xyz",
+    ]
 
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:

@@ -6,6 +6,7 @@ from data.models import Alert
 
 
 class OHGamcaAdminSite(admin.AdminSite):
+    login_template = 'admin/login.html'
 
     def each_context(self, request):
         alerts = Alert.objects.filter(show_in_admin=True, active=True)\

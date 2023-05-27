@@ -1,7 +1,8 @@
 from auth.restriction_helper import is_allowed
 from users.models import MicrosoftUser, User, Clazz, Grade
 
-def handle_user_login(request, user):
+
+def handle_user_login(request, user, admin=False):
     id = user['id']
 
     if not MicrosoftUser.objects.filter(id=id).exists():
@@ -53,6 +54,10 @@ def handle_user_login(request, user):
         raise Exception(f'STRERROR: {message}')
 
     django_user = User.objects.get(microsoft_user=msft_user)
+
+    if admin:
+        if not django_user.is_staff:
+            raise Exception('STRERROR: Not an admin')
 
     return django_user
 
