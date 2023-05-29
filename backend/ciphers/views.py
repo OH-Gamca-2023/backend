@@ -20,12 +20,10 @@ class SubmissionRateThrottle(throttling.BaseThrottle):
                 cipher_pk = view.kwargs['cipher_pk']
                 last_submission = Submission.objects.filter(clazz=request.user.clazz,
                                                             cipher_id=cipher_pk).order_by('-time').first()
-                if last_submission is not None and last_submission.time + settings.CIPHERS_DELAY > timezone.now():
+                submission_delay = Cipher.objects.get(pk=cipher_pk).submission_delay
+                if last_submission and last_submission.time + timezone.timedelta(seconds=submission_delay) > timezone.now():
                     return False
         return True
-
-    def wait(self):
-        return settings.CIPHERS_DELAY.total_seconds()
 
 
 class SubmissionViewSet(ReadCreateViewSet):

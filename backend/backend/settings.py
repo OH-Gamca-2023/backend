@@ -258,6 +258,5 @@ JET_SIDE_MENU_ITEMS = [
     ]},
 ]
 
-CIPHERS_DELAY = timezone.timedelta(minutes=15)
 CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
 CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']

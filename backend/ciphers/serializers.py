@@ -7,7 +7,7 @@ from users.models import Clazz
 class CipherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cipher
-        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended']
+        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended', 'submission_delay']
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

@@ -29,6 +29,11 @@ class Cipher(models.Model):
     start = models.DateTimeField()
     task_file = models.FileField(upload_to=file_path, validators=[validate_file])
 
+    submission_delay = models.IntegerField(default=600, help_text='Čas v sekundách, ktorý musí uplynúť pred odoslaním'
+                                                                  'ďalšej odpovede. Predvolená hodnota je 600 sekúnd'
+                                                                  '(10 minút), odporúčame nemeniť.',
+                                           verbose_name='Interval medzi odpoveďami')
+
     hint_text = models.CharField(max_length=1000, blank=True, null=True)
     hint_publish_time = models.DateTimeField(blank=True, null=True)
 
@@ -87,7 +92,7 @@ class Submission(models.Model):
     correct = models.BooleanField(default=False)
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+            self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         if not self.pk:
             # refuse to create submissions after the cipher has ended
