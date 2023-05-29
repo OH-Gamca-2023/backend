@@ -23,7 +23,7 @@ django-mdeditor = "*"
 django-rest-knox = "*"
 django-cors-headers = "*"
 uritemplate = "*"
-google-api-python-client = "==1.4.1"
+google-api-python-client = "==2.87.0"
 django-extensions = "*"
 django-admin-sortable2 = "*"
 
