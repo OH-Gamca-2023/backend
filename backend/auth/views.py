@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from rest_framework import permissions
 from rest_framework.views import APIView
 from knox.views import LoginView as KnoxLoginView
+import json
 
 from users.serializers import UserSerializer
 from .oauth_helper import get_sign_in_flow, get_token_from_code, remove_user_and_token, settings
