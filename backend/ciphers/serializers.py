@@ -27,12 +27,19 @@ class CipherSerializer(serializers.ModelSerializer):
                         'after_hint': instance.solved_after_hint_by(clazz),
                         'attempts': instance.attempts_by(clazz)
                     }
-            else:
-                clazz = self.context['request'].user.clazz
+
+            clazz = self.context['request'].user.clazz
+            if clazz.grade.cipher_competing:
                 ret['classes'][clazz.id] = {
                     'solved': instance.solved_by(clazz),
                     'after_hint': instance.solved_after_hint_by(clazz),
                     'attempts': instance.attempts_by(clazz)
+                }
+            else:
+                ret['classes'][clazz.id] = {
+                    'solved': instance.solved_by(self.context['request'].user, True),
+                    'after_hint': instance.solved_after_hint_by(self.context['request'].user, True),
+                    'attempts': instance.attempts_by(self.context['request'].user, True)
                 }
         return ret
 
@@ -52,11 +59,12 @@ class SubmissionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This cipher has not started yet.')
 
         if self.context['request'].user.is_authenticated:
-            if not self.context['request'].user.clazz.grade.cipher_competing:
-                raise serializers.ValidationError('Grade of your class is not competing in ciphers.')
-
-            if data['cipher'].solved_by(self.context['request'].user.clazz):
-                raise serializers.ValidationError('You have already solved this cipher.')
+            if self.context['request'].user.clazz.grade.cipher_competing:
+                if data['cipher'].solved_by(self.context['request'].user.clazz):
+                    raise serializers.ValidationError('You have already solved this cipher.')
+            else:
+                if data['cipher'].solved_by(self.context['request'].user, True):
+                    raise serializers.ValidationError('You have already solved this cipher.')
 
             data['submitted_by'] = self.context['request'].user
             data['clazz'] = self.context['request'].user.clazz

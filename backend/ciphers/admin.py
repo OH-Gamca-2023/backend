@@ -25,9 +25,13 @@ class CipherAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ('pk', '__str__', 'cipher', 'clazz', 'answer', 'time', 'after_hint', 'correct')
+    list_display = ('pk', '__str__', 'cipher', 'clazz', 'competing', 'answer', 'time', 'after_hint', 'correct')
     list_filter = ('cipher', 'clazz', 'after_hint', 'correct')
     search_fields = ('answer',)
     ordering = ('time',)
 
     list_display_links = ('pk', '__str__')
+
+    @admin.display(description='Súťažné', boolean=True)
+    def competing(self, obj):
+        return obj.clazz.grade.cipher_competing

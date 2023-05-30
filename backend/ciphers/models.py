@@ -11,8 +11,8 @@ from users.models import Clazz
 def file_path(instance, filename):
     instance.task_file.open()
     fname, ext = os.path.splitext(filename)
-    digest = hashlib.sha256(instance.task_file.read()).hexdigest()
-    return f'sifry/zadania/{instance.pk}/{digest}{ext}'
+    digest = hashlib.sha256(instance.task_file.read()).hexdigest()[:16]
+    return f'sifry/zadania/{digest}{ext}'
 
 
 def validate_file(file):
@@ -31,7 +31,8 @@ class Cipher(models.Model):
 
     submission_delay = models.IntegerField(default=600, help_text='Čas v sekundách, ktorý musí uplynúť pred odoslaním'
                                                                   'ďalšej odpovede. Predvolená hodnota je 600 sekúnd'
-                                                                  '(10 minút), odporúčame nemeniť.',
+                                                                  '(10 minút), odporúčame nemeniť. Pri individuálnom '
+                                                                  'riešení je táto hodnota zdvojnásobená.',
                                            verbose_name='Interval medzi odpoveďami')
 
     hint_text = models.CharField(max_length=1000, blank=True, null=True)
@@ -67,17 +68,22 @@ class Cipher(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def _submission_set(self, target, is_user=False):
+        if is_user:
+            return self.submission_set.filter(submitted_by=target)
+        return self.submission_set.filter(clazz=target)
 
-    def solved_by(self, clazz):
-        return self.submission_set.filter(clazz=clazz, correct=True).exists()
+    def solved_by(self, target, is_user=False):
+        return self._submission_set(target, is_user).filter(correct=True).exists()
 
-    def solved_after_hint_by(self, clazz):
-        if self.solved_by(clazz):
-            return self.submission_set.filter(clazz=clazz, correct=True).first().after_hint
+    def solved_after_hint_by(self, target, is_user=False):
+        if self.solved_by(target, is_user):
+            return self._submission_set(target, is_user).filter(correct=True).order_by('time').first().after_hint
         return False
 
-    def attempts_by(self, clazz):
-        return self.submission_set.filter(clazz=clazz).count()
+    def attempts_by(self, target, is_user=False):
+        return self._submission_set(target, is_user).count()
 
 
 class Submission(models.Model):
