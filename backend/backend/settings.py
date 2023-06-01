@@ -261,8 +261,10 @@ JET_SIDE_MENU_ITEMS = [
 CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
 CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']
 
-CSP_DEFAULT_SRC = ("'self'", "localhost:5173", "localhost", "localhost:8000", "127.0.0.1:5173", "127.0.0.1", "127.0.0.1:8000",
+CSP_DEFAULT_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/", "127.0.0.1:8000/",
                    "https://*.google.com/", "https://*.googleapis.com/", "https://*.gstatic.com/", "https://*.google-analytics.com/",
                    "https://*.googletagmanager.com/")
-CSP_FRAME_SRC = ("'self'", "localhost:5173", "localhost", "localhost:8000", "127.0.0.1:5173", "127.0.0.1", "127.0.0.1:8000",
-                 "https://oh.gamca.sk", "https://2023.oh.gamca.sk", "https://oh.jaksia.xyz")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/",
+                 "127.0.0.1:8000/", "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")
+CSP_FRAME_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/", "127.0.0.1:8000/",
+                 "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")
