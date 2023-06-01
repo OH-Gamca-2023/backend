@@ -71,7 +71,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError('You must be logged in to submit answers.')
 
-        data['correct'] = data['answer'].strip().lower() == data['cipher'].correct_answer.strip().lower()
+        data['correct'] = data['cipher'].validate_answer(data['answer'])
         data['after_hint'] = data['cipher'].hint_visible
 
         return data

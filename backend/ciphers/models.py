@@ -1,6 +1,7 @@
 import hashlib
 import os
 
+import unidecode
 from django.db import models
 from django.utils import timezone
 
@@ -29,7 +30,7 @@ class Cipher(models.Model):
     start = models.DateTimeField()
     task_file = models.FileField(upload_to=file_path, validators=[validate_file])
 
-    submission_delay = models.IntegerField(default=600, help_text='Čas v sekundách, ktorý musí uplynúť pred odoslaním'
+    submission_delay = models.IntegerField(default=600, help_text='Čas v sekundách, ktorý musí uplynúť pred odoslaním '
                                                                   'ďalšej odpovede. Predvolená hodnota je 600 sekúnd'
                                                                   '(10 minút), odporúčame nemeniť. Pri individuálnom '
                                                                   'riešení je táto hodnota zdvojnásobená.',
@@ -39,6 +40,11 @@ class Cipher(models.Model):
     hint_publish_time = models.DateTimeField(blank=True, null=True)
 
     correct_answer = models.CharField(max_length=20)
+
+    ignore_case = models.BooleanField(default=True)
+    ignore_intermediate_whitespace = models.BooleanField(default=False)
+    ignore_trailing_leading_whitespace = models.BooleanField(default=True)
+    ignore_accents = models.BooleanField(default=True)
 
     end = models.DateTimeField()
 
@@ -85,6 +91,29 @@ class Cipher(models.Model):
     def attempts_by(self, target, is_user=False):
         return self._submission_set(target, is_user).count()
 
+    def validate_answer(self, answer):
+        correct = self.correct_answer
+
+        if self.ignore_case:
+            answer = answer.lower()
+            correct = correct.lower()
+
+        if self.ignore_trailing_leading_whitespace:
+            answer = answer.strip()
+            correct = correct.strip()
+
+        if self.ignore_intermediate_whitespace:
+            answer = ''.join(answer.split())
+            correct = ''.join(correct.split())
+
+        if self.ignore_accents:
+            answer = unidecode.unidecode(answer)
+            correct = unidecode.unidecode(correct)
+
+        print("answer: ", answer, " correct: ", correct)
+
+        return answer == correct
+
 
 class Submission(models.Model):
     cipher = models.ForeignKey(Cipher, on_delete=models.CASCADE)
@@ -112,7 +141,7 @@ class Submission(models.Model):
                 raise Exception('Class has already solved this cipher.')
 
             # if creating, set after_hint and correct
-            self.correct = self.answer.strip().lower() == self.cipher.correct_answer.strip().lower()
+            self.correct = self.cipher.validate_answer(self.answer)
             self.after_hint = self.cipher.hint_visible
         super(Submission, self).save(force_insert, force_update, using, update_fields)
 
