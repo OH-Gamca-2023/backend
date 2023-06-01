@@ -1,9 +1,8 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django_object_actions import action, DjangoObjectActions
 
 from .models import Grade, Clazz, User, MicrosoftUser
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django import forms
 

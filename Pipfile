@@ -26,6 +26,9 @@ uritemplate = "*"
 google-api-python-client = "==1.4.1"
 django-extensions = "*"
 django-admin-sortable2 = "*"
+pyflakes = "*"
+django-csp = "*"
+unidecode = "*"
 
 [dev-packages]
 

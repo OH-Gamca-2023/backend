@@ -4,3 +4,8 @@ fe_redirect: "http://localhost:5173/auth/login"
 scopes:
   - user.read
 authority: "https://login.microsoftonline.com/b5df9d6f-f2dc-492a-ba67-7afdfa5eef57"
+
+admin_redirect: "http://localhost:8000/api/auth/admin/callback"
+admin_logout: "http://localhost:8000/admin/logout"
+admin_login_url: "http://localhost:8000/api/auth/admin/login"
+admin_login_redirect: "http://localhost:8000/admin"

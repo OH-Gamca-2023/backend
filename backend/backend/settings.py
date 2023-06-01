@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-import hashlib
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -32,7 +31,13 @@ hosts = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
 if hosts:
     CSRF_TRUSTED_ORIGINS = hosts.split(",")
 elif DEBUG:
-    CSRF_TRUSTED_ORIGINS = ["*"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8000",
+        "http://localhost:5173",
+        "https://2023.oh.gamca.sk",
+        "https://oh.gamca.sk",
+        "https://oh.jaksia.xyz",
+    ]
 
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
@@ -79,11 +84,11 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "corsheaders.middleware.CorsMiddleware",
+    'csp.middleware.CSPMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -253,6 +258,13 @@ JET_SIDE_MENU_ITEMS = [
     ]},
 ]
 
-CIPHERS_DELAY = timezone.timedelta(minutes=15)
 CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
 CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']
+
+CSP_DEFAULT_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/", "127.0.0.1:8000/",
+                   "https://*.google.com/", "https://*.googleapis.com/", "https://*.gstatic.com/", "https://*.google-analytics.com/",
+                   "https://*.googletagmanager.com/")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/",
+                 "127.0.0.1:8000/", "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")
+CSP_FRAME_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/", "127.0.0.1:8000/",
+                 "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")

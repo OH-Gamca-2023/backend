@@ -6,7 +6,7 @@ from .models import User, Clazz, Grade
 class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'competing', 'cipher_competing')
 
 
 class ClazzSerializer(serializers.ModelSerializer):

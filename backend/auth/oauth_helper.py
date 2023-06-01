@@ -1,17 +1,15 @@
-import yaml
-import msal
 import os
+import msal
+import yaml
 
-# Load the oauth_settings.yml file located in your app DIR
 stream = open('data/oauth_settings.yml', 'r')
 settings = yaml.load(stream, yaml.SafeLoader)
+keys = ['app_id', 'redirect', 'fe_redirect', 'authority', 'admin_redirect', 'admin_logout',
+        'admin_login_url', 'admin_login_redirect', 'app_secret']
 
-if 'redirect' in os.environ:
-    settings['redirect'] = os.environ.get('redirect')
-if 'fe_redirect' in os.environ:
-    settings['fe_redirect'] = os.environ.get('fe_redirect')
-if 'app_secret' in os.environ:
-    settings['app_secret'] = os.environ.get('app_secret')
+for key in keys:
+    if os.environ.get(key):
+        settings[key] = os.environ.get(key)
 
 
 def load_cache(request):
@@ -39,38 +37,24 @@ def get_msal_app(cache=None):
 
 
 # Method to generate a sign-in flow
-def get_sign_in_flow():
+def get_sign_in_flow(redirect_uri=None):
     auth_app = get_msal_app()
     return auth_app.initiate_auth_code_flow(
         settings['scopes'],
-        redirect_uri=settings['redirect'])
+        redirect_uri=redirect_uri or settings['redirect'])
 
 
 # Method to exchange auth code for access token
-def get_token_from_code(request):
+def get_token_from_code(request, flow_name='auth_flow'):
     cache = load_cache(request)
     auth_app = get_msal_app(cache)
 
     # Get the flow saved in session
-    flow = request.session.pop('auth_flow', {})
+    flow = request.session.pop(flow_name, {})
     result = auth_app.acquire_token_by_auth_code_flow(flow, request.GET)
     save_cache(request, cache)
 
     return result
-
-
-def store_user(request, user):
-    try:
-        request.session['user'] = {
-            'is_authenticated': True,
-            'name': user['displayName'],
-            'email': user['mail'] if 'mail' in user else user['userPrincipalName'],
-            'id': user['id'],
-            'department': user['department'],
-            'job_title': user['jobTitle'],
-        }
-    except Exception as e:
-        print(e)
 
 
 def get_token(request):

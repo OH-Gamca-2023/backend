@@ -1,12 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth import logout, login
-from django.core import serializers
 from django.http import HttpResponseRedirect
 from rest_framework import permissions
 from rest_framework.views import APIView
 from knox.views import LoginView as KnoxLoginView
+import json
 
 from users.serializers import UserSerializer
-from .oauth_helper import get_sign_in_flow, get_token_from_code, store_user, remove_user_and_token, settings
+from .oauth_helper import get_sign_in_flow, get_token_from_code, remove_user_and_token, settings
 from .graph_helper import *
 from .user_helper import handle_user_login
 
@@ -40,9 +41,25 @@ class OauthStartView(APIView):
         return response
 
 
-class OauthCallbackView(KnoxLoginView):
+class OauthAdminStartView(APIView):
     permission_classes = (permissions.AllowAny,)
 
+    def get(self, request):
+        # Get the sign-in flow
+        flow = get_sign_in_flow(settings['admin_redirect'])
+        # Save the expected flow so we can use it in the callback
+        try:
+            request.session['admin_auth_flow'] = flow
+        except Exception as e:
+            print(e)
+        # Redirect to the Azure sign-in page
+        response = HttpResponseRedirect(flow['auth_uri'])
+        response['Cross-Origin-Opener-Policy'] = 'unsafe-none'
+        return response
+
+
+class OauthCallbackView(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         try:
@@ -50,8 +67,6 @@ class OauthCallbackView(KnoxLoginView):
             result = get_token_from_code(request)
             # Get the user's profile from graph_helper.py script
             user = get_user(result['access_token'])
-            # Store user from auth_helper.py script
-            store_user(request, user)
 
             logged_user = handle_user_login(request, user)
             login(request, logged_user)
@@ -76,3 +91,25 @@ class OauthCallbackView(KnoxLoginView):
 
             url_params = '?status=error&error=' + str(e)
             return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+
+
+class OauthAdminCallbackView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        try:
+            # Make the token request
+            result = get_token_from_code(request, 'admin_auth_flow')
+            # Get the user's profile from graph_helper.py script
+            user = get_user(result['access_token'])
+
+            logged_user = handle_user_login(request, user, True)
+            login(request, logged_user)
+
+            return HttpResponseRedirect(settings['admin_login_redirect'])
+        except Exception as e:
+            # If something goes wrong, logout the user, just in case
+            logout(request)
+
+            messages.error(request, e)
+            return HttpResponseRedirect(settings['admin_login_redirect'])

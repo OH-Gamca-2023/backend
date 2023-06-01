@@ -1,7 +1,6 @@
 from django.utils import timezone
 from rest_framework import permissions, viewsets, throttling
 
-from backend import settings
 from backend.utils import ReadCreateViewSet
 from ciphers.models import Cipher, Submission
 from ciphers.serializers import CipherSerializer, SubmissionSerializer
@@ -20,12 +19,14 @@ class SubmissionRateThrottle(throttling.BaseThrottle):
                 cipher_pk = view.kwargs['cipher_pk']
                 last_submission = Submission.objects.filter(clazz=request.user.clazz,
                                                             cipher_id=cipher_pk).order_by('-time').first()
-                if last_submission is not None and last_submission.time + settings.CIPHERS_DELAY > timezone.now():
+
+                submission_delay = Cipher.objects.get(pk=cipher_pk).submission_delay
+                if not request.user.clazz.grade.cipher_competing:
+                    submission_delay *= 2
+
+                if last_submission and last_submission.time + timezone.timedelta(seconds=submission_delay) > timezone.now():
                     return False
         return True
-
-    def wait(self):
-        return settings.CIPHERS_DELAY.total_seconds()
 
 
 class SubmissionViewSet(ReadCreateViewSet):
@@ -36,6 +37,9 @@ class SubmissionViewSet(ReadCreateViewSet):
     def get_queryset(self):
         base = Submission.objects.filter(cipher=self.kwargs['cipher_pk'])
         if self.request.user.is_authenticated:
-            return base.filter(clazz=self.request.user.clazz)
+            if self.request.user.clazz.grade.cipher_competing:
+                return base.filter(clazz=self.request.user.clazz)
+            else:
+                return base.filter(submitted_by=self.request.user)
         return base.none()
 
