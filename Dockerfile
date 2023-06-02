@@ -27,4 +27,7 @@ WORKDIR /app/backend
 
 RUN python manage.py collectstatic --noinput
 
-CMD gunicorn backend.wsgi --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4
+VOLUME /app/backend/staticfiles
+VOLUME /app/backend/uploads
+
+CMD python manage.py migrate && gunicorn backend.wsgi --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4
