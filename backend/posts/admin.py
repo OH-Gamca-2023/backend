@@ -1,9 +1,7 @@
 from django.contrib import admin
 from django_object_actions import DjangoObjectActions, action
 
-from .models import Post, Comment, Tag
-
-admin.site.register(Comment)
+from .models import Post, Tag
 
 
 @admin.register(Tag)
@@ -33,11 +31,11 @@ class TagAdmin(DjangoObjectActions, admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'author', 'date', 'disable_comments')
+    list_display = ('id', 'title', 'author', 'date')
     list_display_links = ('id', 'title')
     search_fields = ('title', 'content', 'author__username')
-    list_filter = ('date', 'disable_comments')
-    readonly_fields = ('id', 'disable_comments')
+    list_filter = ('date',)
+    readonly_fields = ('id',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -47,8 +47,6 @@ class Post(models.Model):
                                              verbose_name="Ovplyvnené stupne")
     tags = models.ManyToManyField(Tag, blank=True, related_name='posts_for_tag', verbose_name="Tagy")
 
-    disable_comments = models.BooleanField("Vypnuté komentáre", default=False)
-
     @property
     def discipline_categories(self):
         return self.related_disciplines.all().values_list('category', flat=True).distinct()
@@ -93,25 +91,3 @@ class Post(models.Model):
 
             match = re.search(regex, content)
         return content
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name="Príspevok")
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL
-        , on_delete=models.SET_NULL, null=True, blank=True, related_name='comments', verbose_name="Autor")
-    content = models.CharField("Obsah", max_length=10000, help_text="Ak je autor príspevku organizátor, obsah bude "
-                                                                    "prehnaný cez Markdown.")
-    date = models.DateTimeField("Dátum", auto_now_add=True)
-
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
-                               verbose_name="Rodičovský komentár")
-
-    def __str__(self):
-        if self.author is None:
-            return "Komentár od administátora"
-        return "Komentár od " + self.author.username
-
-    class Meta:
-        verbose_name_plural = 'komentáre'
-        verbose_name = 'komentár'

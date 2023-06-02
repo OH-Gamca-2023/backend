@@ -48,7 +48,6 @@ organizer = [
     'disciplines\\.publish_results',
     'disciplines\\.(.*)_placements',
     'posts\\.(.*)_post',
-    'posts\\.(view|add)_comment',
     'posts\\.(view|add)_tag',
     'ciphers\\.(.*)_cipher',
     'ciphers\\.(view)_submission',

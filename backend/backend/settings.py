@@ -237,7 +237,6 @@ JET_SIDE_MENU_ITEMS = [
     ]},
     {'label': 'Príspevky', 'app_label': 'posts', 'items': [
         {'name': 'post'},
-        {'name': 'comment'},
         {'name': 'tag'},
     ]},
     {'label': 'Šifry', 'app_label': 'ciphers', 'items': [
