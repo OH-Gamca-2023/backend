@@ -27,4 +27,4 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = ('id', 'discipline', 'name', 'grades', 'placements', 'markdown')
+        fields = ('id', 'discipline', 'name', 'grades', 'placements')

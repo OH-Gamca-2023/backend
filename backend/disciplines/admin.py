@@ -6,7 +6,7 @@ from django.urls import reverse, path
 
 from .models import *
 from kalendar.generator import generate
-from .publishing import DetailsPublishView, ResultsPublishView
+# from .publishing import DetailsPublishView, ResultsPublishView
 
 
 @admin.register(Category)
@@ -85,14 +85,13 @@ class DisciplineAdmin(admin.ModelAdmin):
             else:
                 modified = modified[0] if modified else None
                 if modified:
-                    setattr(obj, modified, False)
+                    messages.error(request, 'Publishing is temporarily disabled while a new system is being developed')
+                    modified = None
 
                     if modified == 'date_published':
                         if not request.user.has_perm('disciplines.publish_details'):
                             messages.error(request, 'You do not have permission to publish details')
                             modified = None
-                        else:
-                            obj.date_published = True
                     elif modified == 'details_published':
                         if not request.user.has_perm('disciplines.publish_details'):
                             messages.error(request, 'You do not have permission to publish details')
@@ -136,13 +135,13 @@ class DisciplineAdmin(admin.ModelAdmin):
                 readonly.append('results_published')
         return readonly
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()), name='disciplines_publish_details'),
-            path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()), name='disciplines_publish_results'),
-        ]
-        return custom_urls + urls
+    # def get_urls(self):
+    #     urls = super().get_urls()
+    #     custom_urls = [
+    #         path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()), name='disciplines_publish_details'),
+    #         path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()), name='disciplines_publish_results'),
+    #     ]
+    #     return custom_urls + urls
 
 
 class PlacementInline(TabularInline):
