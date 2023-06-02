@@ -85,6 +85,11 @@ class User(AbstractUser):
     microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True,
                                           verbose_name="Microsoft používateľ")
 
+    individual_cipher_solving = models.BooleanField("Môže riešiť šifrovačku individuálne", default=False, help_text=
+                                                    "Používateľ môže riešiť šifrovačku individuálne, bez priradenia do " 
+                                                    "triedy. Ak trieda používateľa súťaží v online šifrovačke, táto "
+                                                    "možnosť nemá žiadny efekt.")
+
     def type(self):
         if self.is_superuser or self.is_admin:
             return 'admin'
