@@ -24,8 +24,10 @@ class UserSerializer(serializers.ModelSerializer):
             self.fields.pop('has_password')
             self.fields.pop('email')
             self.fields.pop('clazz')
+            self.fields.pop('phone_number')
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'clazz', 'type', 'microsoft_user', 'has_password')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone_number', 'clazz', 'type',
+                  'microsoft_user', 'has_password')
         extra_kwargs = {'password': {'write_only': True}}

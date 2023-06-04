@@ -2,6 +2,7 @@ import json
 import re
 
 from django.http import JsonResponse, HttpResponse
+from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
@@ -30,11 +31,16 @@ class CurrentUserView(APIView):
         if 'email' in data and re.match(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$', data['email']) is None:
             return JsonResponse({'error': 'Invalid email'}, status=400)
 
+        phone = PhoneNumber.from_string(data['phone_number']) if 'phone_number' in data else None
+        if phone is not None and not phone.is_valid() and phone != '':
+            return JsonResponse({'error': 'Invalid phone number'}, status=400)
+
         user = User.objects.get(pk=request.user.pk)
         user.first_name = data['first_name'] if 'first_name' in data else user.first_name
         user.last_name = data['last_name'] if 'last_name' in data else user.last_name
         user.email = data['email'] if 'email' in data else user.email
         user.username = data['username'] if 'username' in data else user.username
+        user.phone_number = None if phone == '' else (phone if phone is not None else user.phone_number)
         user.save()
 
         serializer = UserSerializer(user)
