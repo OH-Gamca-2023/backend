@@ -39,8 +39,8 @@ admin = [
     'admin\\.view_logentry',
 ]
 
-# Organizer - permissions that organizers have by default
-organizer = [
+# Organiser - permissions that organisers have by default
+organiser = [
     'disciplines\\.(.*)_discipline',
     'disciplines\\.view_category',
     'disciplines\\.(.*)_result',
@@ -60,8 +60,8 @@ default = []
 
 
 default_module_permissions = set(map(lambda x: x.split('\\.')[0], default))
-organizer_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organizer))
-admin_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organizer + admin))
+organiser_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organiser))
+admin_module_permissions = set(map(lambda x: x.split('\\.')[0], default + organiser + admin))
 
 
 def matches(p_set, permission):
@@ -74,7 +74,7 @@ def matches(p_set, permission):
 #   2.1. superuser - allow everything
 # 3. blacklist - deny if matches
 # 4. admin (if user is admin) - allow if matches
-# 5. organizer (if user is organizer or admin) - allow if matches
+# 5. organiser (if user is organiser or admin) - allow if matches
 # 6. default - allow if matches
 
 # Profile edit permission - specifies which fields can be edited by which users
@@ -82,6 +82,6 @@ profile_edit_permission = {
     'student': ['phone', 'email'],
     'alumni': ['phone', 'email'],
     'teacher': ['phone', 'email'],
-    'organizer': ['phone', 'email', 'username', 'password'],
+    'organiser': ['phone', 'email', 'username', 'password'],
     'admin': ['first_name', 'last_name', 'phone', 'email', 'username', 'password'],
 }

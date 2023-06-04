@@ -45,7 +45,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('date', 'time', 'location', 'volatile_date')
         }),
         ('Organising', {
-            'fields': ('primary_organizer', 'organizers', 'teacher_oversight'),
+            'fields': ('primary_organiser', 'organisers', 'teacher_oversight'),
             'classes': ('collapse',),
             'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
                            'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
@@ -151,7 +151,7 @@ class DisciplineAdmin(admin.ModelAdmin):
                 readonly.append('results_published')
 
         if not request.user.has_perm('disciplines.modify_people'):
-            readonly += ['primary_organizer', 'organizers', 'teacher_oversight']
+            readonly += ['primary_organiser', 'organisers', 'teacher_oversight']
 
         return readonly
 

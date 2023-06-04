@@ -2,8 +2,8 @@ from django.contrib.auth.models import AbstractUser, Permission
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
-from data.permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
-    blacklist, organizer, admin, default, force_blacklist
+from data.permissions import admin_module_permissions, organiser_module_permissions, default_module_permissions, matches, \
+    blacklist, organiser, admin, default, force_blacklist
 
 
 class Grade(models.Model):
@@ -18,7 +18,7 @@ class Grade(models.Model):
     competing = models.BooleanField("Súťažná?", default=True)
     cipher_competing = models.BooleanField("Súťaží v online šifrovačke?", default=False)
 
-    is_organizer = models.BooleanField("Je organizátorská?", default=False)
+    is_organiser = models.BooleanField("Je organizátorská?", default=False)
     is_teacher = models.BooleanField("Je učiteľská?", default=False)
 
     class Meta:
@@ -100,7 +100,7 @@ class User(AbstractUser):
         if self.is_superuser or self.is_admin:
             return 'admin'
         elif self.clazz.grade.name == 'Organizátori':
-            return 'organizer'
+            return 'organiser'
         elif self.clazz.grade.name == 'Učitelia':
             return 'teacher'
         elif self.clazz.grade.name == 'Alumni':
@@ -134,7 +134,7 @@ class User(AbstractUser):
                 return True
 
         if self.is_staff:
-            if matches(organizer, perm):
+            if matches(organiser, perm):
                 return True
 
         return matches(default, perm)
@@ -148,7 +148,7 @@ class User(AbstractUser):
         if self.is_admin:
             return app_label in admin_module_permissions
         elif self.is_staff:
-            return app_label in organizer_module_permissions
+            return app_label in organiser_module_permissions
         else:
             return app_label in default_module_permissions or super().has_module_perms(app_label)
 

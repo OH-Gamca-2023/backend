@@ -68,7 +68,7 @@ class UserAdmin(BaseUserAdmin):
                         return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
                                                        'user_permissions', 'microsoft_user')
                 else:
-                    # user is not superuser and is editing a normal user or organizer
+                    # user is not superuser and is editing a normal user or organiser
                     # disable permission fields and microsoft user
                     return self.readonly_fields + (
                         'is_superuser', 'is_admin', 'groups', 'user_permissions', 'microsoft_user')
@@ -82,7 +82,7 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
-    list_display = ('id', 'name', 'competing', 'cipher_competing', 'is_organizer', 'is_teacher')
+    list_display = ('id', 'name', 'competing', 'cipher_competing', 'is_organiser', 'is_teacher')
     list_display_links = ('id', 'name')
     search_fields = ('name',)
     list_filter = ('competing', 'cipher_competing')
@@ -93,7 +93,7 @@ class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
         for name in Grade.grade_options:
             Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'],
                                         cipher_competing=name[0] in ['2. Stupeň', 'Organizátori'],
-                                        is_organizer=name[0] in ['Organizátori'],
+                                        is_organiser=name[0] in ['Organizátori'],
                                         is_teacher=name[0] in ['Učitelia'])
 
     changelist_actions = ('create_grades',)
