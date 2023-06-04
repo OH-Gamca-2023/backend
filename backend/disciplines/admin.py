@@ -45,7 +45,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('date', 'time', 'location', 'volatile_date')
         }),
         ('Organising', {
-            'fields': ('primary_organiser', 'organisers', 'teacher_oversight'),
+            'fields': ('primary_organiser', 'organisers', 'teacher_supervisors'),
             'classes': ('collapse',),
             'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
                            'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
