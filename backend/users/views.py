@@ -2,7 +2,7 @@ import json
 import re
 
 from django.http import JsonResponse, HttpResponse
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
@@ -11,7 +11,7 @@ from .serializers import *
 from backend.utils import ViewModelPermissions
 
 
-class CurrentUserAPIView(APIView):
+class CurrentUserView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
@@ -41,7 +41,7 @@ class CurrentUserAPIView(APIView):
         return JsonResponse(serializer.data)
 
 
-class UserPermissionAPIView(APIView):
+class CurrentUserPermissionView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
@@ -62,7 +62,7 @@ class UserPermissionAPIView(APIView):
         return JsonResponse(response)
 
 
-class PasswordChangeAPIView(APIView):
+class PasswordChangeView(APIView):
     permission_classes = (IsAdminUser,)
 
     def post(self, request):
@@ -118,27 +118,20 @@ class PasswordChangeAPIView(APIView):
         return None
 
 
-class ClassesView(generics.ListAPIView):
-    serializer_class = ClazzSerializer
-    queryset = Clazz.objects.all()
-
-
-class ClassDetailView(generics.RetrieveAPIView):
-    serializer_class = ClazzSerializer
-    queryset = Clazz.objects.all()
-
-
-class GradesView(generics.ListAPIView):
-    serializer_class = GradeSerializer
-    queryset = Grade.objects.all()
-
-
-class GradeDetailView(generics.RetrieveAPIView):
-    serializer_class = GradeSerializer
-    queryset = Grade.objects.all()
-
-
-class UserDetailAPIView(generics.RetrieveAPIView):
-    permission_classes = (ViewModelPermissions,)
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    model = User
     serializer_class = UserSerializer
     queryset = User.objects.all()
+    permission_classes = (ViewModelPermissions,)
+
+
+class ClassViewSet(viewsets.ReadOnlyModelViewSet):
+    model = Clazz
+    serializer_class = ClazzSerializer
+    queryset = Clazz.objects.all()
+
+
+class GradeViewSet(viewsets.ReadOnlyModelViewSet):
+    model = Grade
+    serializer_class = GradeSerializer
+    queryset = Grade.objects.all()
