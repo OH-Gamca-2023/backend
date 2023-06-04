@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'adminsortable2',
     'django_extensions',
+    'phonenumber_field',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -267,3 +268,7 @@ CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "localhost:5173/", "localhost/", "
                  "127.0.0.1:8000/", "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")
 CSP_FRAME_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "127.0.0.1:5173/", "127.0.0.1/", "127.0.0.1:8000/",
                  "https://oh.gamca.sk/", "https://2023.oh.gamca.sk/", "https://oh.jaksia.xyz/")
+
+PHONENUMBER_DB_FORMAT = 'E164'
+PHONENUMBER_DEFAULT_REGION = 'SK'
+PHONENUMBER_DEFAULT_FORMAT = 'INTERNATIONAL'

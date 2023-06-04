@@ -29,6 +29,7 @@ django-admin-sortable2 = "*"
 pyflakes = "*"
 django-csp = "*"
 unidecode = "*"
+django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
 
 [dev-packages]
 

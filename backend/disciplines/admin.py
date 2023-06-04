@@ -44,6 +44,12 @@ class DisciplineAdmin(admin.ModelAdmin):
         ('Date and time', {
             'fields': ('date', 'time', 'location', 'volatile_date')
         }),
+        ('Organising', {
+            'fields': ('primary_organizer', 'organizers', 'teacher_oversight'),
+            'classes': ('collapse',),
+            'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
+                           'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
+        }),
         ('Publishing', {
             'fields': ('date_published', 'details_published', 'results_published')
         }),
@@ -55,15 +61,25 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     add_fieldsets = (
         (None, {
-            'fields': ('name', 'short_name', 'description')
+            'fields': ('name', 'short_name', 'details')
         }),
         ('Categorisation', {
-            'fields': ('category', 'tags', 'target_grades')
+            'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
             'fields': ('date', 'time', 'location', 'volatile_date')
         }),
     )
+
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            return self.fieldsets
+        return self.add_fieldsets
+
+    def get_inlines(self, request, obj):
+        if obj:
+            return self.inlines
+        return []
 
     @admin.display(description='Result sets')
     def result_sets(self, obj):
@@ -133,6 +149,10 @@ class DisciplineAdmin(admin.ModelAdmin):
                 readonly.append('details_published')
             if obj.results_published:
                 readonly.append('results_published')
+
+        if not request.user.has_perm('disciplines.modify_people'):
+            readonly += ['primary_organizer', 'organizers', 'teacher_oversight']
+
         return readonly
 
     # def get_urls(self):

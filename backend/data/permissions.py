@@ -79,9 +79,9 @@ def matches(p_set, permission):
 
 # Profile edit permission - specifies which fields can be edited by which users
 profile_edit_permission = {
-    'student': [],
-    'alumni': ['email'],
-    'teacher': ['email'],
-    'organizer': ['email', 'username', 'password'],
-    'admin': ['first_name', 'last_name', 'email', 'username', 'password'],
+    'student': ['phone', 'email'],
+    'alumni': ['phone', 'email'],
+    'teacher': ['phone', 'email'],
+    'organizer': ['phone', 'email', 'username', 'password'],
+    'admin': ['first_name', 'last_name', 'phone', 'email', 'username', 'password'],
 }

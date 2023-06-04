@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_staff', 'is_admin', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
         ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_admin', 'is_superuser')}),
         ('Advanced permissions', {
             'classes': ('collapse',),
@@ -42,7 +42,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'fields': ('email', 'password1', 'password2', 'microsoft_user')}
          ),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superuser')}),
     )
     search_fields = ('email', 'first_name', 'last_name')
@@ -82,7 +82,7 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
-    list_display = ('id', 'name', 'competing', 'cipher_competing')
+    list_display = ('id', 'name', 'competing', 'cipher_competing', 'is_organizer', 'is_teacher')
     list_display_links = ('id', 'name')
     search_fields = ('name',)
     list_filter = ('competing', 'cipher_competing')
@@ -92,7 +92,9 @@ class GradeAdmin(DjangoObjectActions, admin.ModelAdmin):
     def create_grades(self, request, queryset):
         for name in Grade.grade_options:
             Grade.objects.get_or_create(name=name[0], competing=name[0] in ['2. Stupeň', '3. Stupeň'],
-                                        cipher_competing=name[0] in ['2. Stupeň', 'Organizátori'])
+                                        cipher_competing=name[0] in ['2. Stupeň', 'Organizátori'],
+                                        is_organizer=name[0] in ['Organizátori'],
+                                        is_teacher=name[0] in ['Učitelia'])
 
     changelist_actions = ('create_grades',)
 

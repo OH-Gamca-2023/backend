@@ -29,9 +29,9 @@ class Discipline(models.Model):
 
     name = models.CharField("Názov", max_length=100)
     short_name = models.CharField("Krátky názov", max_length=15, blank=True, null=True,
-                                    help_text="Zobrazí sa v kalendári. Maximálna dĺžka ktorá sa v kalebdári "
-                                                "správne zobrazí je 15 znakov. V prípade viac ako 3 disciplín "
-                                                "v jednom dni odporúčame maximálne 7 znakov.")
+                                  help_text="Zobrazí sa v kalendári. Maximálna dĺžka ktorá sa v kalebdári "
+                                            "správne zobrazí je 15 znakov. V prípade viac ako 3 disciplín "
+                                            "v jednom dni odporúčame maximálne 7 znakov.")
 
     details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
 
@@ -46,6 +46,17 @@ class Discipline(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
     target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
+
+    primary_organizer = models.ForeignKey('users.User', on_delete=models.SET_NULL, blank=True, null=True,
+                                          related_name="primary_disciplines", verbose_name="Zodpovedný organizátor",
+                                          limit_choices_to={'clazz__grade__is_organizer': True})
+    organizers = models.ManyToManyField('users.User', blank=True, verbose_name="Organizátori",
+                                        related_name="organized_disciplines",
+                                        limit_choices_to={'clazz__grade__is_organizer': True})
+
+    teacher_supervisors = models.ManyToManyField('users.User', blank=True, verbose_name="Dozorujúci učitelia",
+                                                 related_name="disciplines_to_supervise",
+                                                 limit_choices_to={'clazz__grade__is_teacher': True})
 
     date_published = models.BooleanField(default=False, verbose_name="Dátum zverejnený")
     details_published = models.BooleanField(default=False, verbose_name="Detaily zverejnené")
@@ -63,6 +74,7 @@ class Discipline(models.Model):
             ('publish_date', 'Can publish date'),
             ('publish_details', 'Can publish details'),
             ('publish_results', 'Can publish results'),
+            ('modify_people', 'Can modify organizers and supervisors'),
         ]
 
 
@@ -107,7 +119,7 @@ class Placement(models.Model):
     place = models.SmallIntegerField("Pozícia", default=-1, null=False, blank=False)
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+            self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         if self.place < 1:
             self.place = -1
