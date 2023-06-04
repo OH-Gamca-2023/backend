@@ -1,8 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 
 from kalendar.models import Calendar
-from messages.error import server_error
 
 
 def http_cache_date(millis):
@@ -40,7 +39,7 @@ def handle(request, type):
     if should_generate:
         content = Calendar.objects.get(key=type)
         if content is None:
-            return server_error(503, "not_ready")
+            return JsonResponse({'error': 'not_ready'}, status=503)
         response['Content-Type'] = content.content_type
         response.content = content.content
     return response
