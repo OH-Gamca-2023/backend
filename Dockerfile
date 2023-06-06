@@ -11,10 +11,6 @@ RUN apt update \
     && apt -y clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p ./backend \
-    && chown -R appuser:appuser ./backend \
-    && chmod -R 755 ./backend
-
 USER appuser
 
 RUN pip install --upgrade pipenv
@@ -22,6 +18,13 @@ COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --dev --deploy
 
 COPY backend ./backend
+
+USER root
+
+RUN chown -R appuser ./backend \
+    && chmod 754 -R ./backend
+
+USER appuser
 
 WORKDIR /app/backend
 
