@@ -96,6 +96,8 @@ class User(AbstractUser):
                                                     "triedy. Ak trieda používateľa súťaží v online šifrovačke, táto "
                                                     "možnosť nemá žiadny efekt.")
 
+    individual_cipher_solving = models.BooleanField("Rieši šifrovačku individuálne", default=False)
+
     def type(self):
         if self.is_superuser or self.is_admin:
             return 'admin'
