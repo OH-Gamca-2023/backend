@@ -47,13 +47,10 @@ class Discipline(models.Model):
     target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
 
-    primary_organiser = models.ForeignKey('users.User', on_delete=models.SET_NULL, blank=True, null=True,
-                                          related_name="primary_disciplines", verbose_name="Zodpovedný organizátor",
-                                          limit_choices_to={'clazz__grade__is_organiser': True})
-    organisers = models.ManyToManyField('users.User', blank=True, verbose_name="Organizátori",
-                                        related_name="organized_disciplines",
-                                        limit_choices_to={'clazz__grade__is_organiser': True})
-
+    primary_organisers = models.ManyToManyField('users.User', blank=True, null=True,
+                                                related_name="primary_disciplines",
+                                                verbose_name="Zodpovedný organizátori",
+                                                limit_choices_to={'clazz__grade__is_organiser': True})
     teacher_supervisors = models.ManyToManyField('users.User', blank=True, verbose_name="Dozorujúci učitelia",
                                                  related_name="disciplines_to_supervise",
                                                  limit_choices_to={'clazz__grade__is_teacher': True})

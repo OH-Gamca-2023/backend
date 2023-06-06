@@ -36,65 +36,15 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = ResultSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get', 'put', 'delete'], name='Primary organiser')
-    def primary_organiser(self, request, pk=None):
+    @action(detail=True, methods=['put', 'delete'], name='Primary organisers')
+    def primary_organisers(self, request, pk=None):
         if not self.request.user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not self.request.user.clazz.grade.is_teacher and not self.request.user.is_staff:
+        if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
         discipline = self.get_object()
-        if request.method == 'GET':
-            if discipline.primary_organiser is None:
-                return Response("null")
-            return Response(discipline.primary_organiser.pk)
-        elif request.method == 'PUT':
-            if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
-
-            po_pk = request.data['primary_organiser']
-            if po_pk is None:
-                return Response({'detail': 'Primary organiser cannot be null. Use DELETE to remove.'}, status=400)
-
-            po = User.objects.filter(pk=po_pk).first()
-            if po is None:
-                return Response({'detail': 'Target user does not exist.'}, status=400)
-
-            if po.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to assign other users as primary organiser.'}, status=403)
-
-            if po == discipline.primary_organiser:
-                return Response(DisciplineSerializer(discipline).data)
-
-            discipline.primary_organiser = po
-            discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
-        elif request.method == 'DELETE':
-            if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
-
-            if discipline.primary_organiser is None:
-                return Response({'detail': 'No primary organiser to delete.'}, status=404)
-            if discipline.primary_organiser.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to remove other users as primary organiser.'}, status=403)
-
-            discipline.primary_organiser = None
-            discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
-
-    @action(detail=True, methods=['get', 'put', 'delete'], name='Organisers')
-    def organisers(self, request, pk=None):
-        if not self.request.user.is_authenticated:
-            return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not self.request.user.clazz.grade.is_teacher and not self.request.user.is_staff:
-            return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
-
-        discipline = self.get_object()
-        if request.method == 'GET':
-            return Response([o.pk for o in discipline.organisers.all()])
-        elif request.method == 'PUT':
-            if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
+        if request.method == 'PUT':
 
             organiser = request.data['organiser']
             if organiser is None:
@@ -102,20 +52,22 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
             organiser = User.objects.filter(pk=organiser).first()
             if organiser is None:
-                return Response({'detail': 'Target user does not exist.'}, status=400)
+                return Response({'detail': 'Target user does not exist.'}, status=404)
 
             if organiser.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to assign other users as organiser.'}, status=403)
 
-            if organiser in discipline.organisers.all():
+            if not organiser.clazz.grade.is_organiser:
+                return Response({'detail': 'Target user is not an organiser.'}, status=400)
+
+            if organiser in discipline.primary_organisers.all():
                 return Response(DisciplineSerializer(discipline).data)
 
-            discipline.organisers.add(organiser)
+            discipline.primary_organisers.add(organiser)
             discipline.save()
             return Response(DisciplineSerializer(discipline).data)
+
         elif request.method == 'DELETE':
-            if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
             organiser = request.data['organiser']
             if organiser is None:
@@ -123,42 +75,41 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
             organiser = User.objects.filter(pk=organiser).first()
             if organiser is None:
-                return Response({'detail': 'Target user does not exist.'}, status=400)
+                return Response({'detail': 'Target user does not exist.'}, status=404)
 
             if organiser.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to remove other users from organiser.'}, status=403)
 
-            if organiser not in discipline.organisers.all():
-                return Response({'detail': 'Target user is not an organiser.'}, status=400)
+            if organiser not in discipline.primary_organisers.all():
+                return Response({'detail': 'Target user is not a primary organiser.'}, status=400)
 
-            discipline.organisers.remove(organiser)
+            discipline.primary_organisers.remove(organiser)
             discipline.save()
             return Response(DisciplineSerializer(discipline).data)
 
-    @action(detail=True, methods=['get', 'put', 'delete'], name='Teacher supervisors')
+    @action(detail=True, methods=['put', 'delete'], name='Teacher supervisors')
     def teacher_supervisors(self, request, pk=None):
         if not self.request.user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not self.request.user.clazz.grade.is_teacher and not self.request.user.is_staff:
+        if not self.request.user.clazz.grade.is_teacher and not self.request.user.has_perm('disciplines.modify_people'):
             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
         discipline = self.get_object()
-        if request.method == 'GET':
-            return Response([o.pk for o in discipline.teacher_supervisors.all()])
-        elif request.method == 'PUT':
-            if not self.request.user.clazz.grade.is_teacher and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
+        if request.method == 'PUT':
 
             teacher = request.data['teacher']
             if teacher is None:
-                return Response({'detail': 'Organiser to add cannot be null.'}, status=400)
+                return Response({'detail': 'Teacher to add cannot be null.'}, status=400)
 
             teacher = User.objects.filter(pk=teacher).first()
             if teacher is None:
-                return Response({'detail': 'Target user does not exist.'}, status=400)
+                return Response({'detail': 'Target user does not exist.'}, status=404)
 
             if teacher.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to assign other users as supervising teachers.'}, status=403)
+
+            if not teacher.clazz.grade.is_teacher:
+                return Response({'detail': 'Target user is not a teacher.'}, status=400)
 
             if teacher in discipline.teacher_supervisors.all():
                 return Response(DisciplineSerializer(discipline).data)
@@ -166,9 +117,8 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
             discipline.teacher_supervisors.add(teacher)
             discipline.save()
             return Response(DisciplineSerializer(discipline).data)
+
         elif request.method == 'DELETE':
-            if not self.request.user.clazz.grade.is_teacher and not self.request.user.has_perm('disciplines.modify_people'):
-                return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
             teacher = request.data['teacher']
             if teacher is None:
@@ -176,15 +126,15 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
             teacher = User.objects.filter(pk=teacher).first()
             if teacher is None:
-                return Response({'detail': 'Target user does not exist.'}, status=400)
+                return Response({'detail': 'Target user does not exist.'}, status=404)
 
             if teacher.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to remove other users from supervising teachers.'}, status=403)
 
-            if teacher not in discipline.organisers.all():
-                return Response({'detail': 'Target user is not an organiser.'}, status=400)
+            if teacher not in discipline.teacher_supervisors.all():
+                return Response({'detail': 'Target user is not a supervising teacher.'}, status=400)
 
-            discipline.organisers.remove(teacher)
+            discipline.teacher_supervisors.remove(teacher)
             discipline.save()
             return Response(DisciplineSerializer(discipline).data)
 
