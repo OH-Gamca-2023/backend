@@ -17,14 +17,17 @@ class ClazzSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    def __init__(self, *args, hide_confidential=False, **kwargs):
+    def __init__(self, *args, hide_personal=False, hide_confidential=False, **kwargs):
         super().__init__(*args, **kwargs)
+        if hide_personal:
+            self.fields.pop('email')
+            self.fields.pop('phone_number')
+            self.fields.pop('clazz')
+            hide_confidential = True  # hide_confidential is implied by hide_personal
+
         if hide_confidential:
             self.fields.pop('microsoft_user')
             self.fields.pop('has_password')
-            self.fields.pop('email')
-            self.fields.pop('clazz')
-            self.fields.pop('phone_number')
 
     class Meta:
         model = User

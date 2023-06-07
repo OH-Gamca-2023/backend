@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from disciplines.models import Category, Discipline, Result, Placement
+from users.serializers import UserSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -10,6 +11,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class DisciplineSerializer(serializers.ModelSerializer):
+    primary_organisers = UserSerializer(many=True, read_only=True, hide_confidential=True)
+    teacher_supervisors = UserSerializer(many=True, read_only=True, hide_confidential=True)
+
     class Meta:
         model = Discipline
         fields = ('id', 'name', 'short_name', 'details', 'date', 'time', 'location', 'volatile_date', 'category',

@@ -11,7 +11,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = UserSerializer(hide_confidential=True)
+    author = UserSerializer(hide_personal=True)
     content = serializers.CharField(source='parsed_content', read_only=True, trim_whitespace=False)
 
     class Meta:
