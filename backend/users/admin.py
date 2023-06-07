@@ -28,7 +28,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
-        ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_admin', 'is_superuser')}),
+        ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_admin', 'is_superuser', 'individual_cipher_solving')}),
         ('Advanced permissions', {
             'classes': ('collapse',),
             'description': '<h3 style="color: red;"><b>Advanced permission settings. Only change these if you know '
