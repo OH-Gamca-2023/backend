@@ -16,7 +16,7 @@ class CurrentUserView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, permissions=True)
         return JsonResponse(serializer.data)
 
     def post(self, request):
@@ -51,21 +51,8 @@ class CurrentUserPermissionView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        user_type = request.user.type()
-
-        response = {
-            'user_type': user_type,
-            'staff': request.user.is_staff,
-            'admin': request.user.is_admin,
-            'superuser': request.user.is_superuser,
-            'permissions': [(perm.content_type.app_label + '.' + perm.codename) for perm in request.user.get_all_permissions()],
-            'profile_edit': []
-        }
-
-        if user_type in profile_edit_permission:
-            response['profile_edit'] = profile_edit_permission[user_type]
-
-        return JsonResponse(response)
+        serializer = PermissionSerializer(user=request.user)
+        return JsonResponse(serializer.data)
 
 
 class PasswordChangeView(APIView):

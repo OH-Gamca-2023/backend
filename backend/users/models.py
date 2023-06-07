@@ -101,9 +101,9 @@ class User(AbstractUser):
     def type(self):
         if self.is_superuser or self.is_admin:
             return 'admin'
-        elif self.clazz.grade.name == 'Organizátori':
+        elif self.clazz.grade.is_organiser:
             return 'organiser'
-        elif self.clazz.grade.name == 'Učitelia':
+        elif self.clazz.grade.is_teacher:
             return 'teacher'
         elif self.clazz.grade.name == 'Alumni':
             return 'alumni'
