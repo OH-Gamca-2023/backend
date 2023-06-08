@@ -120,6 +120,3 @@ class MicrosoftUserAdmin(admin.ModelAdmin):
 
     list_filter = ('department', 'job_title')
 
-    readonly_fields = (
-        'id', 'mail', 'display_name', 'given_name', 'surname', 'job_title', 'office_location', 'department')
-

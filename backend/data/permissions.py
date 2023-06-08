@@ -23,6 +23,7 @@ blacklist = [
     'data\\.delete_(.*)',
     # prevent unwanted user modifications
     'users\\.delete_microsoftuser',
+    'users\\.change_microsoftuser',
     'users\\.delete_user',
     'users\\.delete_grade',
 ]
