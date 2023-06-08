@@ -42,7 +42,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location', 'volatile_date')
+            'fields': ('date', 'time', 'location')
         }),
         ('Organising', {
             'fields': ('primary_organisers', 'teacher_supervisors'),
@@ -67,7 +67,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location', 'volatile_date')
+            'fields': ('date', 'time', 'location')
         }),
     )
 

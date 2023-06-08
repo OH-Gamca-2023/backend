@@ -38,10 +38,6 @@ class Discipline(models.Model):
     date = models.DateField("Dátum", blank=True, null=True)
     time = models.TimeField("Čas", blank=True, null=True)
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
-    volatile_date = models.BooleanField("Neurčitý dátum",
-                                        default=False,
-                                        help_text="Ak je zaškrtnuté, zobrazí sa varovanie, že dátum sa ešte môže "
-                                                  "zmeniť.")
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
     target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne",
