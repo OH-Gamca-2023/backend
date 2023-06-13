@@ -7,7 +7,7 @@ from .models import User, Clazz, Grade
 class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
-        fields = ('id', 'name', 'competing', 'cipher_competing')
+        fields = ('id', 'name', 'competing', 'cipher_competing', 'is_organiser', 'is_teacher')
 
 
 class ClazzSerializer(serializers.ModelSerializer):
@@ -54,6 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
         if hide_confidential:
             self.fields.pop('microsoft_user')
             self.fields.pop('has_password')
+            self.fields.pop('individual_cipher_solving')
             permissions = False  # !permissions is implied by hide_confidential
 
         self.permissions = permissions
