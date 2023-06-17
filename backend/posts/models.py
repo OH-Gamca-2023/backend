@@ -21,10 +21,11 @@ class Tag(models.Model):
         verbose_name_plural = 'tagy'
         verbose_name = 'tag'
 
-    def delete(self, using=None, keep_parents=False):
-        if self.special is not None:
-            raise Exception("Cannot delete special tag.")
-        super().delete(using, keep_parents)
+        permissions = [
+            ('add_special_tag', 'Can add special tag'),
+            ('change_special_tag', 'Can change special tag'),
+            ('delete_special_tag', 'Can delete special tag')
+        ]
 
 
 def gen_id():
@@ -61,6 +62,11 @@ class Post(models.Model):
     class Meta:
         verbose_name_plural = 'príspevky'
         verbose_name = 'príspevok'
+
+        permissions = [
+            ('change_others_post', 'Can change posts of other users'),
+            ('delete_others_post', 'Can delete posts of other users')
+        ]
 
     @property
     def parsed_content(self):

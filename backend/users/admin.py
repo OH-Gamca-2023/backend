@@ -22,19 +22,14 @@ class UserChangeForm(forms.ModelForm):
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
 
-    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_admin', 'is_superuser', 'clazz', 'date_joined')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'clazz', 'date_joined')
     list_display_links = ('id', 'email')
-    list_filter = ('is_staff', 'is_admin', 'is_superuser', 'is_active', 'groups', 'clazz')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
-        ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_admin', 'is_superuser', 'individual_cipher_solving')}),
-        ('Advanced permissions', {
-            'classes': ('collapse',),
-            'description': '<h3 style="color: red;"><b>Advanced permission settings. Only change these if you know '
-                           'what you are doing ('
-                           'preferably not at all).</b></h3>',
-            'fields': ('groups', 'user_permissions')
+        ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_superuser', 'individual_cipher_solving',
+                                    'groups', 'user_permissions')
         }),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -50,34 +45,6 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ('groups', 'user_permissions',)
 
     readonly_fields = ('last_login', 'date_joined', 'type')
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            if not request.user.is_superuser:
-                if obj.is_admin or obj.is_superuser:
-                    if request.user.id != obj.id:
-                        # user is not superuser and is editing an admin or superuser
-                        # disable all fields
-                        return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
-                                                       'user_permissions', 'microsoft_user', 'username', 'email',
-                                                       'password', 'first_name', 'last_name', 'clazz', 'groups',
-                                                       'user_permissions', 'last_login', 'date_joined', 'type')
-                    else:
-                        # user is not superuser and is editing himself
-                        # disable permission fields and microsoft user
-                        return self.readonly_fields + ('is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups',
-                                                       'user_permissions', 'microsoft_user')
-                else:
-                    # user is not superuser and is editing a normal user or organiser
-                    # disable permission fields and microsoft user
-                    return self.readonly_fields + (
-                        'is_superuser', 'is_admin', 'groups', 'user_permissions', 'microsoft_user')
-
-            # user is superuser and is editing himself
-            if request.user.is_superuser and request.user.id == obj.id:
-                return self.readonly_fields + ('is_active', 'is_staff', 'is_superuser')
-
-        return self.readonly_fields
 
 
 @admin.register(Grade)

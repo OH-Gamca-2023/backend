@@ -13,8 +13,6 @@ def is_allowed(request, type, user=None, department=None):
         if user:
             if restriction.bypass_staff and user.is_staff:
                 return True, ""
-            if restriction.bypass_admin and user.is_admin:
-                return True, ""
             if restriction.bypass_superuser and user.is_superuser:
                 return True, ""
         if department:

@@ -48,6 +48,14 @@ class Cipher(models.Model):
 
     end = models.DateTimeField()
 
+    class Meta:
+        verbose_name_plural = 'šifry'
+        verbose_name = 'šifra'
+
+        permissions = [
+            ('change_cipher_advanced', 'Úprava pokročilých nastavení šifry'),
+        ]
+
     @property
     def started(self):
         return self.start < timezone.now()

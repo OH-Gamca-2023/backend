@@ -78,8 +78,6 @@ class AuthRestriction(models.Model):
                                            'Multiple can be separated by commas.')
     bypass_staff = models.BooleanField(default=False,
                                        help_text='Whether staff members can bypass this restriction.')
-    bypass_admin = models.BooleanField(default=True,
-                                       help_text='Whether administrators can bypass this restriction.')
     bypass_superuser = models.BooleanField(default=True,
                                            help_text='Whether superusers can bypass this restriction.')
     bypass_department = models.CharField(max_length=1000, blank=True,

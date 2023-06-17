@@ -21,9 +21,8 @@ class CipherAdmin(admin.ModelAdmin):
             'fields': ('ignore_case', 'ignore_intermediate_whitespace', 'ignore_trailing_leading_whitespace',
                        'ignore_accents', 'submission_delay'),
             'classes': ('collapse',),
-            'description': '<b><h3 style="color: red;">Advanced settings</h3><br>Only editable by admins. You most '
-                           'likely don\'t want to change these. Any and all changes from default values should be '
-                           'consulted with cipher\'s author or server admin.</b>'
+            'description': '<b><h3 style="color: red;">Advanced settings</h3><br>Only editable with special '
+                           'permissions. You most  likely don\'t want to change these.</b>'
         })
     )
 
@@ -42,7 +41,7 @@ class CipherAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         base = super().get_readonly_fields(request, obj)
 
-        if not request.user.is_admin and not request.user.is_superuser:
+        if not request.user.has_perm("ciphers.change_cipher_advanced"):
             base += ('ignore_case', 'ignore_intermediate_whitespace', 'ignore_trailing_leading_whitespace',
                      'ignore_accents', 'submission_delay')
 

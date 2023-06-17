@@ -12,8 +12,8 @@ class SettingAdmin(ModelAdmin):
 
 @admin.register(AuthRestriction)
 class AuthRestrictionAdmin(ModelAdmin):
-    list_display = ['type', 'restricted', 'bypass_staff', 'bypass_admin', 'bypass_superuser', 'bypass_department']
-    list_editable = ['restricted', 'bypass_staff', 'bypass_admin', 'bypass_superuser', 'bypass_department']
+    list_display = ['type', 'restricted', 'bypass_staff', 'bypass_superuser', 'bypass_department']
+    list_editable = ['restricted', 'bypass_staff', 'bypass_superuser', 'bypass_department']
 
     def changelist_view(self, request, extra_context=None):
         self.message_user(request, 'Akákoľvek zmena týchto nastavení odhlási všetkých používateľov a zruší platnosť '

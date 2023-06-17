@@ -3,11 +3,10 @@ import re
 
 from django.http import JsonResponse, HttpResponse
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework import generics, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
-from data.permissions import profile_edit_permission
 from .serializers import *
 from backend.utils import ViewModelPermissions
 

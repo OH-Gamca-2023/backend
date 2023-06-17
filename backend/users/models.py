@@ -1,9 +1,6 @@
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-
-from data.permissions import admin_module_permissions, organiser_module_permissions, default_module_permissions, matches, \
-    blacklist, organiser, admin, default, force_blacklist
 
 
 class Grade(models.Model):
@@ -20,6 +17,8 @@ class Grade(models.Model):
 
     is_organiser = models.BooleanField("Je organizátorská?", default=False)
     is_teacher = models.BooleanField("Je učiteľská?", default=False)
+
+    permission_group = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'stupne'
@@ -84,10 +83,6 @@ class User(AbstractUser):
 
     phone_number = PhoneNumberField("Telefónne číslo", null=True, blank=True)
 
-    is_admin = models.BooleanField("Administátor", default=False,
-                                      help_text="Používateľ je administrátorom. Administrátori majú viac práv ako "
-                                                "štandardní organizátori.")
-
     microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True,
                                           verbose_name="Microsoft používateľ")
 
@@ -96,10 +91,8 @@ class User(AbstractUser):
                                                     "triedy. Ak trieda používateľa súťaží v online šifrovačke, táto "
                                                     "možnosť nemá žiadny efekt.")
 
-    individual_cipher_solving = models.BooleanField("Rieši šifrovačku individuálne", default=False)
-
     def type(self):
-        if self.is_superuser or self.is_admin:
+        if self.is_superuser:
             return 'admin'
         elif self.clazz.grade.is_organiser:
             return 'organiser'
@@ -113,52 +106,15 @@ class User(AbstractUser):
     def has_password(self):
         return self.password != ''
 
-    def has_perm(self, perm, obj=None):
-        if not self.is_active:
-            return False
-
-        if isinstance(perm, Permission):
-            perm = perm.content_type.app_label + '.' + perm.codename
-
-        if matches(force_blacklist, perm):
-            return False
-
-        if self.is_superuser:
-            return True
-        elif super().has_perm(perm, obj):
-            return True
-
-        if matches(blacklist, perm):
-            return False
-
-        if self.is_admin:
-            if matches(admin, perm):
-                return True
-
-        if self.is_staff:
-            if matches(organiser, perm):
-                return True
-
-        return matches(default, perm)
-
-    def has_module_perms(self, app_label):
-        if self.is_superuser:
-            return True
-        elif not self.is_active:
-            return False
-
-        if self.is_admin:
-            return app_label in admin_module_permissions
-        elif self.is_staff:
-            return app_label in organiser_module_permissions
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.id:
+            if 'clazz' in update_fields:
+                old = User.objects.get(id=self.id)
+                if old.clazz and old.clazz.grade.permission_group:
+                    self.groups.remove(old.clazz.grade.permission_group)
+                if self.clazz and self.clazz.grade.permission_group:
+                    self.groups.add(self.clazz.grade.permission_group)
         else:
-            return app_label in default_module_permissions or super().has_module_perms(app_label)
-
-    def has_perms(self, perm_list, obj=None):
-        return all(self.has_perm(perm, obj) for perm in perm_list)
-
-    def get_user_permissions(self, obj=None):
-        return set(filter(self.has_perm, Permission.objects.all()))
-
-    def get_all_permissions(self, obj=None):
-        return self.get_user_permissions(obj).union(self.get_user_permissions(obj))
+            if self.clazz and self.clazz.grade.permission_group:
+                self.groups.add(self.clazz.grade.permission_group)
+        super().save(force_insert, force_update, using, update_fields)

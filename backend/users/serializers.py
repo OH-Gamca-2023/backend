@@ -30,7 +30,6 @@ class PermissionSerializer(serializers.Serializer):
         self.instance = {
             'staff': user.is_staff,
             'teacher': user.clazz.grade.is_teacher,
-            'admin': user.is_admin,
             'superuser': user.is_superuser,
             'type': user.type(),
             'profile_edit': [],
