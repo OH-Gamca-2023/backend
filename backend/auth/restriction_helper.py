@@ -2,7 +2,7 @@ from data.models import AuthRestriction
 
 
 def is_allowed(request, type, user=None, department=None):
-    if type not in ['registration', 'login']:
+    if type not in ['register', 'login']:
         raise Exception('Invalid type.')
 
     try:

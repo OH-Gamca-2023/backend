@@ -30,7 +30,7 @@ def handle_user_login(request, user, admin=False):
         
     msft_user = MicrosoftUser.objects.get(id=id)
     if not User.objects.filter(microsoft_user=msft_user).exists():
-        allowed, message = is_allowed(request, 'registration', None, msft_user.department)
+        allowed, message = is_allowed(request, 'register', None, msft_user.department)
         if not allowed:
             raise Exception(f'STRERROR: {message}')
         if allowed and message != "":
