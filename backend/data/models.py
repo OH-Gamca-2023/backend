@@ -138,3 +138,22 @@ class Alert(models.Model):
 
     def __str__(self):
         return f'{self.message} ({self.type})'
+
+
+class ProfileEditPermissions(models.Model):
+    user_type = models.CharField(max_length=20, primary_key=True)
+
+    username = models.BooleanField(default=False)
+    first_name = models.BooleanField(default=False)
+    last_name = models.BooleanField(default=False)
+    email = models.BooleanField(default=False)
+    phone_number = models.BooleanField(default=False)
+    password = models.BooleanField(default=False)
+
+    @staticmethod
+    def get(user):
+        type = user.type()
+        try:
+            return ProfileEditPermissions.objects.get(user_type=type)
+        except ProfileEditPermissions.DoesNotExist:
+            return ProfileEditPermissions.objects.get_or_create(user_type=type)[0]

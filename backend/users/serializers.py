@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.permissions import profile_edit_permission
+from data.models import ProfileEditPermissions
 from .models import User, Clazz, Grade
 
 
@@ -19,25 +19,29 @@ class ClazzSerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.Serializer):
     staff = serializers.BooleanField()
     teacher = serializers.BooleanField()
-    admin = serializers.BooleanField()
     superuser = serializers.BooleanField()
     type = serializers.CharField(max_length=100)
-    profile_edit = serializers.ListSerializer(child=serializers.CharField(max_length=100))
+    profile_edit = serializers.DictField()
     permissions = serializers.ListSerializer(child=serializers.CharField(max_length=100))
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        edit_permissions = ProfileEditPermissions.get(user)
         self.instance = {
             'staff': user.is_staff,
             'teacher': user.clazz.grade.is_teacher,
             'superuser': user.is_superuser,
             'type': user.type(),
-            'profile_edit': [],
-            'permissions': [(perm.content_type.app_label + '.' + perm.codename) for perm in user.get_all_permissions()],
+            'profile_edit': {
+                'username': edit_permissions.username,
+                'first_name': edit_permissions.first_name,
+                'last_name': edit_permissions.last_name,
+                'email': edit_permissions.email,
+                'phone_number': edit_permissions.phone_number,
+                'password': edit_permissions.password,
+            },
+            'permissions': user.get_all_permissions(),
         }
-
-        if user.type() in profile_edit_permission:
-            self.instance['profile_edit'] = profile_edit_permission[user.type()]
 
 
 class UserSerializer(serializers.ModelSerializer):

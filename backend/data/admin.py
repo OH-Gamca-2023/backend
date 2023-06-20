@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import Setting, AuthRestriction, Alert
+from .models import Setting, AuthRestriction, Alert, ProfileEditPermissions
 
 
 @admin.register(Setting)
@@ -35,3 +35,9 @@ class AlertAdmin(ModelAdmin):
             'fields': ['id', 'message', 'type', ('show_on_site', 'show_in_admin'), ('created_at', 'lasts_until'), 'active']
         }),
     ]
+
+
+@admin.register(ProfileEditPermissions)
+class ProfileEditPermissionsAdmin(ModelAdmin):
+    list_display = ['user_type', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'password']
+    list_editable = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'password']
