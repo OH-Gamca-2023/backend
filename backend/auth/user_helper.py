@@ -33,6 +33,8 @@ def handle_user_login(request, user, admin=False):
         allowed, message = is_allowed(request, 'registration', None, msft_user.department)
         if not allowed:
             raise Exception(f'STRERROR: {message}')
+        if allowed and message != "":
+            print(message)
         user_clazz = process_clazz(msft_user)
         User.objects.create(
             microsoft_user=msft_user,
@@ -52,6 +54,8 @@ def handle_user_login(request, user, admin=False):
     allowed, message = is_allowed(request, 'login', User.objects.get(microsoft_user=msft_user), msft_user.department)
     if not allowed:
         raise Exception(f'STRERROR: {message}')
+    if allowed and message != "":
+        print(message)
 
     django_user = User.objects.get(microsoft_user=msft_user)
 
