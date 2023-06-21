@@ -114,8 +114,9 @@ class User(AbstractUser):
                     self.groups.remove(old.clazz.grade.permission_group)
                 if self.clazz and self.clazz.grade.permission_group:
                     self.groups.add(self.clazz.grade.permission_group)
+            super().save(force_insert, force_update, using, update_fields)
         else:
             super().save(force_insert, force_update, using, update_fields)
             if self.clazz and self.clazz.grade.permission_group:
                 self.groups.add(self.clazz.grade.permission_group)
-        super().save(force_insert, force_update, using, update_fields)
+            super().save()
