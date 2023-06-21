@@ -108,8 +108,8 @@ class User(AbstractUser):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.id:
-            if 'clazz' in update_fields:
-                old = User.objects.get(id=self.id)
+            old = User.objects.get(id=self.id)
+            if old.clazz != self.clazz:
                 if old.clazz and old.clazz.grade.permission_group:
                     self.groups.remove(old.clazz.grade.permission_group)
                 if self.clazz and self.clazz.grade.permission_group:
