@@ -1,3 +1,5 @@
+import traceback
+
 from data.models import AuthRestriction
 
 
@@ -27,6 +29,6 @@ def is_allowed(request, type, user=None, department=None):
         return False, restriction.message
     except AuthRestriction.DoesNotExist:
         return True, f"Restriction {type} does not exist."
-    except Exception as e:
-        print(e)
-        return False, 'Nastala chyba pri overovaní prihlasovania.'
+    except:
+        traceback.print_exc()
+        return False, 'Nastala chyba pri povoľovaní prístupu.'

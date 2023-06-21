@@ -1,3 +1,5 @@
+import traceback
+
 from django.contrib import messages
 from django.contrib.auth import logout, login
 from django.http import HttpResponseRedirect
@@ -83,7 +85,7 @@ class OauthCallbackView(KnoxLoginView):
                 url_params = '?status=error&error=' + str(response.data)
                 return HttpResponseRedirect(settings['fe_redirect'] + url_params)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
             # If something goes wrong, logout the user
             remove_user_and_token(request)
