@@ -38,9 +38,9 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['put', 'delete'], name='Primary organisers')
     def primary_organisers(self, request, pk=None):
-        if not self.request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not self.request.user.clazz.grade.is_organiser and not self.request.user.has_perm('disciplines.modify_people'):
+        if not request.user.clazz.grade.is_organiser and not request.user.has_perm('disciplines.modify_people'):
             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
         discipline = self.get_object()
@@ -49,35 +49,39 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
             organiser = request.data['organiser']
             if organiser is None:
                 return Response({'detail': 'Organiser to add cannot be null.'}, status=400)
+            if organiser == 'me':
+                organiser = request.user.pk
 
             organiser = User.objects.filter(pk=organiser).first()
             if organiser is None:
                 return Response({'detail': 'Target user does not exist.'}, status=404)
 
-            if organiser.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
+            if organiser.pk != request.user.pk and not request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to assign other users as organiser.'}, status=403)
 
             if not organiser.clazz.grade.is_organiser:
                 return Response({'detail': 'Target user is not an organiser.'}, status=400)
 
             if organiser in discipline.primary_organisers.all():
-                return Response(DisciplineSerializer(discipline).data)
+                return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
             discipline.primary_organisers.add(organiser)
             discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
+            return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
         elif request.method == 'DELETE':
 
             organiser = request.data['organiser']
             if organiser is None:
                 return Response({'detail': 'Organiser to remove cannot be null.'}, status=400)
+            if organiser == 'me':
+                organiser = request.user.pk
 
             organiser = User.objects.filter(pk=organiser).first()
             if organiser is None:
                 return Response({'detail': 'Target user does not exist.'}, status=404)
 
-            if organiser.pk != self.request.user.pk and not self.request.user.has_perm('disciplines.modify_people'):
+            if organiser.pk != request.user.pk and not request.user.has_perm('disciplines.modify_people'):
                 return Response({'detail': 'You do not have permission to remove other users from organiser.'}, status=403)
 
             if organiser not in discipline.primary_organisers.all():
@@ -85,7 +89,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
             discipline.primary_organisers.remove(organiser)
             discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
+            return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
     @action(detail=True, methods=['put', 'delete'], name='Teacher supervisors')
     def teacher_supervisors(self, request, pk=None):
@@ -112,11 +116,11 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
                 return Response({'detail': 'Target user is not a teacher.'}, status=400)
 
             if teacher in discipline.teacher_supervisors.all():
-                return Response(DisciplineSerializer(discipline).data)
+                return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
             discipline.teacher_supervisors.add(teacher)
             discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
+            return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
         elif request.method == 'DELETE':
 
@@ -136,7 +140,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
 
             discipline.teacher_supervisors.remove(teacher)
             discipline.save()
-            return Response(DisciplineSerializer(discipline).data)
+            return Response(DisciplineSerializer(discipline, context={'request': request}).data)
 
 
 class ResultsViewSet(viewsets.ReadOnlyModelViewSet):
