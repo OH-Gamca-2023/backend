@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from data.models import Alert, Setting
-from data.serializers import AlertSerializer, SettingSerializer
+from backend.data.models import Alert, Setting
+from backend.data.serializers import AlertSerializer, SettingSerializer
 
 
 class AlertViewSet(viewsets.ReadOnlyModelViewSet):

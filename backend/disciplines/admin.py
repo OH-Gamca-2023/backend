@@ -2,11 +2,11 @@ from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.urls import reverse, path
+from django.urls import reverse
 
 from .models import *
-from kalendar.generator import generate
-from .publishing import DetailsPublishView, ResultsPublishView
+from backend.kalendar.generator import generate
+# from .publishing import DetailsPublishView, ResultsPublishView
 
 
 @admin.register(Category)
@@ -31,7 +31,7 @@ class DisciplineAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'target_grades_str', 'date', 'time', 'date_published', 'details_published',
                     'results_published', 'result_sets')
     list_filter = ('date_published', 'details_published', 'category', 'target_grades')
-    search_fields = ('name', 'description')
+    search_fields = ('name', 'details')
     date_hierarchy = 'date'
 
     fieldsets = (
@@ -42,7 +42,13 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location', 'volatile_date')
+            'fields': ('date', 'time', 'location')
+        }),
+        ('Organising', {
+            'fields': ('primary_organisers', 'teacher_supervisors'),
+            'classes': ('collapse',),
+            'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
+                           'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
         }),
         ('Publishing', {
             'fields': ('date_published', 'details_published', 'results_published')
@@ -55,15 +61,25 @@ class DisciplineAdmin(admin.ModelAdmin):
 
     add_fieldsets = (
         (None, {
-            'fields': ('name', 'short_name', 'description')
+            'fields': ('name', 'short_name', 'details')
         }),
         ('Categorisation', {
-            'fields': ('category', 'tags', 'target_grades')
+            'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location', 'volatile_date')
+            'fields': ('date', 'time', 'location')
         }),
     )
+
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            return self.fieldsets
+        return self.add_fieldsets
+
+    def get_inlines(self, request, obj):
+        if obj:
+            return self.inlines
+        return []
 
     @admin.display(description='Result sets')
     def result_sets(self, obj):
@@ -85,14 +101,13 @@ class DisciplineAdmin(admin.ModelAdmin):
             else:
                 modified = modified[0] if modified else None
                 if modified:
-                    setattr(obj, modified, False)
+                    messages.error(request, 'Publishing is temporarily disabled while a new system is being developed')
+                    modified = None
 
                     if modified == 'date_published':
                         if not request.user.has_perm('disciplines.publish_details'):
                             messages.error(request, 'You do not have permission to publish details')
                             modified = None
-                        else:
-                            obj.date_published = True
                     elif modified == 'details_published':
                         if not request.user.has_perm('disciplines.publish_details'):
                             messages.error(request, 'You do not have permission to publish details')
@@ -134,15 +149,19 @@ class DisciplineAdmin(admin.ModelAdmin):
                 readonly.append('details_published')
             if obj.results_published:
                 readonly.append('results_published')
+
+        if not request.user.has_perm('disciplines.modify_people'):
+            readonly += ['primary_organisers', 'teacher_oversight']
+
         return readonly
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()), name='disciplines_publish_details'),
-            path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()), name='disciplines_publish_results'),
-        ]
-        return custom_urls + urls
+    # def get_urls(self):
+    #     urls = super().get_urls()
+    #     custom_urls = [
+    #         path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()), name='disciplines_publish_details'),
+    #         path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()), name='disciplines_publish_results'),
+    #     ]
+    #     return custom_urls + urls
 
 
 class PlacementInline(TabularInline):

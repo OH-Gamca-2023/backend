@@ -1,12 +1,11 @@
 import random
-import re
 
 from django.db import models
 from mdeditor.fields import MDTextField
 
 from backend import settings
-from disciplines.models import Discipline
-from users.models import Grade
+from backend.disciplines.models import Discipline
+from backend.users.models import Grade
 
 
 class Tag(models.Model):
@@ -21,10 +20,11 @@ class Tag(models.Model):
         verbose_name_plural = 'tagy'
         verbose_name = 'tag'
 
-    def delete(self, using=None, keep_parents=False):
-        if self.special is not None:
-            raise Exception("Cannot delete special tag.")
-        super().delete(using, keep_parents)
+        permissions = [
+            ('add_special_tag', 'Can add special tag'),
+            ('change_special_tag', 'Can change special tag'),
+            ('delete_special_tag', 'Can delete special tag')
+        ]
 
 
 def gen_id():
@@ -41,13 +41,11 @@ class Post(models.Model):
         , on_delete=models.SET_NULL, null=True, blank=True, related_name='posts', verbose_name="Autor")
     date = models.DateTimeField("Dátum", auto_now_add=True)
 
-    related_disciplines = models.ManyToManyField(Discipline, blank=True, related_name='posts_for_discipline',
+    related_disciplines = models.ManyToManyField('disciplines.Discipline', blank=True, related_name='posts_for_discipline',
                                                  verbose_name="Súvisiace disciplíny")
-    affected_grades = models.ManyToManyField(Grade, blank=True, related_name='posts_for_category',
+    affected_grades = models.ManyToManyField('users.Grade', blank=True, related_name='posts_for_category',
                                              verbose_name="Ovplyvnené stupne")
     tags = models.ManyToManyField(Tag, blank=True, related_name='posts_for_tag', verbose_name="Tagy")
-
-    disable_comments = models.BooleanField("Vypnuté komentáre", default=False)
 
     @property
     def discipline_categories(self):
@@ -64,54 +62,7 @@ class Post(models.Model):
         verbose_name_plural = 'príspevky'
         verbose_name = 'príspevok'
 
-    @property
-    def parsed_content(self):
-        # look for /%disciplines\[([^\]]+)\]\.([^\[]+)(?:\[([^\]]+)\])?%/g
-        # get the groups as discipline_id, property, property_args
-        content = self.content
-        regex = r"%disciplines\[([^]]+)]\.([^\[]+)(?:\[([^]]+)])?%"
-        match = re.search(regex, content)
-        while match is not None:
-            discipline_id = match.group(1)
-            property = match.group(2)
-            property_args = match.group(3)
-            discipline = Discipline.objects.get(id=discipline_id)
-            if property == "details":
-                # replace match with discipline.details
-                content = content[:match.start()] + discipline.details + content[match.end():]
-            elif property == "results":
-                results = ""
-                if property_args is None:
-                    l = []
-                    for result in discipline.result_set.all():
-                        l.append(result.markdown)
-                    results = "\n".join(l)
-                else:
-                    result = discipline.result_set.get(id=property_args)
-                    results = result.markdown
-                content = content[:match.start()] + results + content[match.end():]
-
-            match = re.search(regex, content)
-        return content
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name="Príspevok")
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL
-        , on_delete=models.SET_NULL, null=True, blank=True, related_name='comments', verbose_name="Autor")
-    content = models.CharField("Obsah", max_length=10000, help_text="Ak je autor príspevku organizátor, obsah bude "
-                                                                    "prehnaný cez Markdown.")
-    date = models.DateTimeField("Dátum", auto_now_add=True)
-
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children',
-                               verbose_name="Rodičovský komentár")
-
-    def __str__(self):
-        if self.author is None:
-            return "Komentár od administátora"
-        return "Komentár od " + self.author.username
-
-    class Meta:
-        verbose_name_plural = 'komentáre'
-        verbose_name = 'komentár'
+        permissions = [
+            ('change_others_post', 'Can change posts of other users'),
+            ('delete_others_post', 'Can delete posts of other users')
+        ]

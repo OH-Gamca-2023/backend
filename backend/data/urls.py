@@ -1,6 +1,6 @@
 from rest_framework.routers import SimpleRouter
 
-from data.views import AlertViewSet, SettingViewSet
+from backend.data.views import AlertViewSet, SettingViewSet
 
 router = SimpleRouter()
 router.register('alerts', AlertViewSet, basename='alerts')

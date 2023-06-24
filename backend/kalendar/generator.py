@@ -1,21 +1,23 @@
 import json
 import random
-from datetime import datetime, time
 import time as time_p
+from datetime import time
 
-from disciplines.models import Discipline, Category
-from users.models import Grade
+from django.utils import timezone
+
+from backend.disciplines.models import Discipline, Category
+from backend.users.models import Grade
 from .models import GenerationEvent, Calendar
 
 
 
 def generate(request, cause):
     generation_event = GenerationEvent()
-    generation_event.initiation_time = datetime.now()
+    generation_event.initiation_time = timezone.now()
     generation_event.initiator = request.user
     generation_event.cause = cause
 
-    generation_event.start = datetime.now()
+    generation_event.start = timezone.now()
     try:
         cal_id = "".join(random.choices("0123456789abcdef", k=8))
 
@@ -112,7 +114,7 @@ def generate(request, cause):
             }
         )
 
-        generation_event.end = datetime.now()
+        generation_event.end = timezone.now()
         generation_event.duration = generation_event.end - generation_event.start
         generation_event.was_successful = True
         generation_event.result = "generated " + cal_id
@@ -120,7 +122,7 @@ def generate(request, cause):
         generation_event.save()
 
     except Exception as e:
-        generation_event.end = datetime.now()
+        generation_event.end = timezone.now()
         generation_event.duration = generation_event.end - generation_event.start
         generation_event.was_successful = False
         generation_event.result = str(e)

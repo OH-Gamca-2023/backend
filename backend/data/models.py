@@ -78,8 +78,6 @@ class AuthRestriction(models.Model):
                                            'Multiple can be separated by commas.')
     bypass_staff = models.BooleanField(default=False,
                                        help_text='Whether staff members can bypass this restriction.')
-    bypass_admin = models.BooleanField(default=True,
-                                       help_text='Whether administrators can bypass this restriction.')
     bypass_superuser = models.BooleanField(default=True,
                                            help_text='Whether superusers can bypass this restriction.')
     bypass_department = models.CharField(max_length=1000, blank=True,
@@ -140,3 +138,22 @@ class Alert(models.Model):
 
     def __str__(self):
         return f'{self.message} ({self.type})'
+
+
+class ProfileEditPermissions(models.Model):
+    user_type = models.CharField(max_length=20, primary_key=True)
+
+    username = models.BooleanField(default=False)
+    first_name = models.BooleanField(default=False)
+    last_name = models.BooleanField(default=False)
+    email = models.BooleanField(default=False)
+    phone_number = models.BooleanField(default=False)
+    password = models.BooleanField(default=False)
+
+    @staticmethod
+    def get(user):
+        type = user.type()
+        try:
+            return ProfileEditPermissions.objects.get(user_type=type)
+        except ProfileEditPermissions.DoesNotExist:
+            return ProfileEditPermissions.objects.get_or_create(user_type=type)[0]

@@ -21,23 +21,23 @@ from . import settings
 from .views import *
 
 api_urls = [
-    path('auth/', include('auth.urls')),
-    path('user/', include('users.urls')),
+    path('auth/', include('backend.auth.urls')),
+    path('user/', include('backend.users.urls')),
     path('status/', StatusView.as_view(), name='status'),
-    path('disciplines/', include('disciplines.urls')),
-    path('calendar/', include('kalendar.urls')),
-    path('posts/', include('posts.urls')),
-    path('ciphers/', include('ciphers.urls')),
-    path('data/', include('data.urls'))
+    path('disciplines/', include('backend.disciplines.urls')),
+    path('calendar/', include('backend.kalendar.urls')),
+    path('posts/', include('backend.posts.urls')),
+    path('ciphers/', include('backend.ciphers.urls')),
+    path('data/', include('backend.data.urls'))
 ]
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('jet/', include('jet.urls', 'jet')),
-    # path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('api/', include(api_urls)),
     path('', home, name='home'),
     path(r'mdeditor/', include('mdeditor.urls'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

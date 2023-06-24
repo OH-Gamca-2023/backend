@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from posts.models import Tag, Post
-from users.serializers import UserSerializer
+from backend.posts.models import Tag, Post
+from backend.users.serializers import UserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -11,10 +11,8 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = UserSerializer(hide_confidential=True)
-    content = serializers.CharField(source='parsed_content', read_only=True, trim_whitespace=False)
+    author = UserSerializer(hide_personal=True)
 
     class Meta:
         model = Post
-        fields = ('id', 'title', 'content', 'author', 'date', 'related_disciplines', 'affected_grades', 'tags',
-                  'disable_comments')
+        fields = ('id', 'title', 'content', 'author', 'date', 'related_disciplines', 'affected_grades', 'tags')

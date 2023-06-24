@@ -1,8 +1,6 @@
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-from data.permissions import admin_module_permissions, organizer_module_permissions, default_module_permissions, matches, \
-    blacklist, organizer, admin, default, force_blacklist
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Grade(models.Model):
@@ -17,6 +15,11 @@ class Grade(models.Model):
     competing = models.BooleanField("Súťažná?", default=True)
     cipher_competing = models.BooleanField("Súťaží v online šifrovačke?", default=False)
 
+    is_organiser = models.BooleanField("Je organizátorská?", default=False)
+    is_teacher = models.BooleanField("Je učiteľská?", default=False)
+
+    permission_group = models.ForeignKey('auth.Group', on_delete=models.SET_NULL, null=True, blank=True)
+
     class Meta:
         verbose_name_plural = 'stupne'
         verbose_name = 'stupeň'
@@ -30,7 +33,7 @@ class Grade(models.Model):
 
 class Clazz(models.Model):
     name = models.CharField("Názov", max_length=100)
-    grade = models.ForeignKey(Grade, on_delete=models.CASCADE, verbose_name="Stupeň", related_name="classes")
+    grade = models.ForeignKey('users.Grade', on_delete=models.CASCADE, verbose_name="Stupeň", related_name="classes")
     is_fake = models.BooleanField("Je nesúťažná", default=False)
     microsoft_department = models.CharField(max_length=100, null=True, blank=True)
 
@@ -66,7 +69,7 @@ class MicrosoftUser(models.Model):
 
 
 class User(AbstractUser):
-    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, null=True, blank=True)
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, null=True, blank=True)
 
     username = models.CharField(
         "Používateľské meno",
@@ -78,19 +81,22 @@ class User(AbstractUser):
         },
     )
 
-    is_admin = models.BooleanField("Administátor", default=False,
-                                      help_text="Používateľ je administrátorom. Administrátori majú viac práv ako "
-                                                "štandardní organizátori.")
+    phone_number = PhoneNumberField("Telefónne číslo", null=True, blank=True)
 
     microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True,
                                           verbose_name="Microsoft používateľ")
 
+    individual_cipher_solving = models.BooleanField("Môže riešiť šifrovačku individuálne", default=False, help_text=
+                                                    "Používateľ môže riešiť šifrovačku individuálne, bez priradenia do " 
+                                                    "triedy. Ak trieda používateľa súťaží v online šifrovačke, táto "
+                                                    "možnosť nemá žiadny efekt.")
+
     def type(self):
-        if self.is_superuser or self.is_admin:
+        if self.is_superuser:
             return 'admin'
-        elif self.clazz.grade.name == 'Organizátori':
-            return 'organizer'
-        elif self.clazz.grade.name == 'Učitelia':
+        elif self.clazz.grade.is_organiser:
+            return 'organiser'
+        elif self.clazz.grade.is_teacher:
             return 'teacher'
         elif self.clazz.grade.name == 'Alumni':
             return 'alumni'
@@ -100,52 +106,17 @@ class User(AbstractUser):
     def has_password(self):
         return self.password != ''
 
-    def has_perm(self, perm, obj=None):
-        if not self.is_active:
-            return False
-
-        if isinstance(perm, Permission):
-            perm = perm.content_type.app_label + '.' + perm.codename
-
-        if matches(force_blacklist, perm):
-            return False
-
-        if self.is_superuser:
-            return True
-        elif super().has_perm(perm, obj):
-            return True
-
-        if matches(blacklist, perm):
-            return False
-
-        if self.is_admin:
-            if matches(admin, perm):
-                return True
-
-        if self.is_staff:
-            if matches(organizer, perm):
-                return True
-
-        return matches(default, perm)
-
-    def has_module_perms(self, app_label):
-        if self.is_superuser:
-            return True
-        elif not self.is_active:
-            return False
-
-        if self.is_admin:
-            return app_label in admin_module_permissions
-        elif self.is_staff:
-            return app_label in organizer_module_permissions
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.id:
+            old = User.objects.get(id=self.id)
+            if old.clazz != self.clazz:
+                if old.clazz and old.clazz.grade.permission_group:
+                    self.groups.remove(old.clazz.grade.permission_group)
+                if self.clazz and self.clazz.grade.permission_group:
+                    self.groups.add(self.clazz.grade.permission_group)
+            super().save(force_insert, force_update, using, update_fields)
         else:
-            return app_label in default_module_permissions or super().has_module_perms(app_label)
-
-    def has_perms(self, perm_list, obj=None):
-        return all(self.has_perm(perm, obj) for perm in perm_list)
-
-    def get_user_permissions(self, obj=None):
-        return set(filter(self.has_perm, Permission.objects.all()))
-
-    def get_all_permissions(self, obj=None):
-        return self.get_user_permissions(obj).union(self.get_user_permissions(obj))
+            super().save(force_insert, force_update, using, update_fields)
+            if self.clazz and self.clazz.grade.permission_group:
+                self.groups.add(self.clazz.grade.permission_group)
+            super().save()

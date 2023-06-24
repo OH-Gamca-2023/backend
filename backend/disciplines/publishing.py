@@ -3,9 +3,9 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.urls import reverse
 from django.views.generic.edit import CreateView
 
-from disciplines.models import Discipline
-from posts.admin import TagAdmin
-from posts.models import Post, Tag
+from backend.disciplines.models import Discipline
+from backend.posts.admin import TagAdmin
+from backend.posts.models import Post, Tag
 
 
 class PublishView(PermissionRequiredMixin, CreateView):

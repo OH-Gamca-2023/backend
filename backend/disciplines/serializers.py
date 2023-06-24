@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from disciplines.models import Category, Discipline, Result, Placement
+from backend.disciplines.models import Category, Discipline, Result, Placement
+from backend.users.serializers import UserSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -10,10 +11,27 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class DisciplineSerializer(serializers.ModelSerializer):
+    primary_organisers = UserSerializer(many=True, read_only=True, hide_confidential=True)
+    teacher_supervisors = UserSerializer(many=True, read_only=True, hide_confidential=True)
+
     class Meta:
         model = Discipline
-        fields = ('id', 'name', 'short_name', 'details', 'date', 'time', 'location', 'volatile_date', 'category',
-                  'target_grades', 'is_public', 'date_published', 'details_published', 'results_published')
+        fields = ('id', 'name', 'short_name', 'details', 'date', 'time', 'location', 'category',
+                  'target_grades', 'is_public', 'date_published', 'details_published', 'results_published',
+                  'primary_organisers', 'teacher_supervisors')
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # if user is logged in
+        if not self.context['request'].user.is_authenticated:
+            fields.pop('primary_organisers')
+            fields.pop('teacher_supervisors')
+        elif not (self.context['request'].user.is_staff or self.context['request'].user.clazz.grade.is_teacher or \
+                    self.context['request'].user.clazz.grade.is_organiser):
+            fields.pop('primary_organisers')
+            fields.pop('teacher_supervisors')
+
+        return fields
 
 
 class PlacementSerializer(serializers.ModelSerializer):
@@ -27,4 +45,4 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = ('id', 'discipline', 'name', 'grades', 'placements', 'markdown')
+        fields = ('id', 'discipline', 'name', 'grades', 'placements')

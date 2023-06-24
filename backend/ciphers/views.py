@@ -1,9 +1,9 @@
 from django.utils import timezone
 from rest_framework import permissions, viewsets, throttling
 
-from backend.utils import ReadCreateViewSet
-from ciphers.models import Cipher, Submission
-from ciphers.serializers import CipherSerializer, SubmissionSerializer
+from backend.users.utils import ReadCreateViewSet
+from backend.ciphers.models import Cipher, Submission
+from backend.ciphers.serializers import CipherSerializer, SubmissionSerializer
 
 
 class CiphersViewSet(viewsets.ReadOnlyModelViewSet):

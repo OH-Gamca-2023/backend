@@ -11,16 +11,19 @@ services:
 
   web:
     build:
-        context: .
+      context: .
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/:/app/backend/
-    environment:
-      - DEBUG=True
+      - ./:/app/
     depends_on:
       - db
-    command: "./start_dev.sh"
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=psql://postgres:postgres@db/postgres
+    env_file:
+      - .env
+    command: "./entrypoint.sh dev"
 
 volumes:
   postgres_data:

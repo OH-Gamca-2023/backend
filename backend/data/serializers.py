@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import Alert, Setting
+from backend.data.models import Alert, Setting
 
 
 class AlertSerializer(serializers.ModelSerializer):

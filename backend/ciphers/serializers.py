@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from ciphers.models import Cipher, Submission
-from users.models import Clazz
+from backend.ciphers.models import Cipher, Submission
 
 
 class CipherSerializer(serializers.ModelSerializer):
@@ -18,25 +17,18 @@ class CipherSerializer(serializers.ModelSerializer):
         if instance.hint_visible:
             ret['hint_text'] = instance.hint_text
 
-        ret['classes'] = {}
+        ret['data'] = None
         if self.context['request'].user.is_authenticated:
-            if self.context['request'].user.is_staff:
-                for clazz in Clazz.objects.filter(grade__cipher_competing=True):
-                    ret['classes'][clazz.id] = {
-                        'solved': instance.solved_by(clazz),
-                        'after_hint': instance.solved_after_hint_by(clazz),
-                        'attempts': instance.attempts_by(clazz)
-                    }
 
             clazz = self.context['request'].user.clazz
             if clazz.grade.cipher_competing:
-                ret['classes'][clazz.id] = {
+                ret['data'] = {
                     'solved': instance.solved_by(clazz),
                     'after_hint': instance.solved_after_hint_by(clazz),
                     'attempts': instance.attempts_by(clazz)
                 }
             else:
-                ret['classes'][clazz.id] = {
+                ret['data'] = {
                     'solved': instance.solved_by(self.context['request'].user, True),
                     'after_hint': instance.solved_after_hint_by(self.context['request'].user, True),
                     'attempts': instance.attempts_by(self.context['request'].user, True)
@@ -63,6 +55,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
                 if data['cipher'].solved_by(self.context['request'].user.clazz):
                     raise serializers.ValidationError('You have already solved this cipher.')
             else:
+                if not self.context['request'].user.individual_cipher_solving:
+                    raise serializers.ValidationError('You are not allowed to compete individually.')
+
                 if data['cipher'].solved_by(self.context['request'].user, True):
                     raise serializers.ValidationError('You have already solved this cipher.')
 
