@@ -5,8 +5,8 @@ from datetime import time
 
 from django.utils import timezone
 
-from disciplines.models import Discipline, Category
-from users.models import Grade
+from backend.disciplines.models import Discipline, Category
+from backend.users.models import Grade
 from .models import GenerationEvent, Calendar
 
 

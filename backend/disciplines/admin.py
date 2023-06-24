@@ -2,10 +2,10 @@ from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.urls import reverse, path
+from django.urls import reverse
 
 from .models import *
-from kalendar.generator import generate
+from backend.kalendar.generator import generate
 # from .publishing import DetailsPublishView, ResultsPublishView
 
 

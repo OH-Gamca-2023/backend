@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from disciplines.models import Category, Discipline, Result, Placement
-from users.serializers import UserSerializer
+from backend.disciplines.models import Category, Discipline, Result, Placement
+from backend.users.serializers import UserSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):

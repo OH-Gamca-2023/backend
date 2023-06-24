@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import ProfileEditPermissions
+from backend.data.models import ProfileEditPermissions
 from .models import User, Clazz, Grade
 
 

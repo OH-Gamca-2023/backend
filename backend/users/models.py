@@ -33,7 +33,7 @@ class Grade(models.Model):
 
 class Clazz(models.Model):
     name = models.CharField("Názov", max_length=100)
-    grade = models.ForeignKey(Grade, on_delete=models.CASCADE, verbose_name="Stupeň", related_name="classes")
+    grade = models.ForeignKey('users.Grade', on_delete=models.CASCADE, verbose_name="Stupeň", related_name="classes")
     is_fake = models.BooleanField("Je nesúťažná", default=False)
     microsoft_department = models.CharField(max_length=100, null=True, blank=True)
 
@@ -69,7 +69,7 @@ class MicrosoftUser(models.Model):
 
 
 class User(AbstractUser):
-    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, null=True, blank=True)
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, null=True, blank=True)
 
     username = models.CharField(
         "Používateľské meno",

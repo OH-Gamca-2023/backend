@@ -14,23 +14,23 @@ from datetime import timedelta
 from pathlib import Path
 
 from django.utils import timezone
+import environ
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY", "django-insecure-g)d0f!f@6r&^e!y!)4rxosy=aczx1&)1+vt8ysevp7ajps#m14"
+SECRET_KEY = env(
+    "SECRET_KEY", default="django-insecure-g)d0f!f@6r&^e!y!)4rxosy=aczx1&)1+vt8ysevp7ajps#m14"
 )
-DEBUG = bool(os.environ.get("DEBUG", False))
+DEBUG = env("DEBUG", default=False)
 
-
-hosts = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
-if hosts:
-    CSRF_TRUSTED_ORIGINS = hosts.split(",")
-elif DEBUG:
+if DEBUG:
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
         "http://localhost:5173",
@@ -38,36 +38,34 @@ elif DEBUG:
         "https://oh.gamca.sk",
         "https://oh.jaksia.xyz",
     ]
+else:
+    CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS", default=[])
 
-hosts = os.environ.get("ALLOWED_HOSTS", "")
-if hosts:
-    ALLOWED_HOSTS = hosts.split(",")
-elif DEBUG:
+if DEBUG:
     ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = env("ALLOWED_HOSTS", default=[])
 
-hosts = os.environ.get("CORS_ALLOWED_ORIGINS", "")
-if hosts:
-    CORS_ALLOWED_ORIGINS = hosts.split(",")
-elif DEBUG:
+if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS", default=[])
 
 # Application definition
 
 INSTALLED_APPS = [
-    'users.apps.UsersConfig',
-    'disciplines.apps.DisciplinesConfig',
-    'posts.apps.PostsConfig',
-    'ciphers.apps.CiphersConfig',
-    'kalendar.apps.CalendarConfig',
-    'data.apps.DataConfig',
-    # 'jet.dashboard',
-    # 'jet',
-    'admin.apps.OHGamcaAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'backend.users',
+    'backend.disciplines',
+    'backend.posts',
+    'backend.ciphers',
+    'backend.kalendar',
+    'backend.data',
+    'admin.apps.OHGamcaAdminConfig',
     'rest_framework',
     'knox',
     'django_filters',
@@ -76,6 +74,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'adminsortable2',
     'django_extensions',
+    'django_probes',
     'phonenumber_field',
 ]
 
@@ -98,8 +97,7 @@ DJANGO_ADMIN_LOGS_DELETABLE = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,14 +116,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "postgres"),
-        "USER": os.environ.get("DB_USER", "postgres"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
-        "HOST": os.environ.get("DB_HOST", "db"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
-    }
+    "default": env.db()
 }
 
 # Password validation
@@ -161,11 +152,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'admin_static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'backend' / 'static']
 
+DEFAULT_FILE_STORAGE = 'backend.storages.OverwriteFileSystemStorage'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_ROOT = BASE_DIR / 'uploads'
-MEDIA_URL = '/uploads/'
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -221,43 +213,6 @@ REST_KNOX = {
     'AUTH_HEADER_PREFIX': 'Bearer',
 }
 
-# Add this to your settings.py to customize applications and models list
-JET_SIDE_MENU_ITEMS = [
-    {'label': 'Administrácia', 'app_label': 'data', 'items': [
-        {'name': 'authrestriction', 'label': 'Obmedzenia prihlasovania'},
-        {'name': 'setting', 'label': 'Nastavenia'},
-        {'name': 'admin.logentry', 'label': 'Logy', 'url': {
-            'type': 'reverse',
-            'name': 'admin:admin_logentry_changelist',
-        }}
-    ]},
-    {'label': 'Disciplíny', 'app_label': 'disciplines', 'items': [
-        {'name': 'discipline'},
-        {'name': 'result'},
-        {'name': 'category'},
-    ]},
-    {'label': 'Príspevky', 'app_label': 'posts', 'items': [
-        {'name': 'post'},
-        {'name': 'tag'},
-    ]},
-    {'label': 'Šifry', 'app_label': 'ciphers', 'items': [
-        {'name': 'cipher'},
-        {'name': 'submission'},
-    ]},
-    {'label': 'Kalendár', 'app_label': 'kalendar', 'items': [
-        {'name': 'calendar', 'label': 'Dáta kalendára'},
-        {'name': 'generationevent', 'label': 'Záznamy generovania'},
-    ]},
-    {'label': 'Používatelia', 'app_label': 'users', 'items': [
-        {'name': 'user'},
-        {'name': 'microsoftuser'},
-        {'name': 'grade'},
-        {'name': 'clazz'},
-        {'name': 'knox.authtoken', 'label': 'Prístupové kľúče'},
-        {'name': 'auth.group', 'label': 'Skupiny'},
-    ]},
-]
-
 CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB
 CIPHERS_ALLOWED_FILE_TYPES = ['.pdf', '.txt', '.jpg', '.jpeg', '.png']
 
@@ -272,3 +227,13 @@ CSP_FRAME_SRC = ("'self'", "localhost:5173/", "localhost/", "localhost:8000/", "
 PHONENUMBER_DB_FORMAT = 'E164'
 PHONENUMBER_DEFAULT_REGION = 'SK'
 PHONENUMBER_DEFAULT_FORMAT = 'INTERNATIONAL'
+
+OAUTH_APP_ID = env("OAUTH_APP_ID", default="b4c732ad-f922-452d-8515-633faccca296")
+OAUTH_REDIRECT = env("OAUTH_REDIRECT", default="http://localhost:8000/api/auth/callback")
+OAUTH_FE_REDIRECT = env("OAUTH_DE_REDIRECT", default="http://localhost:5173/auth/login")
+OAUTH_APP_SECRET = env("OAUTH_APP_SECRET")
+
+OAUTH_ADMIN_REDIRECT = env("OAUTH_ADMIN_REDIRECT", default="http://localhost:8000/api/auth/admin/callback")
+OAUTH_ADMIN_LOGOUT = env("OAUTH_ADMIN_LOGOUT", default="http://localhost:8000/admin/logout")
+OAUTH_ADMIN_LOGIN_URL = env("OAUTH_ADMIN_LOGIN_URL", default="http://localhost:8000/api/auth/admin/login")
+OAUTH_ADMIN_LOGIN_REDIRECT = env("OAUTH_ADMIN_LOGIN_REDIRECT", default="http://localhost:8000/admin")

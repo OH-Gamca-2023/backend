@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 
-from posts.models import Tag, Post
-from posts.serializers import TagSerializer, PostSerializer
+from backend.posts.models import Tag, Post
+from backend.posts.serializers import TagSerializer, PostSerializer
 
 
 class TagsView(generics.ListAPIView):

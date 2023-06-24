@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.db.models import Q
 from django.utils import timezone
 
-from data.models import Alert
+from backend.data.models import Alert
 
 
 class OHGamcaAdminSite(admin.AdminSite):

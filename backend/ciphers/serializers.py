@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ciphers.models import Cipher, Submission
+from backend.ciphers.models import Cipher, Submission
 
 
 class CipherSerializer(serializers.ModelSerializer):

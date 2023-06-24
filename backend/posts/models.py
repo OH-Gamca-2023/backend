@@ -1,12 +1,11 @@
 import random
-import re
 
 from django.db import models
 from mdeditor.fields import MDTextField
 
 from backend import settings
-from disciplines.models import Discipline
-from users.models import Grade
+from backend.disciplines.models import Discipline
+from backend.users.models import Grade
 
 
 class Tag(models.Model):
@@ -42,9 +41,9 @@ class Post(models.Model):
         , on_delete=models.SET_NULL, null=True, blank=True, related_name='posts', verbose_name="Autor")
     date = models.DateTimeField("Dátum", auto_now_add=True)
 
-    related_disciplines = models.ManyToManyField(Discipline, blank=True, related_name='posts_for_discipline',
+    related_disciplines = models.ManyToManyField('disciplines.Discipline', blank=True, related_name='posts_for_discipline',
                                                  verbose_name="Súvisiace disciplíny")
-    affected_grades = models.ManyToManyField(Grade, blank=True, related_name='posts_for_category',
+    affected_grades = models.ManyToManyField('users.Grade', blank=True, related_name='posts_for_category',
                                              verbose_name="Ovplyvnené stupne")
     tags = models.ManyToManyField(Tag, blank=True, related_name='posts_for_tag', verbose_name="Tagy")
 

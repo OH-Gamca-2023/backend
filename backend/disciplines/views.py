@@ -5,10 +5,10 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from users.models import User
+from backend.users.models import User
 
-from disciplines.models import Category, Discipline, Result
-from disciplines.serializers import CategorySerializer, DisciplineSerializer, ResultSerializer
+from backend.disciplines.models import Category, Discipline, Result
+from backend.disciplines.serializers import CategorySerializer, DisciplineSerializer, ResultSerializer
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):

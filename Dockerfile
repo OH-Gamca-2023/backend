@@ -1,36 +1,17 @@
 FROM python:3.11.3-slim-bullseye
 WORKDIR /app
-RUN useradd --create-home appuser
+RUN useradd --create-home appuser \
+    && chmod 777 /app
 
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONFAULTHANDLER 1
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PATH=/home/appuser/.local/bin:$PATH
-
-RUN apt update \
-    && apt -y upgrade \
-    && apt -y clean \
-    && rm -rf /var/lib/apt/lists/*
 
 USER appuser
 
 RUN pip install --upgrade pipenv
 COPY Pipfile Pipfile.lock ./
-RUN pipenv install --system --dev --deploy
+RUN pipenv install --system --deploy
 
-COPY backend ./backend
-
-USER root
-
-RUN chown -R appuser ./backend \
-    && chmod 754 -R ./backend
-
-USER appuser
-
-WORKDIR /app/backend
-
-RUN python manage.py collectstatic --noinput
-
-VOLUME /app/backend/staticfiles
-VOLUME /app/backend/uploads
-
-CMD python manage.py migrate && gunicorn backend.wsgi --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --workers 4
+COPY --chown=appuser:appuser . /app/
+CMD ["/app/entrypoint.sh"]

@@ -2,14 +2,7 @@ import os
 import msal
 import yaml
 
-stream = open('data/oauth_settings.yml', 'r')
-settings = yaml.load(stream, yaml.SafeLoader)
-keys = ['app_id', 'redirect', 'fe_redirect', 'authority', 'admin_redirect', 'admin_logout',
-        'admin_login_url', 'admin_login_redirect', 'app_secret']
-
-for key in keys:
-    if os.environ.get(key):
-        settings[key] = os.environ.get(key)
+from backend import settings
 
 
 def load_cache(request):
@@ -29,9 +22,9 @@ def save_cache(request, cache):
 def get_msal_app(cache=None):
     # Initialize the MSAL confidential client
     auth_app = msal.ConfidentialClientApplication(
-        settings['app_id'],
-        authority=settings['authority'],
-        client_credential=settings['app_secret'],
+        settings.OAUTH_APP_ID,
+        authority=settings.OAUTH_AUTHORITY,
+        client_credential=settings.OAUTH_APP_SECRET,
         token_cache=cache)
     return auth_app
 
@@ -40,8 +33,8 @@ def get_msal_app(cache=None):
 def get_sign_in_flow(redirect_uri=None):
     auth_app = get_msal_app()
     return auth_app.initiate_auth_code_flow(
-        settings['scopes'],
-        redirect_uri=redirect_uri or settings['redirect'])
+        settings.OAUTH_SCOPES,
+        redirect_uri=redirect_uri or settings.OUATH_REDIRECT_URI)
 
 
 # Method to exchange auth code for access token

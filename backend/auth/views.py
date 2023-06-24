@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from knox.views import LoginView as KnoxLoginView
 import json
 
-from users.serializers import UserSerializer
+from backend.users.serializers import UserSerializer
 from .oauth_helper import get_sign_in_flow, get_token_from_code, remove_user_and_token, settings
 from .graph_helper import *
 from .user_helper import handle_user_login

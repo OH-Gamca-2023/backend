@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 from backend import settings
-from users.models import Clazz
+from backend.users.models import Clazz
 
 
 def file_path(instance, filename):
@@ -125,7 +125,7 @@ class Cipher(models.Model):
 
 class Submission(models.Model):
     cipher = models.ForeignKey(Cipher, on_delete=models.CASCADE)
-    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE)
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE)
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     answer = models.CharField(max_length=20)

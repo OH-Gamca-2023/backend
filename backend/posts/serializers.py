@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from posts.models import Tag, Post
-from users.serializers import UserSerializer
+from backend.posts.models import Tag, Post
+from backend.users.serializers import UserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):

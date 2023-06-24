@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 
-from kalendar.models import Calendar
+from backend.kalendar.models import Calendar
 
 
 def http_cache_date(millis):

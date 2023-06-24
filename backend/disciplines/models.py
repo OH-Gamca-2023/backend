@@ -3,7 +3,7 @@ import random
 from django.db import models
 from mdeditor.fields import MDTextField
 
-from users.models import Grade, Clazz
+from backend import settings
 
 
 class Category(models.Model):
@@ -40,14 +40,14 @@ class Discipline(models.Model):
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
-    target_grades = models.ManyToManyField(Grade, blank=True, verbose_name="Cielené stupne",
+    target_grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
 
-    primary_organisers = models.ManyToManyField('users.User', blank=True, null=True,
+    primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, null=True,
                                                 related_name="primary_disciplines",
                                                 verbose_name="Zodpovedný organizátori",
                                                 limit_choices_to={'clazz__grade__is_organiser': True})
-    teacher_supervisors = models.ManyToManyField('users.User', blank=True, verbose_name="Dozorujúci učitelia",
+    teacher_supervisors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, verbose_name="Dozorujúci učitelia",
                                                  related_name="disciplines_to_supervise",
                                                  limit_choices_to={'clazz__grade__is_teacher': True})
 
@@ -78,7 +78,7 @@ class Result(models.Model):
                             blank=True,
                             null=True,
                             help_text="Zobrazí sa ak sú k disciplíne priradené viaceré výsledkovky.")
-    grades = models.ManyToManyField(Grade, blank=True, verbose_name="Stupne", help_text="Stupne z ktorých triedy sa "
+    grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Stupne", help_text="Stupne z ktorých triedy sa "
                                                                                         "mali v disciplíne zúčastniť.",
                                     limit_choices_to={'competing': True})
 
@@ -108,7 +108,7 @@ class Placement(models.Model):
     objects = PlacementManager()
     result = models.ForeignKey(Result, on_delete=models.CASCADE, verbose_name="Výsledkovka", related_name="placements")
 
-    clazz = models.ForeignKey(Clazz, on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
     place = models.SmallIntegerField("Pozícia", default=-1, null=False, blank=False)
 
     def save(

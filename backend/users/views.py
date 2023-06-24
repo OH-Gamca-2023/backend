@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 
 from .serializers import *
-from backend.utils import ViewModelPermissions
+from backend.users.utils import ViewModelPermissions
 
 
 class CurrentUserView(APIView):

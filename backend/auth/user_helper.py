@@ -1,5 +1,5 @@
-from auth.restriction_helper import is_allowed
-from users.models import MicrosoftUser, User, Clazz, Grade
+from backend.auth.restriction_helper import is_allowed
+from backend.users.models import MicrosoftUser, User, Clazz, Grade
 
 
 def handle_user_login(request, user, admin=False):

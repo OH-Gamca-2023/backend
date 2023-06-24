@@ -1,6 +1,6 @@
 import traceback
 
-from data.models import AuthRestriction
+from backend.data.models import AuthRestriction
 
 
 def is_allowed(request, type, user=None, department=None):
