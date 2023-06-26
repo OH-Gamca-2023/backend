@@ -28,7 +28,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name', 'details']
 
     def get_queryset(self):
-        if self.request.user.is_authenticated and (self.request.user.is_staff  or self.request.user.clazz.grade.is_teacher):
+        if self.request.user.is_authenticated and self.request.user.has_perm('disciplines.view_hidden'):
             return Discipline.objects.all()
         return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
 
@@ -43,7 +43,9 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
     def primary_organisers(self, request, pk=None):
         if not request.user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not request.user.clazz.grade.is_organiser and not request.user.has_perm('disciplines.modify_people'):
+
+        if not (request.user.has_perm('disciplines.view_primary_organisers') and
+                (request.user.clazz.grade.is_organiser or request.user.has_perm('disciplines.modify_people'))):
             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
         discipline = self.get_object()
@@ -98,7 +100,9 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
     def teacher_supervisors(self, request, pk=None):
         if not self.request.user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
-        if not self.request.user.clazz.grade.is_teacher and not self.request.user.has_perm('disciplines.modify_people'):
+
+        if not (self.request.user.has_perm('disciplines.view_teacher_supervisors') and
+                (self.request.user.clazz.grade.is_teacher or self.request.user.has_perm('disciplines.modify_people'))):
             return Response({'detail': 'You do not have permission to perform this action.'}, status=403)
 
         discipline = self.get_object()
