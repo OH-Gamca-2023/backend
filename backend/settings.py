@@ -229,6 +229,8 @@ PHONENUMBER_DEFAULT_REGION = 'SK'
 PHONENUMBER_DEFAULT_FORMAT = 'INTERNATIONAL'
 
 OAUTH_APP_ID = env("OAUTH_APP_ID", default="b4c732ad-f922-452d-8515-633faccca296")
+OAUTH_AUTHORITY = env("OAUTH_AUTHORITY", default="https://login.microsoftonline.com/b5df9d6f-f2dc-492a-ba67-7afdfa5eef57")
+OAUTH_SCOPES = env("OAUTH_SCOPES", default=["user.read"])
 OAUTH_REDIRECT = env("OAUTH_REDIRECT", default="http://localhost:8000/api/auth/callback")
 OAUTH_FE_REDIRECT = env("OAUTH_DE_REDIRECT", default="http://localhost:5173/auth/login")
 OAUTH_APP_SECRET = env("OAUTH_APP_SECRET")

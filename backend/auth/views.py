@@ -48,7 +48,7 @@ class OauthAdminStartView(APIView):
 
     def get(self, request):
         # Get the sign-in flow
-        flow = get_sign_in_flow(settings['admin_redirect'])
+        flow = get_sign_in_flow(settings.OAUTH_ADMIN_REDIRECT)
         # Save the expected flow so we can use it in the callback
         try:
             request.session['admin_auth_flow'] = flow
@@ -80,10 +80,10 @@ class OauthCallbackView(KnoxLoginView):
                 serialized_logged_user = json.dumps(UserSerializer(logged_user).data)
 
                 url_params = '?status=success&user_token=' + serialized_user_token + '&logged_user=' + serialized_logged_user
-                return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+                return HttpResponseRedirect(settings.OAUTH_FE_REDIRECT + url_params)
             else:
                 url_params = '?status=error&error=' + str(response.data)
-                return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+                return HttpResponseRedirect(settings.OAUTH_FE_REDIRECT + url_params)
         except Exception as e:
             traceback.print_exc()
 
@@ -92,7 +92,7 @@ class OauthCallbackView(KnoxLoginView):
             logout(request)
 
             url_params = '?status=error&error=' + str(e)
-            return HttpResponseRedirect(settings['fe_redirect'] + url_params)
+            return HttpResponseRedirect(settings.OAUTH_FE_REDIRECT + url_params)
 
 
 class OauthAdminCallbackView(APIView):
@@ -108,10 +108,10 @@ class OauthAdminCallbackView(APIView):
             logged_user = handle_user_login(request, user, True)
             login(request, logged_user)
 
-            return HttpResponseRedirect(settings['admin_login_redirect'])
+            return HttpResponseRedirect(settings.OAUTH_ADMIN_LOGIN_REDIRECT)
         except Exception as e:
             # If something goes wrong, logout the user, just in case
             logout(request)
 
             messages.error(request, e)
-            return HttpResponseRedirect(settings['admin_login_redirect'])
+            return HttpResponseRedirect(settings.OAUTH_ADMIN_LOGIN_REDIRECT)

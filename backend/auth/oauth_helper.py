@@ -1,7 +1,4 @@
-import os
 import msal
-import yaml
-
 from backend import settings
 
 
@@ -34,7 +31,7 @@ def get_sign_in_flow(redirect_uri=None):
     auth_app = get_msal_app()
     return auth_app.initiate_auth_code_flow(
         settings.OAUTH_SCOPES,
-        redirect_uri=redirect_uri or settings.OUATH_REDIRECT_URI)
+        redirect_uri=redirect_uri or settings.OAUTH_REDIRECT)
 
 
 # Method to exchange auth code for access token
@@ -57,7 +54,7 @@ def get_token(request):
     accounts = auth_app.get_accounts()
     if accounts:
         result = auth_app.acquire_token_silent(
-            settings['scopes'],
+            settings.OAUTH_SCOPES,
             account=accounts[0])
         save_cache(request, cache)
 
