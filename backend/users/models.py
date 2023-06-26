@@ -68,7 +68,14 @@ class MicrosoftUser(models.Model):
         verbose_name = 'Microsoft používateľ'
 
 
+class UserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('clazz__grade')
+
+
 class User(AbstractUser):
+    objects = UserManager()
+
     clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, null=True, blank=True)
 
     username = models.CharField(
