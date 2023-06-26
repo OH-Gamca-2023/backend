@@ -101,14 +101,15 @@ class User(AbstractUser):
     def type(self):
         if self.is_superuser:
             return 'admin'
-        elif self.clazz.grade.is_organiser:
-            return 'organiser'
-        elif self.clazz.grade.is_teacher:
-            return 'teacher'
-        elif self.clazz.grade.name == 'Alumni':
-            return 'alumni'
-        else:
+        if self.clazz is not None:
+            if self.clazz.grade.is_organiser:
+                return 'organiser'
+            if self.clazz.grade.is_teacher:
+                return 'teacher'
+            if self.clazz.grade.name == 'Alumni':
+                return 'alumni'
             return 'student'
+        return 'unknown'
 
     def has_password(self):
         return self.password != ''
