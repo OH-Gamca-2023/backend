@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -68,13 +68,13 @@ class MicrosoftUser(models.Model):
         verbose_name = 'Microsoft používateľ'
 
 
-class UserManager(models.Manager):
+class CustomUserManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().select_related('clazz__grade')
 
 
 class User(AbstractUser):
-    objects = UserManager()
+    objects = CustomUserManager()
 
     clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, null=True, blank=True)
 
