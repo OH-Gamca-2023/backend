@@ -64,7 +64,7 @@
             </div>
 
             <div class="submit-row">
-                <a href="/api/auth/admin/login/">Prihlásiť sa pomocou Microsoft účtu</a>
+                <a href="{% url 'auth:oauth_begin' 'microsoft' %}?mode=direct&response=message&next={{ next }}">Prihlásiť sa pomocou Microsoft účtu</a>
             </div>
         </form>
 
