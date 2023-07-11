@@ -43,7 +43,7 @@ class Discipline(models.Model):
     target_grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
 
-    primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, null=True,
+    primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True,
                                                 related_name="primary_disciplines",
                                                 verbose_name="Zodpovedný organizátori",
                                                 limit_choices_to={'clazz__grade__is_organiser': True})
