@@ -13,3 +13,5 @@ urlpatterns = [
     path('me/password/', PasswordChangeView.as_view(), name='change_password'),
     path('me/permissions/', CurrentUserPermissionView.as_view(), name='user_permissions'),
 ] + router.urls
+
+app_name = 'backend.users'

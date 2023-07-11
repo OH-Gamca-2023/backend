@@ -12,3 +12,5 @@ urlpatterns = [
     path('admin/login/', OauthAdminStartView.as_view(), name='admin_sign_in'),
     path('admin/callback/', OauthAdminCallbackView.as_view(), name='admin_callback'),
 ]
+
+app_name = 'backend.auth'

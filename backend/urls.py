@@ -21,14 +21,14 @@ from . import settings
 from .views import *
 
 api_urls = [
-    path('auth/', include('backend.auth.urls')),
-    path('user/', include('backend.users.urls')),
+    path('auth/', include('backend.auth.urls', namespace='auth')),
+    path('user/', include('backend.users.urls', namespace='user')),
     path('status/', StatusView.as_view(), name='status'),
-    path('disciplines/', include('backend.disciplines.urls')),
-    path('calendar/', include('backend.kalendar.urls')),
-    path('posts/', include('backend.posts.urls')),
-    path('ciphers/', include('backend.ciphers.urls')),
-    path('data/', include('backend.data.urls'))
+    path('disciplines/', include('backend.disciplines.urls', namespace='disciplines')),
+    path('calendar/', include('backend.kalendar.urls', namespace='calendar')),
+    path('posts/', include('backend.posts.urls', namespace='posts')),
+    path('ciphers/', include('backend.ciphers.urls', namespace='ciphers')),
+    path('data/', include('backend.data.urls', namespace='data')),
 ]
 
 

@@ -11,3 +11,5 @@ router.register('', DisciplineViewSet, basename='disciplines')
 urlpatterns = [
     path('sidebar', SidebarView.as_view(), name='sidebar'),
 ] + router.urls
+
+app_name = 'backend.disciplines'
