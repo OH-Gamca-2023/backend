@@ -1,6 +1,7 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.utils.translation import gettext_lazy as _
 
 
 class Grade(models.Model):
@@ -68,7 +69,14 @@ class MicrosoftUser(models.Model):
         verbose_name = 'Microsoft používateľ'
 
 
+class CustomUserManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().select_related('clazz__grade')
+
+
 class User(AbstractUser):
+    objects = CustomUserManager()
+
     clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, null=True, blank=True)
 
     username = models.CharField(
@@ -80,6 +88,7 @@ class User(AbstractUser):
             "unique": "Používateľ s týmto používateľským menom už existuje."
         },
     )
+    email = models.EmailField(_("email address"), blank=True, unique=True)
 
     phone_number = PhoneNumberField("Telefónne číslo", null=True, blank=True)
 
@@ -94,14 +103,15 @@ class User(AbstractUser):
     def type(self):
         if self.is_superuser:
             return 'admin'
-        elif self.clazz.grade.is_organiser:
-            return 'organiser'
-        elif self.clazz.grade.is_teacher:
-            return 'teacher'
-        elif self.clazz.grade.name == 'Alumni':
-            return 'alumni'
-        else:
+        if self.clazz is not None:
+            if self.clazz.grade.is_organiser:
+                return 'organiser'
+            if self.clazz.grade.is_teacher:
+                return 'teacher'
+            if self.clazz.grade.name == 'Alumni':
+                return 'alumni'
             return 'student'
+        return 'unknown'
 
     def has_password(self):
         return self.password != ''

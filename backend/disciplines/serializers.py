@@ -26,10 +26,11 @@ class DisciplineSerializer(serializers.ModelSerializer):
         if not self.context['request'].user.is_authenticated:
             fields.pop('primary_organisers')
             fields.pop('teacher_supervisors')
-        elif not (self.context['request'].user.is_staff or self.context['request'].user.clazz.grade.is_teacher or \
-                    self.context['request'].user.clazz.grade.is_organiser):
-            fields.pop('primary_organisers')
-            fields.pop('teacher_supervisors')
+        else:
+            if not self.context['request'].user.has_perm('disciplines.view_primary_organisers'):
+                fields.pop('primary_organisers')
+            if not self.context['request'].user.has_perm('disciplines.view_teacher_supervisors'):
+                fields.pop('teacher_supervisors')
 
         return fields
 

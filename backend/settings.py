@@ -228,12 +228,7 @@ PHONENUMBER_DB_FORMAT = 'E164'
 PHONENUMBER_DEFAULT_REGION = 'SK'
 PHONENUMBER_DEFAULT_FORMAT = 'INTERNATIONAL'
 
-OAUTH_APP_ID = env("OAUTH_APP_ID", default="b4c732ad-f922-452d-8515-633faccca296")
-OAUTH_REDIRECT = env("OAUTH_REDIRECT", default="http://localhost:8000/api/auth/callback")
-OAUTH_FE_REDIRECT = env("OAUTH_DE_REDIRECT", default="http://localhost:5173/auth/login")
-OAUTH_APP_SECRET = env("OAUTH_APP_SECRET")
-
-OAUTH_ADMIN_REDIRECT = env("OAUTH_ADMIN_REDIRECT", default="http://localhost:8000/api/auth/admin/callback")
-OAUTH_ADMIN_LOGOUT = env("OAUTH_ADMIN_LOGOUT", default="http://localhost:8000/admin/logout")
-OAUTH_ADMIN_LOGIN_URL = env("OAUTH_ADMIN_LOGIN_URL", default="http://localhost:8000/api/auth/admin/login")
-OAUTH_ADMIN_LOGIN_REDIRECT = env("OAUTH_ADMIN_LOGIN_REDIRECT", default="http://localhost:8000/admin")
+MICROSOFT_APP_ID = env("MICROSOFT_APP_ID", default="b4c732ad-f922-452d-8515-633faccca296")
+MICROSOFT_AUTHORITY = env("MICROSOFT_AUTHORITY", default="https://login.microsoftonline.com/b5df9d6f-f2dc-492a-ba67-7afdfa5eef57")
+MICROSOFT_SCOPES = env("MICROSOFT_SCOPES", default=["user.read"])
+MICROSOFT_APP_SECRET = env("MICROSOFT_APP_SECRET")

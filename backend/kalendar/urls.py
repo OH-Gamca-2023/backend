@@ -11,3 +11,5 @@ urlpatterns = [
     path('ical_staff.ics', ical_staff, name='ICAL Not published events'),
     path('ical_all.ics', ical_all, name='JSON All events'),
 ]
+
+app_name = 'backend.kalendar'

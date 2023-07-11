@@ -5,10 +5,14 @@ from .views import *
 from knox import views as knox_views
 
 urlpatterns = [
-    path('callback/', OauthCallbackView.as_view(), name='callback'),
-    path('login/', OauthStartView.as_view(), name='sign_in'),
-    path('logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
-    path('logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
-    path('admin/login/', OauthAdminStartView.as_view(), name='admin_sign_in'),
-    path('admin/callback/', OauthAdminCallbackView.as_view(), name='admin_callback'),
+    path('logout/', knox_views.LogoutView.as_view(), name='logout'),
+    path('logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall'),
+
+    path('login/', knox_views.LoginView.as_view(), name='basic_login'),
+
+    path('begin/<str:service>/', OauthStartView.as_view(), name='oauth_begin'),
+    path('callback/<str:service>/', OauthCallbackView.as_view(), name='oauth_callback'),
+
 ]
+
+app_name = 'backend.auth'

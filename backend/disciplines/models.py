@@ -43,7 +43,7 @@ class Discipline(models.Model):
     target_grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
 
-    primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, null=True,
+    primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True,
                                                 related_name="primary_disciplines",
                                                 verbose_name="Zodpovedný organizátori",
                                                 limit_choices_to={'clazz__grade__is_organiser': True})
@@ -68,6 +68,9 @@ class Discipline(models.Model):
             ('publish_details', 'Can publish details'),
             ('publish_results', 'Can publish results'),
             ('modify_people', 'Can modify organisers and supervisors'),
+            ('view_hidden', 'Can view disciplines that are not public'),
+            ('view_primary_organisers', 'Can view primary organisers'),
+            ('view_teacher_supervisors', 'Can view teacher supervisors'),
         ]
 
 
