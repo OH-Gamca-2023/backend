@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.utils.translation import gettext_lazy as _
 
 
 class Grade(models.Model):
@@ -87,6 +88,7 @@ class User(AbstractUser):
             "unique": "Používateľ s týmto používateľským menom už existuje."
         },
     )
+    email = models.EmailField(_("email address"), blank=True, unique=True)
 
     phone_number = PhoneNumberField("Telefónne číslo", null=True, blank=True)
 
