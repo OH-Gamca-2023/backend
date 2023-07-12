@@ -9,6 +9,9 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 
 USER appuser
 
+VOLUME /app/staticfiles
+VOLUME /app/media
+
 RUN pip install --upgrade pipenv
 COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --deploy
