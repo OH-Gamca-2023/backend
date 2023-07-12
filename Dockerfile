@@ -17,4 +17,9 @@ COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --deploy
 
 COPY --chown=appuser:appuser . /app/
+
+USER root
+RUN chown appuser:appuser -R /app/
+USER appuser
+
 CMD ["/app/entrypoint.sh"]
