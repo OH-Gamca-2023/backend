@@ -1,6 +1,9 @@
 from rest_framework import permissions
 from rest_framework.views import APIView
+
+from .backends import CredentialsAuthentication
 from .providers import get_oauth_provider
+from knox import views as knox_views
 
 
 class OauthStartView(APIView):
@@ -17,3 +20,7 @@ class OauthCallbackView(APIView):
     def get(self, request, service):
         provider = get_oauth_provider(service)
         return provider.callback(request)
+
+
+class LoginView(knox_views.LoginView):
+    authentication_classes = (CredentialsAuthentication,)
