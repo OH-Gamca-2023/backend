@@ -2,11 +2,13 @@ from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, path
 
 from .models import *
 from backend.kalendar.generator import generate
-# from .publishing import DetailsPublishView, ResultsPublishView
+from .views.publishing import DetailsPublishView, ResultsPublishView
+from backend.posts.models import Post, Tag
+from ..users.models import Clazz
 
 
 @admin.register(Category)
@@ -92,33 +94,26 @@ class DisciplineAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             # disable publishing multiple items at once
-            items = ['date_published', 'details_published', 'results_published']
+            items = ['details_published', 'results_published']
             modified = [item for item in form.changed_data if item in items]
             if len(modified) > 1:
-                messages.warning(request, 'Only one item can be published at a time')
+                messages.warning(request, 'Only one of properties "details published" and "results published" can be '
+                                          'changed at once')
                 for item in modified:
-                    setattr(obj, item, False)
-            else:
-                modified = modified[0] if modified else None
-                if modified:
-                    messages.error(request, 'Publishing is temporarily disabled while a new system is being developed')
-                    modified = None
-
-                    if modified == 'date_published':
-                        if not request.user.has_perm('disciplines.publish_details'):
-                            messages.error(request, 'You do not have permission to publish details')
-                            modified = None
-                    elif modified == 'details_published':
-                        if not request.user.has_perm('disciplines.publish_details'):
-                            messages.error(request, 'You do not have permission to publish details')
-                            modified = None
-                    elif modified == 'results_published':
-                        if not request.user.has_perm('disciplines.publish_results'):
-                            messages.error(request, 'You do not have permission to publish results')
-                            modified = None
-
-                request.POST._mutable = True
-                request.POST['_published'] = modified
+                    setattr(obj, item, not getattr(obj, item))
+            elif len(modified) == 1:
+                if getattr(obj, modified[0]):
+                    setattr(obj, modified[0], False)
+                    request.POST._mutable = True
+                    request.POST['_published'] = modified[0]
+                    request.POST._mutable = False
+                else:
+                    details_post = Post.objects.filter(related_disciplines=obj, tags=Tag.objects.get(special='info' if
+                                                       modified[0] == 'details_published' else 'results'))
+                    if details_post.exists():
+                        details_post = details_post.first()
+                        details_post.delete()
+                    messages.info(request, 'Príspevok zverejňujúci detaily/výsledky bol odstránený.')
 
         super().save_model(request, obj, form, change)
         if not change:
@@ -129,7 +124,7 @@ class DisciplineAdmin(admin.ModelAdmin):
     def response_change(self, request, obj):
         super_response = super().response_change(request, obj)
 
-        if request.POST['_published']:
+        if '_published' in request.POST:
             if request.POST['_published'] == 'details_published':
                 # redirect user to post creation page
                 messages.info(request, 'Detaily budú zverejnené. Tu môžete urobiť posledné úpravy príspevku.')
@@ -143,25 +138,27 @@ class DisciplineAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly = []
         if obj:
-            if obj.date_published:
-                readonly.append('date_published')
-            if obj.details_published:
-                readonly.append('details_published')
-            if obj.results_published:
-                readonly.append('results_published')
+            fields = ['date_published', 'details_published', 'results_published']
+            for field in fields:
+                if getattr(obj, field) and not request.user.has_perm('disciplines.hide_published'):
+                    readonly.append(field)
+                elif not request.user.has_perm(f'disciplines.publish{field.split("_")[0]}'):
+                    readonly.append(field)
 
         if not request.user.has_perm('disciplines.modify_people'):
             readonly += ['primary_organisers', 'teacher_oversight']
 
         return readonly
 
-    # def get_urls(self):
-    #     urls = super().get_urls()
-    #     custom_urls = [
-    #         path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()), name='disciplines_publish_details'),
-    #         path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()), name='disciplines_publish_results'),
-    #     ]
-    #     return custom_urls + urls
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('<str:discipline_id>/publish/details/', admin.site.admin_view(DetailsPublishView.as_view()),
+                 name='disciplines_publish_details'),
+            path('<str:discipline_id>/publish/results/', admin.site.admin_view(ResultsPublishView.as_view()),
+                 name='disciplines_publish_results'),
+        ]
+        return custom_urls + urls
 
 
 class PlacementInline(TabularInline):

@@ -1,5 +1,6 @@
 import random
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from mdeditor.fields import MDTextField
 
@@ -55,6 +56,20 @@ class Discipline(models.Model):
     details_published = models.BooleanField(default=False, verbose_name="Detaily zverejnené")
     results_published = models.BooleanField(default=False, verbose_name="Výsledky zverejnené")
 
+    def clean(self):
+        if self.date_published and not self.date:
+            raise ValidationError({
+                'date_published': f'Dátum musí byť zadaný ak má byť zverejnený.'
+            })
+        if self.details_published and not self.date_published:
+            raise ValidationError({
+                'details_published': f'Dátum musí byť zverejnený ak majú byť zverejnené detaily.'
+            })
+        if self.results_published and not self.date_published:
+            raise ValidationError({
+                'results_published': f'Dátum musí byť zverejnený ak majú byť zverejnené výsledky.'
+            })
+
     @property
     def is_public(self):
         return self.date_published or self.details_published or self.results_published
@@ -67,6 +82,7 @@ class Discipline(models.Model):
             ('publish_date', 'Can publish date'),
             ('publish_details', 'Can publish details'),
             ('publish_results', 'Can publish results'),
+            ('hide_published', 'Can hide published data'),
             ('modify_people', 'Can modify organisers and supervisors'),
             ('view_hidden', 'Can view disciplines that are not public'),
             ('view_primary_organisers', 'Can view primary organisers'),
