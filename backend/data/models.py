@@ -73,6 +73,9 @@ class AuthRestriction(models.Model):
     ), max_length=10, primary_key=True)
     restricted = models.BooleanField(default=True, help_text='Whether this restriction is enabled.')
 
+    full = models.BooleanField(default=False, help_text='Whether this restriction applies to all users. '
+                               'This setting effectively disables all bypasses.')
+
     bypass_ip = models.CharField(max_length=1000, blank=True,
                                  help_text='Specific IP address which can bypass this restriction. '
                                            'Multiple can be separated by commas.')

@@ -209,6 +209,9 @@ class OauthProvider:
 
             user_str = f"[{user.username}#{user.id}]" if user else "[anon]"
 
+            if restriction.full:
+                return restriction.message
+
             if user:
                 if restriction.bypass_staff and user.is_staff:
                     print(f"Restriction {type} bypassed for staff user {user_str}.")
