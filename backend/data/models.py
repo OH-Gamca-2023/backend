@@ -6,6 +6,44 @@ from django.contrib.sessions.models import Session
 from django.db import models
 from knox.models import AuthToken
 
+from huey.signals import SIGNAL_CANCELED, SIGNAL_COMPLETE, SIGNAL_ERROR, \
+    SIGNAL_EXECUTING, SIGNAL_EXPIRED, SIGNAL_LOCKED, SIGNAL_RETRYING, \
+    SIGNAL_REVOKED, SIGNAL_SCHEDULED, SIGNAL_INTERRUPTED
+
+
+SIGNAL_CHOICES = [
+    (SIGNAL_CANCELED, SIGNAL_CANCELED),
+    (SIGNAL_COMPLETE, SIGNAL_COMPLETE),
+    (SIGNAL_ERROR, SIGNAL_ERROR),
+    (SIGNAL_EXECUTING, SIGNAL_EXECUTING),
+    (SIGNAL_EXPIRED, SIGNAL_EXPIRED),
+    (SIGNAL_LOCKED, SIGNAL_LOCKED),
+    (SIGNAL_RETRYING, SIGNAL_RETRYING),
+    (SIGNAL_REVOKED, SIGNAL_REVOKED),
+    (SIGNAL_SCHEDULED, SIGNAL_SCHEDULED),
+    (SIGNAL_INTERRUPTED, SIGNAL_INTERRUPTED)
+]
+
+
+class HueyTask(models.Model):
+    uuid = models.UUIDField()
+    name = models.CharField(max_length=300, verbose_name='názov')  # snad dlhsie nazvy nebudu
+    signal = models.CharField(max_length=20, choices=SIGNAL_CHOICES, null=True, blank=True)
+    is_finished = models.BooleanField(verbose_name='je ukončený')
+
+    error = models.TextField(null=True, blank=True, verbose_name='chyba')
+    retries_left = models.PositiveIntegerField(null=True, blank=True, verbose_name='ostávajúce opakovania')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Huey úloha'
+        verbose_name_plural = 'Huey úlohy'
+        default_permissions = ('view', )
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f'{self.id}: {self.name} - {self.uuid}'
+
 
 class Setting(models.Model):
     key = models.CharField(max_length=50, primary_key=True)
@@ -72,6 +110,9 @@ class AuthRestriction(models.Model):
         ('register', 'Registrácia'),
     ), max_length=10, primary_key=True)
     restricted = models.BooleanField(default=True, help_text='Whether this restriction is enabled.')
+
+    full = models.BooleanField(default=False, help_text='Whether this restriction applies to all users. '
+                               'This setting effectively disables all bypasses.')
 
     bypass_ip = models.CharField(max_length=1000, blank=True,
                                  help_text='Specific IP address which can bypass this restriction. '
@@ -148,6 +189,7 @@ class ProfileEditPermissions(models.Model):
     last_name = models.BooleanField(default=False)
     email = models.BooleanField(default=False)
     phone_number = models.BooleanField(default=False)
+    discord_id = models.BooleanField(default=False)
     password = models.BooleanField(default=False)
 
     @staticmethod

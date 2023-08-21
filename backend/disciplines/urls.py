@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from .views import *
+from .views.api import *
 
 router = SimpleRouter()
 router.register('results', ResultsViewSet, basename='results')

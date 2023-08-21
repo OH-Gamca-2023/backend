@@ -22,5 +22,17 @@ services:
       - .env
     command: "./entrypoint.sh dev"
 
+  huey:
+    build:
+      context: .
+    volumes:
+      - ./:/app/
+    depends_on:
+      - db
+      - web
+    env_file:
+      - .env
+    command: "./entrypoint.sh huey"
+
 volumes:
   postgres_data:

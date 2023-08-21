@@ -17,13 +17,12 @@ class PublishView(PermissionRequiredMixin, CreateView):
     special_tags = []
 
     model = Post
-    fields = ['title', 'content', 'related_disciplines', 'affected_grades', 'tags']
+    fields = ['title', 'redirect', 'related_disciplines', 'affected_grades', 'tags']
     fieldsets = [
-        ("Názov a obsah", {
-            'description': 'Použite <b>%disciplines[{discipline.id}].details%</b> pre vloženie detailov o disciplíne, '
-                           'nevkladajte ich ručne. Stránka sa potom postará o ich doplnenie.<br>Podobne viete vložiť '
-                           'aj výsledky disciplíny pomocou <b>%disciplines[{discipline.id}].results%</b>.',
-            'fields': ['title', 'content']
+        ("Názov príspevku", {
+            'description': 'Názov príspevku ktorý sa zobrazí na stránke.<br>'
+                           '<i>Presmerovanie nemeňte, ak nie ste admin jeho zmena bude ignorovaná.</i>',
+            'fields': ['title', 'redirect']
         }),
         ("Dodatočné údaje", {
             'description': 'Tieto údaje pravdepodobne netreba meniť',
@@ -53,13 +52,13 @@ class PublishView(PermissionRequiredMixin, CreateView):
     def get_default_title(self, discipline):
         return f'Error: get_default_title() not implemented for {self.__class__.__name__}'
 
-    def get_default_content(self, discipline):
-        return f"Error: get_default_content() not implemented for {self.__class__.__name__}"
+    def get_default_redirect_url(self, discipline):
+        return f'Error: get_default_redirect_url() not implemented for {self.__class__.__name__}'
 
     def get_initial(self):
         default = {
             'title': self.get_default_title(self.get_discipline()),
-            'content': self.get_default_content(self.get_discipline()),
+            'redirect': self.get_default_redirect_url(self.get_discipline()),
             'related_disciplines': [self.get_discipline().id],
             'affected_grades': [grade.id for grade in self.get_discipline().target_grades.all()],
             'tags': []
@@ -86,6 +85,10 @@ class PublishView(PermissionRequiredMixin, CreateView):
                     for val in kwargs['initial'][field]:
                         if str(val) not in kwargs['data'].getlist(field):
                             kwargs['data'].appendlist(field, str(val))
+
+            # reset redirect to initial value if not superuser
+            if not self.request.user.is_superuser:
+                kwargs['data']['redirect'] = kwargs['initial']['redirect']
 
             # disable modifying QueryDict
             kwargs['data']._mutable = False
@@ -117,8 +120,8 @@ class DetailsPublishView(PublishView):
     def get_default_title(self, discipline):
         return f'{discipline.name}'
 
-    def get_default_content(self, discipline):
-        return f"**Čaute, prinášame vám informácie ku {discipline.name}.**  \n\n\n%disciplines[{discipline.id}].details%"
+    def get_default_redirect_url(self, discipline):
+        return f'/discipline/{discipline.id}'
 
 
 class ResultsPublishView(PublishView):
@@ -131,5 +134,5 @@ class ResultsPublishView(PublishView):
     def get_default_title(self, discipline):
         return f'Výsledky {discipline.name}'
 
-    def get_default_content(self, discipline):
-        return f"**Čaute, tu sú výsledky {discipline.name}:**  \n\n\n%disciplines[{discipline.id}].results%"
+    def get_default_redirect_url(self, discipline):
+        return f'/discipline/{discipline.id}/results'
