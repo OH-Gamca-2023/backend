@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1d09c2b17edb0c445b1c7a44d5a153ad9b30bbfb70bbb7eede79530f38230e20"
+            "sha256": "3d334aabaa3c5e7ba5e7737f3e015f2d9a864ca35477f8339d06de983983ede6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,11 +18,11 @@
     "default": {
         "asgiref": {
             "hashes": [
-                "sha256:71e68008da809b957b7ee4b43dbccff33d1b23519fb8344e33f049897077afac",
-                "sha256:9567dfe7bd8d3c8c892227827c41cce860b368104c3431da67a0c5a65a949506"
+                "sha256:89b2ef2247e3b562a16eef663bc0e2e703ec6468e2fa8a5cd61cd449786d4f6e",
+                "sha256:9e0ce3aa93a819ba5b45120216b23878cf6e8525eb3848653452b4192b92afed"
             ],
             "index": "pypi",
-            "version": "==3.6.0"
+            "version": "==3.7.2"
         },
         "certifi": {
             "hashes": [
@@ -213,11 +213,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:066b6debb5ac335458d2a713ed995570536c8b59a580005acb0732378d5eb1ee",
-                "sha256:7efa6b1f781a6119a10ac94b4794ded90db8accbe7802281cd26f8664ffed59c"
+                "sha256:7e4225ec065e0f354ccf7349a22d209de09cc1c074832be9eb84c51c1799c432",
+                "sha256:860ae6a138a238fc4f22c99b52f3ead982bb4b1aad8c0122bcd8c8a3a02e409d"
             ],
             "index": "pypi",
-            "version": "==4.2.1"
+            "version": "==4.2.4"
         },
         "django-admin-logs": {
             "hashes": [
@@ -358,11 +358,11 @@
         },
         "msal": {
             "hashes": [
-                "sha256:8a82f5375642c1625c89058018430294c109440dce42ea667d466c2cab520acd",
-                "sha256:9120b7eafdf061c92f7b3d744e5f325fca35873445fa8ffebb40b1086a13dd58"
+                "sha256:25c9a33acf84301f93d1fdbe9f1a9c60cd38af0d5fffdbfa378138fc7bc1e86b",
+                "sha256:3342e0837a047007f9d479e814b559c3219767453d57920dc40a31986862048b"
             ],
             "index": "pypi",
-            "version": "==1.22.0"
+            "version": "==1.23.0"
         },
         "packaging": {
             "hashes": [
