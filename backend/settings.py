@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'huey.contrib.djhuey',
     'backend.users',
     'backend.disciplines',
     'backend.posts',
@@ -211,6 +212,14 @@ REST_KNOX = {
     'TOKEN_TTL': timedelta(days=7),
     'AUTO_REFRESH': False,
     'AUTH_HEADER_PREFIX': 'Bearer',
+}
+
+HUEY = {
+    'huey_class': 'huey.SqliteHuey',
+    'store_none': True,
+    'immediate': False,
+    'utc': False,
+    'filename': BASE_DIR / 'huey' / 'huey.db',
 }
 
 CIPHERS_MAX_FILE_SIZE = 1024 * 1024 * 10  # 10 MB

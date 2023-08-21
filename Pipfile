@@ -30,6 +30,7 @@ django-csp = "*"
 unidecode = "*"
 django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
 django-probes = "*"
+huey = "*"
 
 [dev-packages]
 

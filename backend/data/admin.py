@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import Setting, AuthRestriction, Alert, ProfileEditPermissions
+from .models import Setting, AuthRestriction, Alert, ProfileEditPermissions, HueyTask
 
 
 @admin.register(Setting)
@@ -41,3 +41,25 @@ class AlertAdmin(ModelAdmin):
 class ProfileEditPermissionsAdmin(ModelAdmin):
     list_display = ['user_type', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'discord_id', 'password']
     list_editable = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'discord_id', 'password']
+
+
+@admin.register(HueyTask)
+class HueyTaskAdmin(admin.ModelAdmin):
+    actions_on_top = False
+    list_display = ['id', 'uuid', 'name', 'signal', 'is_finished', 'retries_left', 'admin_timestamp']
+    list_display_links = ['id']
+    search_fields = ['uuid', 'name']
+
+    @admin.display(description='Timestamp')
+    def admin_timestamp(self, obj):
+        return obj.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+
+    # return False to permissions to disable add/changing/deleting in admin
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
