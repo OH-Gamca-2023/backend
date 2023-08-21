@@ -33,7 +33,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
         return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
 
     @action(detail=True)
-    def results(self, request):
+    def results(self, request, pk=None):
         discipline = self.get_object()
         queryset = Result.objects.filter(discipline=discipline)
         serializer = ResultSerializer(queryset, many=True)
