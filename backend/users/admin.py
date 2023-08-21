@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'clazz')
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password', 'microsoft_user')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number', 'discord_id')}),
         ('Permissions', {'fields': ('type', 'is_active', 'is_staff', 'is_superuser', 'individual_cipher_solving',
                                     'groups', 'user_permissions')
         }),

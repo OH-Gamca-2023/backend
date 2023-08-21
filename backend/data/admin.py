@@ -39,5 +39,5 @@ class AlertAdmin(ModelAdmin):
 
 @admin.register(ProfileEditPermissions)
 class ProfileEditPermissionsAdmin(ModelAdmin):
-    list_display = ['user_type', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'password']
-    list_editable = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'password']
+    list_display = ['user_type', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'discord_id', 'password']
+    list_editable = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'discord_id', 'password']

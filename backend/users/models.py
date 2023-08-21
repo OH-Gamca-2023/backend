@@ -91,6 +91,7 @@ class User(AbstractUser):
     email = models.EmailField(_("email address"), blank=True, unique=True)
 
     phone_number = PhoneNumberField("Telefónne číslo", null=True, blank=True)
+    discord_id = models.CharField("Discord ID", max_length=21, null=True, blank=True)
 
     microsoft_user = models.OneToOneField(MicrosoftUser, on_delete=models.CASCADE, null=True, blank=True,
                                           verbose_name="Microsoft používateľ")

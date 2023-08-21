@@ -151,6 +151,7 @@ class ProfileEditPermissions(models.Model):
     last_name = models.BooleanField(default=False)
     email = models.BooleanField(default=False)
     phone_number = models.BooleanField(default=False)
+    discord_id = models.BooleanField(default=False)
     password = models.BooleanField(default=False)
 
     @staticmethod
