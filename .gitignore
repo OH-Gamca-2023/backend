@@ -139,6 +139,3 @@ GitHub.sublime-settings
 __pycache__/
 .idea/
 /media/
-
-**/huey.db*
-huey/huey.db
