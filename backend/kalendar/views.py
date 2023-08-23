@@ -1,5 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+from rest_framework import exceptions
+from rest_framework.decorators import api_view
 
 from backend.kalendar.models import Calendar
 
@@ -45,51 +47,54 @@ def handle(request, type):
     return response
 
 
+@api_view(['GET'])
 def json_default(request):
     return handle(request, "disciplines_json")
 
 
+@api_view(['GET'])
 def json_staff(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
-    if not request.user.is_staff and not request.user.clazz.grade.is_teacher:
-        return JsonResponse({'detail': 'You do not have permission to perform this action.'}, status=403)
+        raise exceptions.NotAuthenticated()
+    if not request.user.has_perm('kalendar.view_all'):
+        raise exceptions.PermissionDenied()
     return handle(request, "staff_only_json")
 
 
+@api_view(['GET'])
 def json_all(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
-    if not request.user.is_staff and not request.user.clazz.grade.is_teacher:
-        return JsonResponse({'detail': 'You do not have permission to perform this action.'}, status=403)
+        raise exceptions.NotAuthenticated()
+    if not request.user.has_perm('kalendar.view_all'):
+        raise exceptions.PermissionDenied()
     return handle(request, "all_json")
 
 
+@api_view(['GET'])
 def json_auto(request):
-    if request.user.is_authenticated and (request.user.is_staff or request.user.clazz.grade.is_teacher):
+    if request.user.is_authenticated and request.user.has_perm('kalendar.view_all'):
         return json_all(request)
     return json_default(request)
 
 
+@api_view(['GET'])
 def ical_default(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
-    if not request.user.is_staff and not request.user.clazz.grade.is_teacher:
-        return JsonResponse({'detail': 'You do not have permission to perform this action.'}, status=403)
     return handle(request, "disciplines_ical")
 
 
+@api_view(['GET'])
 def ical_staff(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
-    if not request.user.is_staff and not request.user.clazz.grade.is_teacher:
-        return JsonResponse({'detail': 'You do not have permission to perform this action.'}, status=403)
+        raise exceptions.NotAuthenticated()
+    if not request.user.has_perm('kalendar.view_all'):
+        raise exceptions.PermissionDenied()
     return handle(request, "staff_only_ical")
 
 
+@api_view(['GET'])
 def ical_all(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'detail': 'Authentication credentials were not provided.'}, status=401)
-    if not request.user.is_staff and not request.user.clazz.grade.is_teacher:
-        return JsonResponse({'detail': 'You do not have permission to perform this action.'}, status=403)
+        raise exceptions.NotAuthenticated()
+    if not request.user.has_perm('kalendar.view_all'):
+        raise exceptions.PermissionDenied()
     return handle(request, "all_ical")

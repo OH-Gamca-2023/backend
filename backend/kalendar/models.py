@@ -13,6 +13,12 @@ class Calendar(models.Model):
     def __str__(self):
         return "Calendar: %s [%s]" % (self.key, self.id)
 
+    class Meta:
+        default_permissions = ('view',)
+        permissions = [
+            ('view_all', 'Can view all calendars'),
+        ]
+
 
 class GenerationEvent(models.Model):
     cause = models.CharField(max_length=255)
