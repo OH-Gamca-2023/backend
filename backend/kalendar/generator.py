@@ -1,6 +1,7 @@
 import json
 import random
 import time as time_p
+import traceback
 from datetime import time
 
 from django.utils import timezone
@@ -21,7 +22,7 @@ def generate(request, cause):
     try:
         cal_id = "".join(random.choices("0123456789abcdef", k=8))
 
-        disciplines = Discipline.objects.filter(date__isnull=False).order_by('date', 'time')
+        disciplines = Discipline.objects.filter(date__isnull=False).order_by('date', 'start_time')
         categories = {category.id: category.name for category in Category.objects.all()}
         grades = {grade.id: grade.name for grade in Grade.objects.all()}
 
@@ -35,9 +36,9 @@ def generate(request, cause):
         serialized_all = serialized_disciplines + serialized_staff_only
 
         # sort disciplines by date and then by time
-        serialized_disciplines.sort(key=lambda discipline: (discipline['date'], discipline['time'] if discipline['time'] else time(0, 0)))
-        serialized_staff_only.sort(key=lambda discipline: (discipline['date'], discipline['time'] if discipline['time'] else time(0, 0)))
-        serialized_all.sort(key=lambda discipline: (discipline['date'], discipline['time'] if discipline['time'] else time(0, 0)))
+        serialized_disciplines.sort(key=lambda discipline: (discipline['date'], discipline['start_time'] if discipline['start_time'] else time(0, 0)))
+        serialized_staff_only.sort(key=lambda discipline: (discipline['date'], discipline['start_time'] if discipline['start_time'] else time(0, 0)))
+        serialized_all.sort(key=lambda discipline: (discipline['date'], discipline['start_time'] if discipline['start_time'] else time(0, 0)))
 
         # serialize the calendars into json
         json_serialized_disciplines = serialize_json_calendar(serialized_disciplines, cal_id)
@@ -121,11 +122,11 @@ def generate(request, cause):
         generation_event.generated_id = cal_id
         generation_event.save()
 
-    except Exception as e:
+    except Exception:
         generation_event.end = timezone.now()
         generation_event.duration = generation_event.end - generation_event.start
         generation_event.was_successful = False
-        generation_event.result = str(e)
+        generation_event.result = traceback.format_exc()
         generation_event.save()
         return
 
@@ -138,7 +139,8 @@ def serialize_discipline(discipline, categories, grades):
             'short': discipline.short_name if discipline.short_name else discipline.name,
         },
         'date': discipline.date,
-        'time': discipline.time,
+        'start_time': discipline.start_time,
+        'end_time': discipline.end_time,
         'location': discipline.location,
         'category': {
             'id': discipline.category.id,
@@ -159,7 +161,8 @@ def serialize_json_calendar(disciplines, cal_id, description="Kalend√°r discipl√
     for d in disciplines:
         d = d.copy()
         d['date'] = d['date'].strftime("%Y-%m-%d")
-        d['time'] = d['time'].strftime("%H:%M") if d['time'] is not None else None
+        d['start_time'] = d['start_time'].strftime("%H:%M") if d['start_time'] is not None else None
+        d['end_time'] = d['end_time'].strftime("%H:%M") if d['end_time'] is not None else None
         d['category'] = d['category']['id']
         cal['events'].append(d)
     return json.dumps(cal)
@@ -178,12 +181,15 @@ def serialize_ical_calendar(disciplines, cal_id, description="Kalend√°r discipl√
     for discipline in disciplines:
         event = "BEGIN:VEVENT\n" \
                 "UID:" + str(discipline['id']) + "\n" \
-                "SUMMARY:" + discipline['name']['regular'] + "\n"
+                "SUMMARY:" + discipline['name']['regular'] + "\n" \
+                "DTSTAMP:" + timezone.now().strftime("%Y%m%dT%H%M%S") + "\n"
 
-        if discipline['time'] is not None:
-            event += "DTSTAMP:" + discipline['date'].strftime("%Y%m%d") + "T" + discipline['time'].strftime("%H%M%S") + "\n"
+        if discipline['start_time'] is not None:
+            event += "DTSTART:" + discipline['date'].strftime("%Y%m%d") + "T" + discipline['start_time'].strftime("%H%M%S") + "\n"
+            if discipline['end_time'] is not None:
+                event += "DTEND:" + discipline['date'].strftime("%Y%m%d") + "T" + discipline['end_time'].strftime("%H%M%S") + "\n"
         else:
-            event += "DTSTAMP:" + discipline['date'].strftime("%Y%m%d") + "T000000\n"
+            event += "DTSTART:" + discipline['date'].strftime("%Y%m%d") + "T000000\n"
 
         if discipline['location'] is not None:
             event += "LOCATION:" + discipline['location'] + "\n"
