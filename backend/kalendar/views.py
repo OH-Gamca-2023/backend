@@ -73,8 +73,8 @@ def json_all(request):
 @api_view(['GET'])
 def json_auto(request):
     if request.user.is_authenticated and request.user.has_perm('kalendar.view_all'):
-        return json_all(request)
-    return json_default(request)
+        return handle(request, "all_json")
+    return handle(request, "disciplines_json")
 
 
 @api_view(['GET'])
