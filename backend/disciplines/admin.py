@@ -35,7 +35,7 @@ class DisciplineAdmin(admin.ModelAdmin):
     list_filter = ('date_published', 'details_published', 'category', 'target_grades')
     search_fields = ('name', 'details')
     date_hierarchy = 'date'
-    ordering = ('-date', '-start_time')
+    ordering = ('date', 'start_time')
 
     fieldsets = (
         (None, {
