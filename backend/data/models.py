@@ -195,7 +195,4 @@ class ProfileEditPermissions(models.Model):
     @staticmethod
     def get(user):
         type = user.type()
-        try:
-            return ProfileEditPermissions.objects.get(user_type=type)
-        except ProfileEditPermissions.DoesNotExist:
-            return ProfileEditPermissions.objects.get_or_create(user_type=type)[0]
+        return ProfileEditPermissions.objects.get_or_create(user_type=type)[0]

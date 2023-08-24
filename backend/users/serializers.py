@@ -38,6 +38,7 @@ class PermissionSerializer(serializers.Serializer):
                 'last_name': edit_permissions.last_name,
                 'email': edit_permissions.email,
                 'phone_number': edit_permissions.phone_number,
+                'discord_id': edit_permissions.discord_id,
                 'password': edit_permissions.password,
             },
             'permissions': user.get_all_permissions(),
@@ -52,6 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
             self.fields.pop('email')
             self.fields.pop('phone_number')
             self.fields.pop('clazz')
+            self.fields.pop('discord_id')
             hide_confidential = True  # hide_confidential is implied by hide_personal
 
         if hide_confidential:
@@ -71,6 +73,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'phone_number', 'clazz', 'type',
-                  'microsoft_user', 'has_password', 'individual_cipher_solving')
+                  'discord_id', 'microsoft_user', 'has_password', 'individual_cipher_solving')
         extra_kwargs = {'password': {'write_only': True}}
 
