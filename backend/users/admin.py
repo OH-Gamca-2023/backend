@@ -37,8 +37,8 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'fields': ('email', 'password1', 'password2', 'microsoft_user')}
          ),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_admin', 'is_superuser')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'clazz', 'phone_number', 'discord_id')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
     )
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('email',)

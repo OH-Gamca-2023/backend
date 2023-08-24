@@ -5,7 +5,7 @@ import urllib.parse
 from django.contrib import messages
 from django.contrib.auth import login, user_logged_in
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -116,87 +116,95 @@ class OauthProvider:
         return HttpResponseRedirect(service_url)
 
     def callback(self, request):
-        session_data = request.session.get('oauth')
-        if session_data is None:
-            return JsonResponse({"error": "No oauth session data found"}, status=400)
+        try:
+            session_data = request.session.get('oauth')
+            if session_data is None:
+                return Response({"detail": "No oauth session data found"}, status=400)
 
-        if session_data['type'] != self.name:
-            return JsonResponse({"error": "Invalid oauth session type"}, status=400)
+            if session_data['type'] != self.name:
+                return Response({"detail": "Invalid oauth session type"}, status=400)
 
-        params = request.GET.dict()
-        if session_data['params']:
-            # Add params from session to params from request
-            params.update(session_data['params'])
-        def respond(data, status):
-            response = params["response"] if "response" in params else "default"
-            next = params["next"] if "next" in params else None
+            params = request.GET.dict()
+            if session_data['params']:
+                # Add params from session to params from request
+                params.update(session_data['params'])
+            def respond(data, status):
+                response = params["response"] if "response" in params else "default"
+                next = params["next"] if "next" in params else None
 
-            def create_message():
-                if data and data["status"] and data["status"] == "success":
-                    if data['logged_user']:
-                        messages.success(request, f"Boli ste úspešne prihlásený ako {data['logged_user']['username']}")
+                def create_message():
+                    if data and data["status"] and data["status"] == "success":
+                        if data['logged_user']:
+                            messages.success(request, f"Boli ste úspešne prihlásený ako {data['logged_user']['username']}")
+                        else:
+                            messages.success(request, "Akcia prebehla úspešne")
                     else:
-                        messages.success(request, "Akcia prebehla úspešne")
+                        messages.error(request, f"Nastala chyba: {data['message']}")
+
+                if next:
+                    if next[0] == "/":
+                        next = request.build_absolute_uri(next)
+
+                    if response == "omit":
+                        return HttpResponseRedirect(next)
+                    elif response == "message":
+                        create_message()
+                        return HttpResponseRedirect(next)
+                    else:
+                        next += "&" if "?" in next else "?"
+                        stringified_data = {k: json.dumps(v) if (isinstance(v, dict) or isinstance(v, list)) else str(v) for
+                                            k, v in data.items() if v is not None}
+                        next += urllib.parse.urlencode(stringified_data)
+                        return HttpResponseRedirect(next)
                 else:
-                    messages.error(request, f"Nastala chyba: {data['message']}")
+                    if response == "omit":
+                        return HttpResponse(status=status)
+                    elif response == "message":
+                        create_message()
+                        return HttpResponse(status=status)
+                    else:
+                        return Response(data, status=status)
 
-            if next:
-                if next[0] == "/":
-                    next = request.build_absolute_uri(next)
-
-                if response == "omit":
-                    return HttpResponseRedirect(next)
-                elif response == "message":
-                    create_message()
-                    return HttpResponseRedirect(next)
-                else:
-                    next += "&" if "?" in next else "?"
-                    stringified_data = {k: json.dumps(v) if (isinstance(v, dict) or isinstance(v, list)) else str(v) for
-                                        k, v in data.items() if v is not None}
-                    next += urllib.parse.urlencode(stringified_data)
-                    return HttpResponseRedirect(next)
-            else:
-                if response == "omit":
-                    return HttpResponse(status=status)
-                elif response == "message":
-                    create_message()
-                    return HttpResponse(status=status)
-                else:
-                    return Response(data=data, status=status)
-
-
-        flow = session_data['flow']
-        if self.oauth_user_model is not None:
-            oauth_user = self.get_oauth_user(request, flow)
             try:
-                user = User.objects.get(**{self.user_property: oauth_user})
-            except User.DoesNotExist:
-                restriction = self.check_restriction(request, 'register')
+                flow = session_data['flow']
+                if self.oauth_user_model is not None:
+                    oauth_user = self.get_oauth_user(request, flow)
+                    try:
+                        user = User.objects.get(**{self.user_property: oauth_user})
+                    except User.DoesNotExist:
+                        restriction = self.check_restriction(request, 'register')
+                        if restriction is not None:
+                            return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+                        user_props = self.get_user_props(request, flow, oauth_user)
+                        if not self.user_property in user_props:
+                            user_props[self.user_property] = oauth_user
+                        user = User.objects.create(**user_props)
+                else:
+                    user_props = self.get_user_props(request, flow)
+                    try:
+                        user = User.objects.get(email=user_props["email"])
+                    except User.DoesNotExist:
+                        restriction = self.check_restriction(request, 'register')
+                        if restriction is not None:
+                            return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+                        user = User.objects.create(**user_props)
+
+                restriction = self.check_restriction(request, 'login', user)
                 if restriction is not None:
                     return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
-                user_props = self.get_user_props(request, flow, oauth_user)
-                if not self.user_property in user_props:
-                    user_props[self.user_property] = oauth_user
-                user = User.objects.create(**user_props)
-        else:
-            user_props = self.get_user_props(request, flow)
-            try:
-                user = User.objects.get(email=user_props["email"])
-            except User.DoesNotExist:
-                restriction = self.check_restriction(request, 'register')
-                if restriction is not None:
-                    return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
-                user = User.objects.create(**user_props)
 
-        restriction = self.check_restriction(request, 'login', user)
-        if restriction is not None:
-            return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+                if not user.is_active:
+                    return respond({"status": "error", "message": f"STRERROR: Váš účet bol deaktivovaný"}, 403)
 
-        if not user.is_active:
-            return respond({"status": "error", "message": f"STRERROR: Váš účet bol deaktivovaný"}, 403)
+                response, status = self.log_user_in(request, user, request.GET.dict())
+                return respond(response, status)
 
-        response, status = self.log_user_in(request, user, request.GET.dict())
-        return respond(response, status)
+            except Exception as e:
+                # Attempt to respond in requested format
+                return respond({"status": "error", "message": f"{e}"}, 500)
+        except Exception as e:
+            # Return error as JSON in case proper response was not possible to generate
+            return Response({"status": "error", "message": f"{e}"}, 500)
 
     def check_restriction(self, request, type, user=None, microsoft_department=None):
         if type not in ['register', 'login']:

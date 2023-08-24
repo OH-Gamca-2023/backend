@@ -1,7 +1,8 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import exceptions
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from backend.kalendar.models import Calendar
 
@@ -19,7 +20,7 @@ def handle_cache(request):
 
     current = Calendar.objects.get(key="current")
     if current is None:
-        return JsonResponse({'error': 'not_ready'}, status=503)
+        return Response({'detail': 'Calendar has not been generated yet.'}, status=503)
     response['ETag'] = current.id
     response['Last-Modified'] = http_cache_date(current.content)
     response['Cache-Control'] = 'max-age=0, must-revalidate'
@@ -41,7 +42,7 @@ def handle(request, type):
     if should_generate:
         content = Calendar.objects.get(key=type)
         if content is None:
-            return JsonResponse({'error': 'not_ready'}, status=503)
+            return Response({'detail': 'Calendar has not been generated yet.'}, status=503)
         response['Content-Type'] = content.content_type
         response.content = content.content
     return response
