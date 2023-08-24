@@ -7,7 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from backend.disciplines.sidebar import SidebarObject, SidebarSerializer
+from backend.disciplines.views.sidebar import SidebarObject, SidebarSerializer
 from backend.users.models import User
 
 from backend.disciplines.models import Category, Discipline, Result
@@ -151,9 +151,3 @@ class ResultsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ResultSerializer
     pagination_class = LimitOffsetPagination
     queryset = Result.objects.filter(discipline__results_published=True)
-
-
-class SidebarView(APIView):
-
-    def get(self, request):
-        return Response(SidebarSerializer(SidebarObject.get_sidebar_object(request), context={'request': request}).data)
