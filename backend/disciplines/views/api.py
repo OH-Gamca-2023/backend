@@ -26,11 +26,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['category', 'target_grades']
     search_fields = ['name', 'details']
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated and self.request.user.has_perm('disciplines.view_hidden'):
-            return Discipline.objects.all()
-        return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
+    queryset = Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
 
     @action(detail=True)
     def results(self, request, pk=None):
