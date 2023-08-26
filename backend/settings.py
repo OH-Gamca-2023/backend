@@ -60,12 +60,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'huey.contrib.djhuey',
+
     'backend.users',
     'backend.disciplines',
     'backend.posts',
     'backend.ciphers',
     'backend.kalendar',
     'backend.data',
+
     'admin.apps.OHGamcaAdminConfig',
     'rest_framework',
     'knox',
@@ -77,6 +79,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_probes',
     'phonenumber_field',
+    'blacklist'
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -89,6 +92,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'blacklist.middleware.BlacklistMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
@@ -166,6 +170,11 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+if env("REVPROXY", default=False):
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
 
 MDEDITOR_CONFIGS = {
     'default': {

@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from .views.api import *
+from .views.sidebar import SidebarView
 
 router = SimpleRouter()
 router.register('results', ResultsViewSet, basename='results')

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import connections
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse
 from rest_framework import status
@@ -37,3 +38,10 @@ class StatusView(APIView):
 
 def home(request):
     return HttpResponse(status=302, headers={'Location': '/admin/'})
+
+
+@api_view(['GET'])
+def api_root(request):
+    return Response({
+        'message': 'Nehrajte sa so stránkou, jediné čo z toho viete dostať je IP ban.',
+    })

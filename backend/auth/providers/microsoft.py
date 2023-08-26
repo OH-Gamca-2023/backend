@@ -1,8 +1,11 @@
+import json
+
 import msal
 import requests
 
 from backend import settings
 from backend.auth.providers.base import OauthProvider
+from backend.disciplines.tasks import send_discord_message
 from backend.users.models import MicrosoftUser, Clazz, Grade
 
 
@@ -32,16 +35,7 @@ class MicrosoftOauthProvider(OauthProvider):
     def format_callback_query(self, request):
         return ""
 
-    def get_oauth_user(self, request, flow):
-        auth_app = self.get_msal_app()
-
-        result = auth_app.acquire_token_by_auth_code_flow(flow, request.GET)
-
-        user = requests.get('https://graph.microsoft.com/v1.0/me',
-                            headers={'Authorization': f"Bearer {result['access_token']}"},
-                            params={
-                                '$select': 'displayName,jobTitle,mail,givenName,surname,id,officeLocation,department,'
-                                           'userPrincipalName'}).json()
+    def __get_oauth_user(self, user):
         id = user['id']
 
         if not MicrosoftUser.objects.filter(id=id).exists():
@@ -69,6 +63,66 @@ class MicrosoftOauthProvider(OauthProvider):
 
         return MicrosoftUser.objects.get(id=id)
 
+    def get_oauth_user(self, request, flow):
+        auth_app = self.get_msal_app()
+
+        result = auth_app.acquire_token_by_auth_code_flow(flow, request.GET)
+
+        user = requests.get('https://graph.microsoft.com/v1.0/me',
+                            headers={'Authorization': f"Bearer {result['access_token']}"},
+                            params={
+                                '$select': 'displayName,jobTitle,mail,givenName,surname,id,officeLocation,department,'
+                                           'userPrincipalName'}).json()
+
+        return self.__get_oauth_user(user)
+
+    def get_verification_oauth_user(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        if 'access_token' not in data:
+            raise Exception("No access token in POST data")
+
+        user = requests.get('https://graph.microsoft.com/v1.0/me',
+                            headers={'Authorization': f"Bearer {data['access_token']}"},
+                            params={
+                                '$select': 'displayName,jobTitle,mail,givenName,surname,id,officeLocation,department,'
+                                           'userPrincipalName'}).json()
+
+        try:
+            for key in ['displayName', 'jobTitle', 'mail', 'givenName', 'surname', 'id', 'officeLocation', 'department',
+                        'userPrincipalName']:
+                if key not in user:
+                    raise Exception(f"POSSIBLE FRAUD: Key {key} not in user data")
+
+                if user[key] != data['user'][key]:
+                    raise Exception(f"POSSIBLE FRAUD: Key {key} does not match")
+        except Exception as e:
+            if 'POSSIBLE FRAUD' in str(e):
+                send_discord_message(f"<@528364834836709376> **Possible login fraud detected**\n"
+                                     f"Real user: {user['id']}\n"
+                                     f"Imitated user: {data['user']['id']}\n"
+                                     f"More details can be found in the logs.")
+                print(f"--- POSSIBLE LOGIN FRAUD ---\n"
+                      f"Real user:\n"
+                        f" - ID: {user['id']}\n"
+                        f" - Name: {user['displayName']}\n"
+                        f" - Email: {user['mail']}\n"
+                      f"Imitated user:\n"
+                        f" - ID: {data['user']['id']}\n"
+                        f" - Name: {data['user']['displayName']}\n"
+                        f" - Email: {data['user']['mail']}\n"
+                      f"Request:\n"
+                        f" - IP: {request.META['REMOTE_ADDR']}\n"
+                      f"--------- RAW DATA ---------\n"
+                        f"Real user: {json.dumps(user)}\n"
+                        f"Imitated user: {json.dumps(data['user'])}\n"
+                        f"Request: {str(request)}\n"
+                      f"--------- EXCEPTION --------\n"
+                        f"{str(e)}\n"
+                      f"----------------------------\n")
+            raise e
+
+        return self.__get_oauth_user(user)
+
     def get_user_props(self, request, flow, oauth_user=None):
         user_clazz = self.process_clazz(oauth_user)
         return {
@@ -85,6 +139,9 @@ class MicrosoftOauthProvider(OauthProvider):
             "is_active": True,
             "is_staff": oauth_user.grade.name == 'Organizátori'
         }
+
+    def get_verification_user_props(self, request, oauth_user=None):
+        return self.get_user_props(request, None, oauth_user)
 
     def process_clazz(self, oauth_user):
         if oauth_user.get_clazz() is not None:

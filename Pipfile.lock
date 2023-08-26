@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3d334aabaa3c5e7ba5e7737f3e015f2d9a864ca35477f8339d06de983983ede6"
+            "sha256": "55255f273ebbe26b413d1f08631e49764f71bf34dab82781eb2508ec7686ad88"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -235,6 +235,14 @@
             "index": "pypi",
             "version": "==2.1.9"
         },
+        "django-blacklist": {
+            "hashes": [
+                "sha256:70cfc2252510d00e776d14b911c01961e4a45e312d4d7c89083a7d34dffe1ef1",
+                "sha256:e62f9e1274abde7c2c3fe22b5cce5e7c17bef436c5c2b74521f763b1dba5ac7a"
+            ],
+            "index": "pypi",
+            "version": "==0.7.0"
+        },
         "django-cors-headers": {
             "hashes": [
                 "sha256:9ada212b0e2efd4a5e339360ffc869cb21ac5605e810afe69f7308e577ea5bde",
@@ -374,10 +382,10 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:3d802739a22592e4127139349937753dee9b6a20bdd5d56847cd885bdc766b1f",
-                "sha256:b360c756252805d44b447b5bca6d250cf6bd6c69b6f0f4258f3bfe5ab81bef69"
+                "sha256:38180247697240ccedd74dec4bfbdbc22bb108b9c5f991f270ca3e41395e6f96",
+                "sha256:ba542f20f6dc83be8f127f240f9b5b7e7c1dec42aceff1879400d4dc0c781d81"
             ],
-            "version": "==8.13.18"
+            "version": "==8.13.19"
         },
         "psycopg2-binary": {
             "hashes": [

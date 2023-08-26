@@ -16,7 +16,7 @@ class DisciplineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Discipline
-        fields = ('id', 'name', 'short_name', 'details', 'date', 'time', 'location', 'category',
+        fields = ('id', 'name', 'short_name', 'details', 'date', 'start_time', 'end_time', 'location', 'category',
                   'target_grades', 'is_public', 'date_published', 'details_published', 'results_published',
                   'primary_organisers', 'teacher_supervisors')
 
@@ -31,6 +31,14 @@ class DisciplineSerializer(serializers.ModelSerializer):
                 fields.pop('primary_organisers')
             if not self.context['request'].user.has_perm('disciplines.view_teacher_supervisors'):
                 fields.pop('teacher_supervisors')
+            if not self.context['request'].user.has_perm('disciplines.view_hidden'):
+                if not self.instance.date_published:
+                    fields.pop('date')
+                    fields.pop('start_time')
+                    fields.pop('end_time')
+                    fields.pop('location')
+                if not self.instance.details_published:
+                    fields.pop('details')
 
         return fields
 

@@ -21,6 +21,7 @@ from . import settings
 from .views import *
 
 api_urls = [
+    path('', api_root),
     path('auth/', include('backend.auth.urls', namespace='auth')),
     path('user/', include('backend.users.urls', namespace='user')),
     path('status/', StatusView.as_view(), name='status'),

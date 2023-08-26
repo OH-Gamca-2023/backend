@@ -30,11 +30,12 @@ class ResultInline(admin.TabularInline):
 
 @admin.register(Discipline)
 class DisciplineAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'target_grades_str', 'date', 'time', 'date_published', 'details_published',
+    list_display = ('name', 'category', 'target_grades_str', 'date', 'start_time', 'end_time', 'date_published', 'details_published',
                     'results_published', 'result_sets')
     list_filter = ('date_published', 'details_published', 'category', 'target_grades')
     search_fields = ('name', 'details')
     date_hierarchy = 'date'
+    ordering = ('date', 'start_time')
 
     fieldsets = (
         (None, {
@@ -44,7 +45,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location')
+            'fields': ('date', 'start_time', 'end_time', 'location')
         }),
         ('Organising', {
             'fields': ('primary_organisers', 'teacher_supervisors'),
@@ -69,7 +70,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             'fields': ('category', 'target_grades')
         }),
         ('Date and time', {
-            'fields': ('date', 'time', 'location')
+            'fields': ('date', 'start_time', 'end_time', 'location')
         }),
     )
 

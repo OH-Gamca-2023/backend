@@ -7,7 +7,7 @@ from backend.disciplines.models import Discipline
 
 
 @djhuey.task(retries=2, retry_delay=60, name='Send discord message')
-def send_discord_notification(message):
+def send_discord_message(message):
     # check if DISCORD_NOTIFICATION_WEBHOOK is set in model Settings
     if not Setting.objects.filter(key='DISCORD_NOTIFICATION_WEBHOOK').exists():
         raise Exception('DISCORD_NOTIFICATION_WEBHOOK is not set in model Settings')
@@ -39,7 +39,7 @@ def send_7day_notification():
             dc_tags += f"<@{user.discord_id}> " if user.discord_id else f"@{user.username} "
 
         message = f"Disciplína {discipline.name} sa koná o týždeň.\n{dc_tags}"
-        send_discord_notification(message)
+        send_discord_message(message)
 
 
 @djhuey.periodic_task(crontab(minute='0', hour='5'), name='Send 3 day notification')
@@ -56,7 +56,7 @@ def send_3day_notification():
             dc_tags += f"<@{user.discord_id}> " if user.discord_id else f"@{user.username} "
 
         message = f"Disciplína {discipline.name} sa koná o 3 dni.\n{dc_tags}"
-        send_discord_notification(message)
+        send_discord_message(message)
 
 
 @djhuey.periodic_task(crontab(minute='0', hour='5'), name='Send 1 day notification')
@@ -73,7 +73,7 @@ def send_1day_notification():
             dc_tags += f"<@{user.discord_id}> " if user.discord_id else f"@{user.username} "
 
         message = f"Disciplína {discipline.name} sa koná zajtra.\n{dc_tags}"
-        send_discord_notification(message)
+        send_discord_message(message)
 
 
 @djhuey.task(name='Send all notifications')
@@ -86,4 +86,4 @@ def send_all_notifications():
             dc_tags += f"<@{user.discord_id}> " if user.discord_id else f"@{user.username} "
 
         message = f"Disciplína {discipline.name} sa koná {discipline.date.strftime('%d.%m.%Y')}.\n{dc_tags}"
-        send_discord_notification(message)
+        send_discord_message(message)

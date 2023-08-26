@@ -7,7 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from backend.disciplines.sidebar import SidebarObject, SidebarSerializer
+from backend.disciplines.views.sidebar import SidebarObject, SidebarSerializer
 from backend.users.models import User
 
 from backend.disciplines.models import Category, Discipline, Result
@@ -26,11 +26,7 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['category', 'target_grades']
     search_fields = ['name', 'details']
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated and self.request.user.has_perm('disciplines.view_hidden'):
-            return Discipline.objects.all()
-        return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
+    queryset = Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
 
     @action(detail=True)
     def results(self, request, pk=None):
@@ -155,9 +151,3 @@ class ResultsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ResultSerializer
     pagination_class = LimitOffsetPagination
     queryset = Result.objects.filter(discipline__results_published=True)
-
-
-class SidebarView(APIView):
-
-    def get(self, request):
-        return Response(SidebarSerializer(SidebarObject.get_sidebar_object(request), context={'request': request}).data)

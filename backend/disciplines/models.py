@@ -37,7 +37,8 @@ class Discipline(models.Model):
     details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
 
     date = models.DateField("Dátum", blank=True, null=True)
-    time = models.TimeField("Čas", blank=True, null=True)
+    start_time = models.TimeField("Čas začiatku", blank=True, null=True)
+    end_time = models.TimeField("Čas konca", blank=True, null=True)
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
 
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
@@ -60,14 +61,6 @@ class Discipline(models.Model):
         if self.date_published and not self.date:
             raise ValidationError({
                 'date_published': f'Dátum musí byť zadaný ak má byť zverejnený.'
-            })
-        if self.details_published and not self.date_published:
-            raise ValidationError({
-                'details_published': f'Dátum musí byť zverejnený ak majú byť zverejnené detaily.'
-            })
-        if self.results_published and not self.date_published:
-            raise ValidationError({
-                'results_published': f'Dátum musí byť zverejnený ak majú byť zverejnené výsledky.'
             })
 
     @property
