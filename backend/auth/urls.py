@@ -12,6 +12,7 @@ urlpatterns = [
 
     path('begin/<str:service>/', OauthStartView.as_view(), name='oauth_begin'),
     path('callback/<str:service>/', OauthCallbackView.as_view(), name='oauth_callback'),
+    path('verify/<str:service>/', OauthVerifyView.as_view(), name='oauth_verify'),
 
 ]
 

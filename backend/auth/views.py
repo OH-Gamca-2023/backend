@@ -22,5 +22,12 @@ class OauthCallbackView(APIView):
         return provider.callback(request)
 
 
+class OauthVerifyView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, service):
+        provider = get_oauth_provider(service)
+        return provider.verify(request)
+
 class LoginView(knox_views.LoginView):
     authentication_classes = (CredentialsAuthentication,)

@@ -90,9 +90,19 @@ class OauthProvider:
             'OauthProvider must override get_oauth_user method'
         )
 
+    def get_verification_oauth_user(self, request):
+        raise ImproperlyConfigured(
+            'OauthProvider must override verify_oauth_user method'
+        )
+
     def get_user_props(self, request, flow, oauth_user=None):
         raise ImproperlyConfigured(
             "OauthProvider must override get_user_props method"
+        )
+
+    def get_verification_user_props(self, request, oauth_user=None):
+        raise ImproperlyConfigured(
+            "OauthProvider must override verify_user_props method"
         )
 
     def format_callback_query(self, request):
@@ -200,9 +210,11 @@ class OauthProvider:
                 return respond(response, status)
 
             except Exception as e:
+                traceback.print_exc()
                 # Attempt to respond in requested format
                 return respond({"status": "error", "message": f"{e}"}, 500)
         except Exception as e:
+            traceback.print_exc()
             # Return error as JSON in case proper response was not possible to generate
             return Response({"status": "error", "message": f"{e}"}, 500)
 
@@ -270,6 +282,7 @@ class OauthProvider:
                 }
                 code = 400
         except Exception as e:
+            traceback.print_exc()
             response_data = {
                 "status": "error",
                 "message": str(e)
@@ -277,3 +290,46 @@ class OauthProvider:
             code = 500
 
         return response_data, code
+
+    def verify(self, request):
+        # FE has authenticated user using OAuth, now we need to verify that login
+        # because we can't trust FE as any data coming from there can be faked
+        # (e.g. user_id, email, etc.)
+        #
+        # Exact verification process might differ based on the OAuth provider
+
+        try:
+            if self.oauth_user_model is not None:
+                oauth_user = self.get_verification_oauth_user(request)
+                try:
+                    user = User.objects.get(**{self.user_property: oauth_user})
+                except User.DoesNotExist:
+                    restriction = self.check_restriction(request, 'register')
+                    if restriction is not None:
+                        return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+                    user_props = self.get_verification_user_props(request, oauth_user)
+                    if not self.user_property in user_props:
+                        user_props[self.user_property] = oauth_user
+                    user = User.objects.create(**user_props)
+            else:
+                user_props = self.get_verification_user_props(request)
+                try:
+                    user = User.objects.get(email=user_props["email"])
+                except User.DoesNotExist:
+                    restriction = self.check_restriction(request, 'register')
+                    if restriction is not None:
+                        return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+                    user = User.objects.create(**user_props)
+
+            restriction = self.check_restriction(request, 'login', user)
+            if restriction is not None:
+                return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
+
+            if not user.is_active:
+                return Response({"status": "error", "message": f"STRERROR: Váš účet bol deaktivovaný"}, 403)
+
+            response, status = self.log_user_in(request, user, request.GET.dict())
+            return Response(response, status)
+        except Exception as e:
+            traceback.print_exc()
+            return Response({"status": "error", "message": f"{e}"}, 500)
