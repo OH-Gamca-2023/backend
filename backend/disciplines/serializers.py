@@ -7,7 +7,7 @@ from backend.users.serializers import UserSerializer
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('id', 'name', 'calendar_class')
+        fields = ('id', 'name', 'calendar_class', 'icon')
 
 
 class DisciplineSerializer(serializers.ModelSerializer):
