@@ -36,7 +36,7 @@ class Discipline(models.Model):
                                             "správne zobrazí je 15 znakov. V prípade viac ako 3 disciplín "
                                             "v jednom dni odporúčame maximálne 7 znakov.")
 
-    details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
+    details = MDTextField("Detaily", max_length=20000, blank=True, null=True)
 
     date = models.DateField("Dátum", blank=True, null=True)
     start_time = models.TimeField("Čas začiatku", blank=True, null=True)

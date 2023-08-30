@@ -34,10 +34,10 @@ api_urls = [
 
 
 urlpatterns = [
+    path(r'admin/mdeditor/', include('mdeditor.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(api_urls)),
-    path('', home, name='home'),
-    path(r'mdeditor/', include('mdeditor.urls'))
+    path('', home, name='home')
 ]
 
 if settings.DEBUG:
