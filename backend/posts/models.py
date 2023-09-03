@@ -35,7 +35,7 @@ class Post(models.Model):
     id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
 
     title = models.CharField("Nadpis", max_length=100)
-    content = MDTextField("Obsah", max_length=10000)
+    content = MDTextField("Obsah", max_length=20000)
     redirect = models.CharField("Presmerovanie", max_length=100, blank=True, null=True,
                                 help_text="Presmerovanie na inú stránku. Ak je vyplnené, obsah bude ignorovaný.")
     author = models.ForeignKey(

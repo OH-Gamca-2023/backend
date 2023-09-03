@@ -12,7 +12,7 @@ from backend.users.models import Clazz
 def file_path(instance, filename):
     instance.task_file.open()
     fname, ext = os.path.splitext(filename)
-    digest = hashlib.sha256(instance.task_file.read()).hexdigest()[:16]
+    digest = hashlib.sha256(instance.task_file.read()).hexdigest()
     return f'sifry/zadania/{digest}{ext}'
 
 

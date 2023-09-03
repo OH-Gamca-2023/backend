@@ -23,18 +23,21 @@ class CurrentUserView(APIView):
         data = json.loads(request.body)
         profile_edit_permission = ProfileEditPermissions.get(request.user)
         # validate that the user is allowed to edit all the fields present in the request
-        for field in data:
-            if not getattr(profile_edit_permission, field, False):
-                return Response({'detail': 'You are not allowed to modify ' + field}, status=403)
-            if data[field] == '' and field not in ['phone_number', 'discord_id']:
-                return Response({'detail': field + ' cannot be empty'}, status=400)
+        not_allowed = [field for field in data if not getattr(profile_edit_permission, field, False)]
+        if len(not_allowed) > 0:
+            return Response({'detail': 'You are not allowed to edit these fields', 'fields': not_allowed}, status=403)
+        non_empty = [field for field in data if data[field] == '' and field not in ['phone_number', 'discord_id']]
+        if len(non_empty) > 0:
+            return Response({'detail': 'These fields cannot be empty', 'fields': non_empty}, status=400)
 
-        if 'email' in data and re.match(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$', data['email']) is None:
-            return Response({'detail': 'Invalid email'}, status=400)
+        if 'email' in data and re.match(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,"
+                                        r"61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+                                        data['email']) is None:
+            return Response({'detail': 'Invalid email', 'field': ['email']}, status=400)
 
         phone = PhoneNumber.from_string(data['phone_number']) if 'phone_number' in data else None
         if phone is not None and not phone.is_valid() and phone != '':
-            return Response({'detail': 'Invalid phone number'}, status=400)
+            return Response({'detail': 'Invalid phone number', 'field': ['phone_number']}, status=400)
 
         user = User.objects.get(pk=request.user.pk)
         user.first_name = data['first_name'] if 'first_name' in data else user.first_name

@@ -12,6 +12,8 @@ class Category(models.Model):
     calendar_class = models.CharField("CSS trieda", max_length=100, blank=True, null=True,
                                       help_text="CSS trieda, ktorá sa priradí k disciplínam tejto kategórie v "
                                                 "kalendári.")
+    icon = models.CharField("Ikona", max_length=100, blank=True, null=True,
+                            help_text="Ikona, ktorá sa zobrazí v navbare. Používa sa Iconify.")
 
     def __str__(self):
         return self.name
@@ -33,7 +35,7 @@ class Discipline(models.Model):
                                   help_text="Zobrazí sa v kalendári. Odporúča sa použiť ak je názov príliš dlhý a "
                                             "do kalendára by sa nezmestil (resp. bol odseknutý).")
 
-    details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
+    details = MDTextField("Detaily", max_length=20000, blank=True, null=True)
 
     date = models.DateField("Dátum", blank=True, null=True)
     start_time = models.TimeField("Čas začiatku", blank=True, null=True)
