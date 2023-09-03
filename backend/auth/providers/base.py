@@ -182,7 +182,7 @@ class OauthProvider:
                     try:
                         user = User.objects.get(**{self.user_property: oauth_user})
                     except User.DoesNotExist:
-                        restriction = self.check_restriction(request, 'register')
+                        restriction = self.check_restriction(request, 'register', **self.get_check_params(request, oauth_user=oauth_user))
                         if restriction is not None:
                             return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
                         user_props = self.get_user_props(request, flow, oauth_user)
@@ -194,7 +194,7 @@ class OauthProvider:
                     try:
                         user = User.objects.get(email=user_props["email"])
                     except User.DoesNotExist:
-                        restriction = self.check_restriction(request, 'register')
+                        restriction = self.check_restriction(request, 'register', **self.get_check_params(request, user_props=user_props))
                         if restriction is not None:
                             return respond({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
                         user = User.objects.create(**user_props)
@@ -219,6 +219,7 @@ class OauthProvider:
             return Response({"status": "error", "message": f"{e}"}, 500)
 
     def check_restriction(self, request, type, user=None, microsoft_department=None):
+        print(f"Checking restriction {type} for user {user.username if user else '[anon]'} in department {microsoft_department}.")
         if type not in ['register', 'login']:
             raise Exception('Invalid type.')
 
@@ -238,7 +239,7 @@ class OauthProvider:
                     return None
                 if restriction.bypass_superuser and user.is_superuser:
                     print(f"Restriction {type} bypassed for superuser {user_str}.")
-                return None
+                    return None
             if microsoft_department:
                 if microsoft_department in restriction.bypass_department.split(','):
                     print(f"Restriction {type} bypassed for user {user_str} in department {microsoft_department}.")
@@ -248,7 +249,7 @@ class OauthProvider:
                     print(f"Restriction {type} bypassed for user {user_str} with IP {request.META['REMOTE_ADDR']}.")
                     return None
 
-            return restriction.message
+            return restriction.message or ('Prihlasovanie je aktuálne obmedzené.' if type == 'login' else 'Registrácia je aktuálne obmedzená.')
         except AuthRestriction.DoesNotExist:
             print(f"Restriction {type} does not exist.")
             return None
@@ -291,6 +292,9 @@ class OauthProvider:
 
         return response_data, code
 
+    def get_check_params(self, request, user=None, oauth_user=None, user_props=None):
+        return {}
+
     def verify(self, request):
         # FE has authenticated user using OAuth, now we need to verify that login
         # because we can't trust FE as any data coming from there can be faked
@@ -304,7 +308,7 @@ class OauthProvider:
                 try:
                     user = User.objects.get(**{self.user_property: oauth_user})
                 except User.DoesNotExist:
-                    restriction = self.check_restriction(request, 'register')
+                    restriction = self.check_restriction(request, 'register', **self.get_check_params(request, oauth_user=oauth_user))
                     if restriction is not None:
                         return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
                     user_props = self.get_verification_user_props(request, oauth_user)
@@ -316,12 +320,12 @@ class OauthProvider:
                 try:
                     user = User.objects.get(email=user_props["email"])
                 except User.DoesNotExist:
-                    restriction = self.check_restriction(request, 'register')
+                    restriction = self.check_restriction(request, 'register', **self.get_check_params(request, user_props=user_props))
                     if restriction is not None:
                         return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
                     user = User.objects.create(**user_props)
 
-            restriction = self.check_restriction(request, 'login', user)
+            restriction = self.check_restriction(request, 'login', user, **self.get_check_params(request, user=user))
             if restriction is not None:
                 return Response({"status": "error", "message": f"STRERROR: {restriction}"}, 403)
 

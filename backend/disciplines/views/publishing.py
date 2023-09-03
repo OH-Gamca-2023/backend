@@ -19,6 +19,12 @@ class PublishView(PermissionRequiredMixin, CreateView):
     model = Post
     fields = ['title', 'redirect', 'related_disciplines', 'affected_grades', 'tags']
     fieldsets = [
+        ("", {
+            'description': 'Toto rozhranie slúži na publikovanie príspevku na stránke. '
+                           'Ak chcete príspevok pridať neskôr alebo použiť iný formát ako '
+                           'presmerovanie na disciplínu, môžete toto rozhranie zavrieť a '
+                           'príspevok upraviť cez sekciu <a href="/admin/posts/post">príspevky</a>.',
+        }),
         ("Názov príspevku", {
             'description': 'Názov príspevku ktorý sa zobrazí na stránke.<br>'
                            '<i>Presmerovanie nemeňte, ak nie ste admin jeho zmena bude ignorovaná.</i>',
