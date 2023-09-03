@@ -137,7 +137,7 @@ class MicrosoftOauthProvider(OauthProvider):
             "last_name": oauth_user.surname,
 
             "is_active": True,
-            "is_staff": oauth_user.grade.name == 'Organizátori'
+            "is_staff": user_clazz.grade.is_organiser
         }
 
     def get_verification_user_props(self, request, oauth_user=None):
@@ -186,3 +186,17 @@ class MicrosoftOauthProvider(OauthProvider):
                         is_fake=False,
                         microsoft_department=oauth_user.department
                     )
+
+    def get_check_params(self, request, user=None, oauth_user=None, user_props=None):
+        if oauth_user is not None:
+            return {
+                'microsoft_department': oauth_user.department,
+                **super().get_check_params(request, user, oauth_user, user_props)
+            }
+        elif user is not None and user.microsoft_user is not None:
+            return {
+                'microsoft_department': user.microsoft_user.department,
+                **super().get_check_params(request, user, oauth_user, user_props)
+            }
+        else:
+            return super().get_check_params(request, user, oauth_user, user_props)

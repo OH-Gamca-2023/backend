@@ -36,7 +36,8 @@ class Clazz(models.Model):
     name = models.CharField("Názov", max_length=100)
     grade = models.ForeignKey('users.Grade', on_delete=models.CASCADE, verbose_name="Stupeň", related_name="classes")
     is_fake = models.BooleanField("Je nesúťažná", default=False)
-    microsoft_department = models.CharField(max_length=100, null=True, blank=True)
+    is_org = models.BooleanField("Je organizátorská", default=False)
+    microsoft_department = models.CharField(max_length=100, null=True, blank=True, unique=True)
 
     class Meta:
         verbose_name_plural = 'triedy'

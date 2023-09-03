@@ -23,8 +23,7 @@ class PublishView(PermissionRequiredMixin, CreateView):
             'description': 'Toto rozhranie slúži na publikovanie príspevku na stránke. '
                            'Ak chcete príspevok pridať neskôr alebo použiť iný formát ako '
                            'presmerovanie na disciplínu, môžete toto rozhranie zavrieť a '
-                           'príspevok upraviť cez sekciu <a href="' + reverse(
-                                'admin:posts_post_changelist') + '">príspevky</a>.',
+                           'príspevok upraviť cez sekciu <a href="/admin/posts/post">príspevky</a>.',
         }),
         ("Názov príspevku", {
             'description': 'Názov príspevku ktorý sa zobrazí na stránke.<br>'
