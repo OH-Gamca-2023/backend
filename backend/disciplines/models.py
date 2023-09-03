@@ -29,10 +29,9 @@ class Discipline(models.Model):
     id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
 
     name = models.CharField("Názov", max_length=100)
-    short_name = models.CharField("Krátky názov", max_length=15, blank=True, null=True,
-                                  help_text="Zobrazí sa v kalendári. Maximálna dĺžka ktorá sa v kalebdári "
-                                            "správne zobrazí je 15 znakov. V prípade viac ako 3 disciplín "
-                                            "v jednom dni odporúčame maximálne 7 znakov.")
+    short_name = models.CharField("Krátky názov", max_length=30, blank=True, null=True,
+                                  help_text="Zobrazí sa v kalendári. Odporúča sa použiť ak je názov príliš dlhý a "
+                                            "do kalendára by sa nezmestil (resp. bol odseknutý).")
 
     details = MDTextField("Detaily", max_length=8000, blank=True, null=True)
 

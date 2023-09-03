@@ -104,7 +104,6 @@ class DisciplineAdmin(admin.ModelAdmin):
                     setattr(obj, item, not getattr(obj, item))
             elif len(modified) == 1:
                 if getattr(obj, modified[0]):
-                    setattr(obj, modified[0], False)
                     request.POST._mutable = True
                     request.POST['_published'] = modified[0]
                     request.POST._mutable = False
