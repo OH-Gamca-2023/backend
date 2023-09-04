@@ -23,10 +23,12 @@ class SidebarObject:
     @staticmethod
     def get_sidebar_object(request):
         def filter_query():
-            if request.user.is_authenticated:
-                if request.user.has_perm('disciplines.view_hidden'):
-                    return Q(date__gte=datetime.now())
-            return Q(date__gte=datetime.now()) & (Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
+            filter = Q(date__gte=datetime.now())
+            if request.user.is_authenticated and request.user.clazz.grade.competing:
+                filter |= Q(target_grades__contains=request.user.clazz.grade)
+            if not (request.user.is_authenticated and request.user.has_perm('disciplines.view_hidden')):
+                filter &= Q(date_published=True) & Q(details_published=True) & Q(results_published=True)
+            return filter
 
         upcoming = Discipline.objects.filter(filter_query()).order_by('date', 'start_time')[:5]
         organising = []

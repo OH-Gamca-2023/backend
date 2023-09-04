@@ -6,7 +6,7 @@ from backend.data.models import Alert, Setting
 class AlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alert
-        fields = '__all__'
+        fields = ('id', 'message', 'type', 'created_at', 'lasts_until', 'active')
 
 
 class SettingSerializer(serializers.ModelSerializer):
