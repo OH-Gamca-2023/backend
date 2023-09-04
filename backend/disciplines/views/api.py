@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from backend.disciplines.views.sidebar import SidebarObject, SidebarSerializer
 from backend.users.models import User
@@ -31,6 +30,10 @@ class DisciplineViewSet(viewsets.ReadOnlyModelViewSet):
         if self.request.user.is_authenticated and self.request.user.has_perm('disciplines.view_hidden'):
             return Discipline.objects.all()
         return Discipline.objects.filter(Q(date_published=True) | Q(details_published=True) | Q(results_published=True))
+
+    @action(detail=False, methods=['get'], name='Sidebar')
+    def sidebar(self, request):
+        return Response(SidebarSerializer(SidebarObject.get_sidebar_object(request)).data)
 
     @action(detail=True)
     def results(self, request, pk=None):
