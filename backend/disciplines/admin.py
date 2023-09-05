@@ -142,7 +142,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             for field in fields:
                 if getattr(obj, field) and not request.user.has_perm('disciplines.hide_published'):
                     readonly.append(field)
-                elif not request.user.has_perm(f'disciplines.publish{field.split("_")[0]}'):
+                elif not request.user.has_perm(f'disciplines.publish_{field.split("_")[0]}'):
                     readonly.append(field)
 
         if not request.user.has_perm('disciplines.modify_people'):
