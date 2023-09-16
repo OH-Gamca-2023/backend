@@ -54,6 +54,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_filter = ('cipher', 'clazz', 'after_hint', 'correct')
     search_fields = ('answer',)
     ordering = ('time',)
+    autocomplete_fields = ('cipher', 'clazz', 'submitted_by')
 
     list_display_links = ('pk', '__str__')
 

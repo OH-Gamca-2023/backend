@@ -19,6 +19,7 @@ from django.urls import path, include
 
 from . import settings
 from .views import *
+from backend.data.views import LinkView
 
 api_urls = [
     path('', api_root),
@@ -37,6 +38,7 @@ urlpatterns = [
     path(r'admin/mdeditor/', include('mdeditor.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(api_urls)),
+    path('link/<str:key>/', LinkView.as_view(), name='link'),
     path('', home, name='home')
 ]
 

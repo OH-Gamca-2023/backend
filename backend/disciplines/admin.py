@@ -41,20 +41,24 @@ class DisciplineAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('name', 'short_name', 'details')
         }),
-        ('Categorisation', {
+        ('Kategorizácia', {
             'fields': ('category', 'target_grades')
         }),
-        ('Date and time', {
+        ('Dátum, čas a miesto', {
             'fields': ('date', 'start_time', 'end_time', 'location')
         }),
-        ('Organising', {
+        ('Organizátori', {
             'fields': ('primary_organisers', 'teacher_supervisors'),
             'classes': ('collapse',),
             'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
                            'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
         }),
-        ('Publishing', {
+        ('Zverejňovanie', {
             'fields': ('date_published', 'details_published', 'results_published')
+        }),
+        ('Detaily výsledkov', {
+            'fields': ('result_details',),
+            'classes': ('collapse',)
         }),
     )
 
@@ -66,10 +70,10 @@ class DisciplineAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('name', 'short_name', 'details')
         }),
-        ('Categorisation', {
+        ('Kategorizácia', {
             'fields': ('category', 'target_grades')
         }),
-        ('Date and time', {
+        ('Dátum, čas a miesto', {
             'fields': ('date', 'start_time', 'end_time', 'location')
         }),
     )
@@ -165,6 +169,7 @@ class PlacementInline(TabularInline):
     model = Placement
     extra = 0
     fields = ('clazz', 'place')
+    autocomplete_fields = ('clazz',)
 
     # limit choices to classes in the grade of the results or fake classes
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -180,6 +185,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'discipline', 'get_grades', 'autofill', 'get_placements')
     list_filter = ('discipline', 'grades')
     search_fields = ('discipline__name',)
+    autocomplete_fields = ('discipline',)
 
     @admin.display(description='Grades')
     def get_grades(self, obj):
