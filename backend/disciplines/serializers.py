@@ -23,22 +23,29 @@ class DisciplineSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         user = self.context.get('request').user
         representation = super().to_representation(instance)
+
+        def hide_unpublished():
+            if not instance.date_published:
+                representation.pop('date')
+                representation.pop('start_time')
+                representation.pop('end_time')
+                representation.pop('location')
+            if not instance.details_published:
+                representation.pop('details')
+            if not instance.results_published:
+                representation.pop('result_details')
+
         if not user.is_authenticated:
             representation.pop('primary_organisers')
             representation.pop('teacher_supervisors')
+            hide_unpublished()
         else:
             if not user.has_perm('disciplines.view_primary_organisers'):
                 representation.pop('primary_organisers')
             if not user.has_perm('disciplines.view_teacher_supervisors'):
                 representation.pop('teacher_supervisors')
             if not user.has_perm('disciplines.view_hidden'):
-                if not instance.date_published:
-                    representation.pop('date')
-                    representation.pop('start_time')
-                    representation.pop('end_time')
-                    representation.pop('location')
-                if not instance.details_published:
-                    representation.pop('details')
+                hide_unpublished()
 
         return representation
 
