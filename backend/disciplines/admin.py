@@ -142,7 +142,7 @@ class DisciplineAdmin(admin.ModelAdmin):
             for field in fields:
                 if getattr(obj, field) and not request.user.has_perm('disciplines.hide_published'):
                     readonly.append(field)
-                elif not request.user.has_perm(f'disciplines.publish{field.split("_")[0]}'):
+                elif not request.user.has_perm(f'disciplines.publish_{field.split("_")[0]}'):
                     readonly.append(field)
 
         if not request.user.has_perm('disciplines.modify_people'):
@@ -177,12 +177,17 @@ class PlacementInline(TabularInline):
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'discipline')
+    list_display = ('__str__', 'discipline', 'get_grades', 'autofill', 'get_placements')
+    list_filter = ('discipline', 'grades')
     search_fields = ('discipline__name',)
 
+    @admin.display(description='Grades')
+    def get_grades(self, obj):
+        return ", ".join([str(grade) for grade in obj.grades.all()])
+
     @admin.display(description='Placements')
-    def placements(self, obj):
-        return obj.placement_set.count()
+    def get_placements(self, obj):
+        return obj.placements.count()
 
     def get_inlines(self, request, obj):
         if obj:
@@ -191,22 +196,18 @@ class ResultAdmin(admin.ModelAdmin):
         return []
 
     def response_add(self, request, obj, post_url_continue=None):
-        for grade in obj.grades.all():
-            for clazz in grade.classes.all():
-                Placement.objects.get_or_create(result=obj, clazz=clazz)
+        if obj.autofill:
+            for grade in obj.grades.all():
+                for clazz in grade.classes.all():
+                    Placement.objects.get_or_create(result=obj, clazz=clazz)
         return super().response_add(request, obj, post_url_continue)
 
     def response_change(self, request, obj):
         all_classes = Clazz.objects.filter(grade__in=obj.grades.all())
-        for clazz in all_classes:
-            Placement.objects.get_or_create(result=obj, clazz=clazz)
+        if obj.autofill:
+            for clazz in all_classes:
+                Placement.objects.get_or_create(result=obj, clazz=clazz)
         for placement in obj.placements.all():
             if placement.clazz not in all_classes and not placement.clazz.is_fake:
                 placement.delete()
         return super().response_change(request, obj)
-
-
-@admin.register(Placement)
-class PlacementAdmin(admin.ModelAdmin):
-    list_display = ('id', 'result', 'clazz', 'place', 'participated')
-    list_filter = ('result__discipline', 'clazz')

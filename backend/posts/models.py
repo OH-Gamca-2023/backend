@@ -66,5 +66,6 @@ class Post(models.Model):
 
         permissions = [
             ('change_others_post', 'Can change posts of other users'),
-            ('delete_others_post', 'Can delete posts of other users')
+            ('delete_others_post', 'Can delete posts of other users'),
+            ('post_as_other', 'Can post as other user')
         ]

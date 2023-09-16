@@ -60,3 +60,19 @@ class PostAdmin(admin.ModelAdmin):
         if obj is not None and obj.author != request.user:
             return super().has_delete_permission(request, obj) and request.user.has_perm('posts.delete_others_post')
         return super().has_delete_permission(request, obj)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        if 'author' not in form.base_fields:
+            if obj is None:
+                form.base_fields['author'].initial = request.user
+            if not request.user.has_perm('posts.post_as_other'):
+                form.base_fields['author'].required = True
+                form.base_fields['author'].queryset = form.base_fields['author'].queryset.filter(id=request.user.id)
+        return form
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if obj is not None and not request.user.has_perm('posts.change_others_post'):
+            readonly_fields += ('author',)
+        return readonly_fields

@@ -48,7 +48,7 @@ class Discipline(models.Model):
 
     primary_organisers = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True,
                                                 related_name="primary_disciplines",
-                                                verbose_name="Zodpovedný organizátori",
+                                                verbose_name="Zodpovední organizátori",
                                                 limit_choices_to={'clazz__grade__is_organiser': True})
     teacher_supervisors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, verbose_name="Dozorujúci učitelia",
                                                  related_name="disciplines_to_supervise",
@@ -91,9 +91,13 @@ class Result(models.Model):
                             blank=True,
                             null=True,
                             help_text="Zobrazí sa ak sú k disciplíne priradené viaceré výsledkovky.")
-    grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Stupne", help_text="Stupne z ktorých triedy sa "
-                                                                                        "mali v disciplíne zúčastniť.",
+    grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Stupne",
+                                    help_text="Stupne z ktorých triedy sa mali v disciplíne zúčastniť.",
                                     limit_choices_to={'competing': True})
+    autofill = models.BooleanField("Automatické vyplnenie", default=True, help_text="Automaticky doplní všetky "
+                                                                                    "triedy zo zvolených stupňov. "
+                                                                                    "Doplnené triedy budú považované "
+                                                                                    "za nezúčastnené.")
 
     class Meta:
         verbose_name_plural = 'výsledkovky'
@@ -138,3 +142,4 @@ class Placement(models.Model):
     class Meta:
         verbose_name_plural = 'umiestnenia'
         verbose_name = 'umiestnenie'
+        unique_together = ('result', 'clazz')

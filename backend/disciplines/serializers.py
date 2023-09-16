@@ -20,27 +20,27 @@ class DisciplineSerializer(serializers.ModelSerializer):
                   'target_grades', 'is_public', 'date_published', 'details_published', 'results_published',
                   'primary_organisers', 'teacher_supervisors')
 
-    def get_fields(self):
-        fields = super().get_fields()
-        # if user is logged in
-        if not self.context['request'].user.is_authenticated:
-            fields.pop('primary_organisers')
-            fields.pop('teacher_supervisors')
+    def to_representation(self, instance):
+        user = self.context.get('request').user
+        representation = super().to_representation(instance)
+        if not user.is_authenticated:
+            representation.pop('primary_organisers')
+            representation.pop('teacher_supervisors')
         else:
-            if not self.context['request'].user.has_perm('disciplines.view_primary_organisers'):
-                fields.pop('primary_organisers')
-            if not self.context['request'].user.has_perm('disciplines.view_teacher_supervisors'):
-                fields.pop('teacher_supervisors')
-            if not self.context['request'].user.has_perm('disciplines.view_hidden'):
-                if not self.instance.date_published:
-                    fields.pop('date')
-                    fields.pop('start_time')
-                    fields.pop('end_time')
-                    fields.pop('location')
-                if not self.instance.details_published:
-                    fields.pop('details')
+            if not user.has_perm('disciplines.view_primary_organisers'):
+                representation.pop('primary_organisers')
+            if not user.has_perm('disciplines.view_teacher_supervisors'):
+                representation.pop('teacher_supervisors')
+            if not user.has_perm('disciplines.view_hidden'):
+                if not instance.date_published:
+                    representation.pop('date')
+                    representation.pop('start_time')
+                    representation.pop('end_time')
+                    representation.pop('location')
+                if not instance.details_published:
+                    representation.pop('details')
 
-        return fields
+        return representation
 
 
 class PlacementSerializer(serializers.ModelSerializer):
