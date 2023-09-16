@@ -50,6 +50,7 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ('title', 'content', 'author__username')
     list_filter = ('date',)
     readonly_fields = ('id',)
+    autocomplete_fields = ('author',)
 
     def has_change_permission(self, request, obj=None):
         if obj is not None and obj.author != request.user:

@@ -169,6 +169,7 @@ class PlacementInline(TabularInline):
     model = Placement
     extra = 0
     fields = ('clazz', 'place')
+    autocomplete_fields = ('clazz',)
 
     # limit choices to classes in the grade of the results or fake classes
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -184,6 +185,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'discipline', 'get_grades', 'autofill', 'get_placements')
     list_filter = ('discipline', 'grades')
     search_fields = ('discipline__name',)
+    autocomplete_fields = ('discipline',)
 
     @admin.display(description='Grades')
     def get_grades(self, obj):
