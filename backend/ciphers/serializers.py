@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from backend.ciphers.models import Cipher, Submission
 
@@ -13,7 +14,8 @@ class CipherSerializer(serializers.ModelSerializer):
 
         if instance.started:
             ret['name'] = instance.name
-            ret['task_file'] = instance.task_file.url
+            ret['task_file'] = reverse('ciphers:ciphers-task-file', kwargs={'pk': instance.pk})
+            ret['task_file_ext'] = instance.task_file.name.split('.')[-1]
         if instance.hint_visible:
             ret['hint_text'] = instance.hint_text
 

@@ -118,8 +118,6 @@ class Cipher(models.Model):
             answer = unidecode.unidecode(answer)
             correct = unidecode.unidecode(correct)
 
-        print("answer: ", answer, " correct: ", correct)
-
         return answer == correct
 
 

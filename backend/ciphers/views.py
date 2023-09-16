@@ -1,5 +1,7 @@
+from django.http import FileResponse
 from django.utils import timezone
 from rest_framework import permissions, viewsets, throttling
+from rest_framework.decorators import action
 
 from backend.users.utils import ReadCreateViewSet
 from backend.ciphers.models import Cipher, Submission
@@ -9,6 +11,13 @@ from backend.ciphers.serializers import CipherSerializer, SubmissionSerializer
 class CiphersViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Cipher.objects.filter()
     serializer_class = CipherSerializer
+
+    @action(detail=True, methods=['get'], url_path='task')
+    def task_file(self, request, pk=None):
+        cipher = self.get_object()
+        hex, ext = cipher.task_file.name.split('/')[-1].split('.')
+        cipher_name = cipher.name.replace(' ', '_')
+        return FileResponse(cipher.task_file, as_attachment=False, filename=f'{cipher_name}_zadanie_{hex[:5]}.{ext}')
 
 
 class SubmissionRateThrottle(throttling.BaseThrottle):

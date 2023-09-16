@@ -181,7 +181,7 @@ MDEDITOR_CONFIGS = {
         'width': '100% ',  # Custom edit box width
         'height': 700,  # Custom edit box height
         'upload_image_url': '/admin/mdeditor/upload/',  # image upload url
-        'image_folder': 'editor',  # image save the folder name
+        'image_folder': 'public',  # image save the folder name
         # 'theme': 'dark',  # edit box theme, dark / default
         # 'preview_theme': 'dark',  # Preview area theme, dark / default
         # 'editor_theme': 'pastel-on-dark',  # edit area theme, pastel-on-dark / default
