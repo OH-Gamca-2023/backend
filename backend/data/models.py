@@ -3,13 +3,13 @@ import random
 
 from django.contrib import messages
 from django.contrib.sessions.models import Session
+from django.core.exceptions import ValidationError
 from django.db import models
 from knox.models import AuthToken
 
 from huey.signals import SIGNAL_CANCELED, SIGNAL_COMPLETE, SIGNAL_ERROR, \
     SIGNAL_EXECUTING, SIGNAL_EXPIRED, SIGNAL_LOCKED, SIGNAL_RETRYING, \
     SIGNAL_REVOKED, SIGNAL_SCHEDULED, SIGNAL_INTERRUPTED
-
 
 SIGNAL_CHOICES = [
     (SIGNAL_CANCELED, SIGNAL_CANCELED),
@@ -38,7 +38,7 @@ class HueyTask(models.Model):
     class Meta:
         verbose_name = 'Huey úloha'
         verbose_name_plural = 'Huey úlohy'
-        default_permissions = ('view', )
+        default_permissions = ('view',)
         ordering = ['-timestamp']
 
     def __str__(self):
@@ -112,7 +112,7 @@ class AuthRestriction(models.Model):
     restricted = models.BooleanField(default=True, help_text='Whether this restriction is enabled.')
 
     full = models.BooleanField(default=False, help_text='Whether this restriction applies to all users. '
-                               'This setting effectively disables all bypasses.')
+                                                        'This setting effectively disables all bypasses.')
 
     bypass_ip = models.CharField(max_length=1000, blank=True,
                                  help_text='Specific IP address which can bypass this restriction. '
@@ -133,7 +133,7 @@ class AuthRestriction(models.Model):
         return self.type + (' (enabled)' if self.restricted else ' (disabled)')
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+            self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         if self.type == 'login':
             # Log out all users when login restriction is changed (for security reasons)
@@ -196,3 +196,59 @@ class ProfileEditPermissions(models.Model):
     def get(user):
         type = user.type()
         return ProfileEditPermissions.objects.get_or_create(user_type=type)[0]
+
+
+class Link(models.Model):
+    key = models.CharField(max_length=50, primary_key=True)
+    target = models.CharField(max_length=500, blank=True, null=True)
+
+    requires_login = models.BooleanField(default=False)
+    requires_staff = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.key} -> {self.target[:30]}{"..." if len(self.target) > 30 else ""}'
+
+    def clean(self):
+        if self.requires_staff and not self.requires_login:
+            raise ValidationError({'requires_staff': 'Link cannot require staff without requiring login.'})
+        if self.class_targets.count() > 0 and not self.requires_login:
+            raise ValidationError({'requires_login': 'Link cannot have class targets without requiring login.'})
+        if self.class_targets.count() == 0 and not self.target:
+            raise ValidationError({'target': 'Link must have either class targets or a target.'})
+
+    @staticmethod
+    def get(key, user):
+        try:
+            obj = Link.objects.get(key=key)
+            if obj.requires_login and not user.is_authenticated:
+                return None
+            if obj.requires_staff and not user.is_staff:
+                return None
+
+            if obj.class_targets.count() > 0 and user.is_authenticated:
+                for ct in obj.class_targets.all():
+                    if user.clazz == ct.clazz:
+                        return ct.target
+
+                if obj.target:
+                    return obj.target
+            else:
+                return obj.target
+
+            return None
+        except Link.DoesNotExist:
+            return None
+
+
+class LinkClassTarget(models.Model):
+    link = models.ForeignKey(Link, on_delete=models.CASCADE, related_name='class_targets')
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE)
+    target = models.CharField(max_length=500, blank=True)
+
+    def __str__(self):
+        return f'{self.link.key} [{self.clazz.name}] -> {self.target[:30]}{"..." if len(self.target) > 30 else ""}'
+
+    class Meta:
+        unique_together = ('link', 'clazz')
+        verbose_name = 'link pre triedu'
+        verbose_name_plural = 'linky pre triedy'

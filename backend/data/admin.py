@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import Setting, AuthRestriction, Alert, ProfileEditPermissions, HueyTask
+from .models import Setting, AuthRestriction, Alert, ProfileEditPermissions, HueyTask, Link, LinkClassTarget
 
 
 @admin.register(Setting)
@@ -63,3 +63,19 @@ class HueyTaskAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class LinkClassTargetInline(admin.TabularInline):
+    model = LinkClassTarget
+    extra = 0
+
+    autocomplete_fields = ['clazz']
+
+
+@admin.register(Link)
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ['key', 'target', 'requires_login', 'requires_staff']
+    list_editable = ['target', 'requires_login', 'requires_staff']
+    search_fields = ['key', 'target']
+
+    inlines = [LinkClassTargetInline]

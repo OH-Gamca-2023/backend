@@ -1,7 +1,10 @@
+from django.http import HttpResponseNotFound
+from django.shortcuts import redirect
 from django.utils import timezone
+from django.views import View
 from rest_framework import viewsets
 
-from backend.data.models import Alert, Setting
+from backend.data.models import Alert, Setting, Link
 from backend.data.serializers import AlertSerializer, SettingSerializer
 
 
@@ -13,3 +16,13 @@ class AlertViewSet(viewsets.ReadOnlyModelViewSet):
 class SettingViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Setting.objects.filter(exposed=True)
     serializer_class = SettingSerializer
+
+
+class LinkView(View):
+    def get(self, request, key):
+        print(key)
+        link = Link.get(key, request.user)
+        if link:
+            return redirect(link, permanent=False)
+        else:
+            return HttpResponseNotFound()
