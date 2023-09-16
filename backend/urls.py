@@ -16,8 +16,8 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.views.decorators.csrf import csrf_exempt
 
-from . import settings
 from .views import *
 from backend.data.views import LinkView
 
@@ -33,9 +33,8 @@ api_urls = [
     path('data/', include('backend.data.urls', namespace='data')),
 ]
 
-
 urlpatterns = [
-    path(r'admin/mdeditor/', include('mdeditor.urls')),
+    path(r'admin/mdeditor/upload/', csrf_exempt(UploadView.as_view()), name='mdeditor_upload'),
     path('admin/', admin.site.urls),
     path('api/', include(api_urls)),
     path('link/<str:key>/', LinkView.as_view(), name='link'),
