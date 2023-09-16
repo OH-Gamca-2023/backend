@@ -18,7 +18,7 @@ class DisciplineSerializer(serializers.ModelSerializer):
         model = Discipline
         fields = ('id', 'name', 'short_name', 'details', 'date', 'start_time', 'end_time', 'location', 'category',
                   'target_grades', 'is_public', 'date_published', 'details_published', 'results_published',
-                  'primary_organisers', 'teacher_supervisors')
+                  'primary_organisers', 'teacher_supervisors', 'result_details')
 
     def to_representation(self, instance):
         user = self.context.get('request').user

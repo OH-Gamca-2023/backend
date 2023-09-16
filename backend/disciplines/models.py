@@ -36,6 +36,9 @@ class Discipline(models.Model):
                                             "do kalendára by sa nezmestil (resp. bol odseknutý).")
 
     details = MDTextField("Detaily", max_length=20000, blank=True, null=True)
+    result_details = MDTextField("Detaily výsledkov", max_length=20000, blank=True, null=True,
+                                 help_text="Tento text sa zobrazí pod výsledkami disciplíny. Odporúča sa použiť "
+                                           "ak chcete upresniť výsledky, ukázať \"pavúka\" alebo podobne.")
 
     date = models.DateField("Dátum", blank=True, null=True)
     start_time = models.TimeField("Čas začiatku", blank=True, null=True)

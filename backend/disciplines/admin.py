@@ -41,20 +41,24 @@ class DisciplineAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('name', 'short_name', 'details')
         }),
-        ('Categorisation', {
+        ('Kategorizácia', {
             'fields': ('category', 'target_grades')
         }),
-        ('Date and time', {
+        ('Dátum, čas a miesto', {
             'fields': ('date', 'start_time', 'end_time', 'location')
         }),
-        ('Organising', {
+        ('Organizátori', {
             'fields': ('primary_organisers', 'teacher_supervisors'),
             'classes': ('collapse',),
             'description': '<b style="color: red;">Ak sa chcete prihlásiť na organizovanie disciplíny, použite '
                            'hlavnú stránku. V tomto rozhraní môžu organizátorov upratovať iba administrátori.</b>'
         }),
-        ('Publishing', {
+        ('Zverejňovanie', {
             'fields': ('date_published', 'details_published', 'results_published')
+        }),
+        ('Detaily výsledkov', {
+            'fields': ('result_details',),
+            'classes': ('collapse',)
         }),
     )
 
@@ -66,10 +70,10 @@ class DisciplineAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('name', 'short_name', 'details')
         }),
-        ('Categorisation', {
+        ('Kategorizácia', {
             'fields': ('category', 'target_grades')
         }),
-        ('Date and time', {
+        ('Dátum, čas a miesto', {
             'fields': ('date', 'start_time', 'end_time', 'location')
         }),
     )
