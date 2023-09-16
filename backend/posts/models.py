@@ -1,5 +1,6 @@
 import random
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from mdeditor.fields import MDTextField
 
@@ -35,7 +36,7 @@ class Post(models.Model):
     id = models.CharField(max_length=15, primary_key=True, unique=True, default=gen_id)
 
     title = models.CharField("Nadpis", max_length=100)
-    content = MDTextField("Obsah", max_length=20000)
+    content = MDTextField("Obsah", max_length=20000, blank=True, null=True)
     redirect = models.CharField("Presmerovanie", max_length=100, blank=True, null=True,
                                 help_text="Presmerovanie na inú stránku. Ak je vyplnené, obsah bude ignorovaný.")
     author = models.ForeignKey(
@@ -59,6 +60,12 @@ class Post(models.Model):
         if self.author is None:
             return self.title + " (administátor)"
         return self.title + " (" + self.author.username + ")"
+
+    def clean(self):
+        if not self.content and not self.redirect:
+            raise ValidationError({
+                'content': 'Obsah alebo presmerovanie musí byť vyplnené.'
+            })
 
     class Meta:
         verbose_name_plural = 'príspevky'

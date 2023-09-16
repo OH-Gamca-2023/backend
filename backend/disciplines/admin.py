@@ -3,9 +3,11 @@ from django.contrib.admin import TabularInline
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse, path
+from django_object_actions import DjangoObjectActions, action
 
 from .models import *
 from backend.kalendar.generator import generate
+from .tasks import send_7day_notification, send_3day_notification, send_1day_notification
 from .views.publishing import DetailsPublishView, ResultsPublishView
 from backend.posts.models import Post, Tag
 from ..users.models import Clazz
@@ -29,7 +31,7 @@ class ResultInline(admin.TabularInline):
 
 
 @admin.register(Discipline)
-class DisciplineAdmin(admin.ModelAdmin):
+class DisciplineAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_display = ('name', 'category', 'target_grades_str', 'date', 'start_time', 'end_time', 'date_published', 'details_published',
                     'results_published', 'result_sets')
     list_filter = ('date_published', 'details_published', 'category', 'target_grades')
@@ -163,6 +165,16 @@ class DisciplineAdmin(admin.ModelAdmin):
                  name='disciplines_publish_results'),
         ]
         return custom_urls + urls
+
+    @action(description='Pošle upozornenie zodpovedným organizátorom', permissions=['disciplines.send_notification'],
+            label='Pošli upozornenie')
+    def send_notification(self, request, queryset):
+        send_7day_notification()()
+        send_3day_notification()()
+        send_1day_notification()()
+        messages.success(request, 'Požiadavka na poslanie upozornení bola zaznamenaná.')
+
+    changelist_actions = ['send_notification']
 
 
 class PlacementInline(TabularInline):

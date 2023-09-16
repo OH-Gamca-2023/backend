@@ -47,10 +47,11 @@ class TagAdmin(DjangoObjectActions, admin.ModelAdmin):
 class PostAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'author', 'date')
     list_display_links = ('id', 'title')
+    ordering = ('-date',)
     search_fields = ('title', 'content', 'author__username')
     list_filter = ('date',)
     readonly_fields = ('id',)
-    autocomplete_fields = ('author',)
+    autocomplete_fields = ('author', 'related_disciplines', 'tags')
 
     def has_change_permission(self, request, obj=None):
         if obj is not None and obj.author != request.user:
