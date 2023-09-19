@@ -30,8 +30,8 @@ def send_7day_notification():
     if not Setting.objects.filter(key='DISCORD_NOTIFICATION_WEBHOOK').exists():
         raise Exception('DISCORD_NOTIFICATION_WEBHOOK is not set in model Settings')
 
-    three_days_from_now = timezone.now() + timezone.timedelta(days=3)
-    disciplines = Discipline.objects.filter(date=three_days_from_now)
+    week_from_now = timezone.now() + timezone.timedelta(days=7)
+    disciplines = Discipline.objects.filter(date=week_from_now)
 
     for discipline in disciplines:
         dc_tags = ""
