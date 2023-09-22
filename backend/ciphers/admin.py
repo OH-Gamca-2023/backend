@@ -19,7 +19,7 @@ class CipherAdmin(admin.ModelAdmin):
         }),
         ('Advanced', {
             'fields': ('ignore_case', 'ignore_intermediate_whitespace', 'ignore_trailing_leading_whitespace',
-                       'ignore_accents', 'submission_delay', 'max_submissions_per_day')
+                       'ignore_accents', 'submission_delay', 'max_submissions_per_day'),
             'classes': ('collapse',),
             'description': '<b><h3 style="color: red;">Advanced settings</h3><br>Only editable with special '
                            'permissions. You most  likely don\'t want to change these.</b>'
