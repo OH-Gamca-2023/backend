@@ -7,7 +7,7 @@ from backend.ciphers.models import Cipher, Submission
 class CipherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cipher
-        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended', 'submission_delay']
+        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended', 'submission_delay', 'max_submissions_per_day']
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
