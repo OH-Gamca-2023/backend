@@ -26,10 +26,22 @@ class SubmissionRateThrottle(throttling.BaseThrottle):
         if request.user.is_authenticated:
             if request.method == 'POST':
                 cipher_pk = view.kwargs['cipher_pk']
-                last_submission = Submission.objects.filter(clazz=request.user.clazz,
-                                                            cipher_id=cipher_pk).order_by('-time').first()
 
-                submission_delay = Cipher.objects.get(pk=cipher_pk).submission_delay
+                base = None
+
+                if request.user.clazz.grade.cipher_competing:
+                    base = Submission.objects.filter(clazz=request.user.clazz)
+                else:
+                    base = Submission.objects.filter(submitted_by=request.user)
+
+                cipher = Cipher.objects.get(pk=cipher_pk)
+
+                if base.filter(cipher_id=cipher_pk, time__day=timezone.now().day).count() >= cipher.max_submissions_per_day:
+                    return False
+
+                last_submission = base.filter(clazz=request.user.clazz, cipher_id=cipher_pk).order_by('-time').first()
+
+                submission_delay = cipher.submission_delay
                 if not request.user.clazz.grade.cipher_competing:
                     submission_delay *= 2
 
@@ -51,4 +63,3 @@ class SubmissionViewSet(ReadCreateViewSet):
             else:
                 return base.filter(submitted_by=self.request.user)
         return base.none()
-

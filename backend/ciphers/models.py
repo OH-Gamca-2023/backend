@@ -35,6 +35,7 @@ class Cipher(models.Model):
                                                                   '(10 minút), odporúčame nemeniť. Pri individuálnom '
                                                                   'riešení je táto hodnota zdvojnásobená.',
                                            verbose_name='Interval medzi odpoveďami')
+    max_submissions_per_day = models.IntegerField(default=5, help_text='Maximálny počet odpovedí na túto šifru za deň.')
 
     hint_text = models.CharField(max_length=1000, blank=True, null=True)
     hint_publish_time = models.DateTimeField(blank=True, null=True)
