@@ -62,23 +62,28 @@ class CipherAdmin(DjangoObjectActions, admin.ModelAdmin):
         def get_results(submitters, individual):
             results = []
             for submitter in submitters:
+                base_query = Submission.objects.filter(
+                    submitted_by=submitter) if individual else Submission.objects.filter(clazz=submitter)
                 result_obj = {
-                    'submitter': User.objects.get(pk=submitter).username if individual else Clazz.objects.get(pk=submitter).name,
-                    'solved': Submission.objects.filter(submitted_by=submitter, correct=True)
+                    'submitter': User.objects.get(pk=submitter).username if individual else Clazz.objects.get(
+                        pk=submitter).name,
+                    'solved': base_query.filter(correct=True)
                     .values_list('cipher', flat=True).distinct(),
                     'days_until_solved': 0,
-                    'solved_before_hint': Submission.objects.filter(submitted_by=submitter, correct=True, after_hint=False)
+                    'solved_before_hint': base_query.filter(correct=True, after_hint=False)
                     .values_list('cipher', flat=True).distinct().count(),
-                    'wrong': Submission.objects.filter(submitted_by=submitter, correct=False).count(),
+                    'wrong': base_query.filter(correct=False).count(),
                     'time_until_solved': 0,
                     'individual': individual
                 }
 
                 for cipher in result_obj['solved']:
-                    solving_submissions = Submission.objects.filter(submitted_by=submitter, cipher=cipher, correct=True)
+                    solving_submissions = base_query.filter(cipher=cipher, correct=True)
                     cipher = Cipher.objects.get(pk=cipher)
-                    result_obj['days_until_solved'] += (solving_submissions.order_by('time').first().time - cipher.start).days
-                    result_obj['time_until_solved'] += int((solving_submissions.order_by('time').first().time - cipher.start).total_seconds())
+                    result_obj['days_until_solved'] += (
+                                solving_submissions.order_by('time').first().time - cipher.start).days
+                    result_obj['time_until_solved'] += int(
+                        (solving_submissions.order_by('time').first().time - cipher.start).total_seconds())
 
                 result_obj['solved'] = result_obj['solved'].count()
                 results.append(result_obj)
