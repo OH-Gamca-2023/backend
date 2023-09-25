@@ -53,9 +53,11 @@ class Discipline(models.Model):
                                                 related_name="primary_disciplines",
                                                 verbose_name="Zodpovední organizátori",
                                                 limit_choices_to={'clazz__grade__is_organiser': True})
-    teacher_supervisors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, verbose_name="Dozorujúci učitelia",
+    teacher_supervisors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, verbose_name="Učitelia v porote",
                                                  related_name="disciplines_to_supervise",
                                                  limit_choices_to={'clazz__grade__is_teacher': True})
+    teacher_supervisors_enabled = models.BooleanField(default=False, verbose_name="Povoliť prihlasovanie učiteľov do "
+                                                                                  "poroty")
 
     date_published = models.BooleanField(default=False, verbose_name="Dátum zverejnený")
     details_published = models.BooleanField(default=False, verbose_name="Detaily zverejnené")

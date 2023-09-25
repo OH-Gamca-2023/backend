@@ -41,7 +41,7 @@ class DisciplineAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'short_name', 'details')
+            'fields': ('name', 'short_name', 'details', 'teacher_supervisors_enabled')
         }),
         ('Kategorizácia', {
             'fields': ('category', 'target_grades')
@@ -70,7 +70,7 @@ class DisciplineAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     add_fieldsets = (
         (None, {
-            'fields': ('name', 'short_name', 'details')
+            'fields': ('name', 'short_name', 'details', 'teacher_supervisors_enabled')
         }),
         ('Kategorizácia', {
             'fields': ('category', 'target_grades')
