@@ -94,10 +94,10 @@ class CipherAdmin(DjangoObjectActions, admin.ModelAdmin):
             # lower is better: days_until_solved, wrong, time_until_solved
             if obj1['solved'] != obj2['solved']:
                 return obj2['solved'] - obj1['solved']
-            elif obj1['days_until_solved'] != obj2['days_until_solved']:
-                return obj1['days_until_solved'] - obj2['days_until_solved']
             elif obj1['solved_before_hint'] != obj2['solved_before_hint']:
                 return obj2['solved_before_hint'] - obj1['solved_before_hint']
+            elif obj1['days_until_solved'] != obj2['days_until_solved']:
+                return obj1['days_until_solved'] - obj2['days_until_solved']
             elif obj1['wrong'] != obj2['wrong']:
                 return obj1['wrong'] - obj2['wrong']
             else:
