@@ -107,9 +107,9 @@ class CipherAdmin(DjangoObjectActions, admin.ModelAdmin):
         results.sort(key=functools.cmp_to_key(sort_results))
 
         # generate csv
-        csv = 'submitter,solved,days_until_solved,solved_before_hint,wrong,time_until_solved,individual\n'
+        csv = 'submitter,solved,solved_before_hint,days_until_solved,wrong,time_until_solved,individual\n'
         for result in results:
-            csv += f'{result["submitter"]},{result["solved"]},{result["days_until_solved"]},{result["solved_before_hint"]},{result["wrong"]},{result["time_until_solved"]},{result["individual"]}\n'
+            csv += f'{result["submitter"]},{result["solved"]},{result["solved_before_hint"]},{result["days_until_solved"]},{result["wrong"]},{result["time_until_solved"]},{result["individual"]}\n'
 
         # return as csv attachment
         response = HttpResponse(csv, content_type='text/csv')
