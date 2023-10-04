@@ -1,13 +1,16 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from backend.ciphers.models import Cipher, Submission
+from backend.ciphers.models import Cipher, Submission, Rating
 
 
 class CipherSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Cipher
-        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended', 'submission_delay', 'max_submissions_per_day']
+        fields = ['id', 'start', 'hint_publish_time', 'end', 'started', 'hint_visible', 'has_ended', 'submission_delay',
+                  'max_submissions_per_day', 'rating']
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -36,6 +39,12 @@ class CipherSerializer(serializers.ModelSerializer):
                     'attempts': instance.attempts_by(self.context['request'].user, True)
                 }
         return ret
+
+    def get_rating(self, obj):
+        rating = obj.get_rating(self.context['request'].user)
+        if rating is None:
+            return None
+        return RatingSerializer(rating).data
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
@@ -72,3 +81,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
         data['after_hint'] = data['cipher'].hint_visible
 
         return data
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['stars', 'detail']

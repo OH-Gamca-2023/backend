@@ -3,6 +3,8 @@ import os
 
 import unidecode
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 from backend import settings
@@ -121,6 +123,13 @@ class Cipher(models.Model):
 
         return answer == correct
 
+    def get_rating(self, user):
+        if user and user.is_authenticated:
+            if user.clazz.grade.cipher_competing:
+                return self.rating_set.filter(clazz=user.clazz).first()
+            return self.rating_set.filter(submitted_by=user).first()
+        return None
+
 
 class Submission(models.Model):
     cipher = models.ForeignKey(Cipher, on_delete=models.CASCADE)
@@ -154,3 +163,60 @@ class Submission(models.Model):
 
     def __str__(self):
         return f'[{"✓" if self.correct else "✗"}] {self.clazz.name} - {self.cipher.name}'
+
+
+class Rating(models.Model):
+    clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE)
+    cipher = models.ForeignKey(Cipher, on_delete=models.CASCADE)
+
+    submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    stars = models.DecimalField(max_digits=3, decimal_places=1)
+    detail = models.CharField(max_length=2000, blank=True, null=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    @property
+    def submitter(self):
+        if self.clazz.grade.cipher_competing:
+            return str(self.clazz) + ' - ' + str(self.submitted_by)
+        return 'Individual - ' + str(self.submitted_by)
+
+    @property
+    def submitter_short(self):
+        if self.clazz.grade.cipher_competing:
+            return str(self.clazz)
+        return str(self.submitted_by)
+
+    def __str__(self):
+        return f'{self.cipher.name} - {self.stars}* [{self.submitter_short}]'
+
+
+class RatingHistory(models.Model):
+    rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
+    stars = models.DecimalField(max_digits=3, decimal_places=1)
+    detail = models.CharField(max_length=2000, blank=True, null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    revision = models.IntegerField()
+    created = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-created']
+        verbose_name = 'rating history entry'
+        verbose_name_plural = 'rating history entries'
+
+
+@receiver(post_save, sender=Rating)
+def create_rating_history(sender, instance, created, **kwargs):
+    revision = 0
+    if not created:
+        revision = RatingHistory.objects.filter(rating=instance).count()
+
+    RatingHistory.objects.create(
+        rating=instance,
+        stars=instance.stars,
+        detail=instance.detail,
+        updated_by=instance.submitted_by,
+        created=instance.updated,
+        revision=revision
+    )

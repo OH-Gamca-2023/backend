@@ -29,7 +29,7 @@ class PermissionSerializer(serializers.Serializer):
         edit_permissions = ProfileEditPermissions.get(user)
         self.instance = {
             'staff': user.is_staff,
-            'teacher': user.clazz.grade.is_teacher,
+            'teacher': user.clazz.grade.is_teacher if user.clazz and user.clazz.grade else False,
             'superuser': user.is_superuser,
             'type': user.type(),
             'profile_edit': {

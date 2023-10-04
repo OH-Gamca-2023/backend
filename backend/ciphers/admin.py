@@ -132,3 +132,41 @@ class SubmissionAdmin(admin.ModelAdmin):
     @admin.display(description='Súťažné', boolean=True)
     def competing(self, obj):
         return obj.clazz.grade.cipher_competing
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'submitter', 'cipher', 'stars', 'detail_cut', 'created', 'updated')
+    list_filter = ('cipher', 'clazz')
+    autocomplete_fields = ('cipher', 'clazz', 'submitted_by')
+    ordering = ('-created',)
+
+    list_display_links = ('pk', 'submitter')
+
+    def detail_cut(self, obj):
+        if obj.detail is None:
+            return ''
+        return obj.detail[:50] + '...' if len(obj.detail) > 50 else obj.detail
+    detail_cut.short_description = 'Detail'
+
+
+@admin.register(RatingHistory)
+class RatingHistoryAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'rating', 'stars', 'detail_cut', 'created')
+    list_filter = ('rating__cipher', 'rating__clazz')
+    ordering = ('-created',)
+
+    def detail_cut(self, obj):
+        if obj.detail is None:
+            return ''
+        return obj.detail[:50] + '...' if len(obj.detail) > 50 else obj.detail
+    detail_cut.short_description = 'Detail'
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
