@@ -103,21 +103,21 @@ class MicrosoftOauthProvider(OauthProvider):
                                      f"More details can be found in the logs.")
                 print(f"--- POSSIBLE LOGIN FRAUD ---\n"
                       f"Real user:\n"
-                        f" - ID: {user['id']}\n"
-                        f" - Name: {user['displayName']}\n"
-                        f" - Email: {user['mail']}\n"
+                      f" - ID: {user['id']}\n"
+                      f" - Name: {user['displayName']}\n"
+                      f" - Email: {user['mail']}\n"
                       f"Imitated user:\n"
-                        f" - ID: {data['user']['id']}\n"
-                        f" - Name: {data['user']['displayName']}\n"
-                        f" - Email: {data['user']['mail']}\n"
+                      f" - ID: {data['user']['id']}\n"
+                      f" - Name: {data['user']['displayName']}\n"
+                      f" - Email: {data['user']['mail']}\n"
                       f"Request:\n"
-                        f" - IP: {request.META['REMOTE_ADDR']}\n"
+                      f" - IP: {request.META['REMOTE_ADDR']}\n"
                       f"--------- RAW DATA ---------\n"
-                        f"Real user: {json.dumps(user)}\n"
-                        f"Imitated user: {json.dumps(data['user'])}\n"
-                        f"Request: {str(request)}\n"
+                      f"Real user: {json.dumps(user)}\n"
+                      f"Imitated user: {json.dumps(data['user'])}\n"
+                      f"Request: {str(request)}\n"
                       f"--------- EXCEPTION --------\n"
-                        f"{str(e)}\n"
+                      f"{str(e)}\n"
                       f"----------------------------\n")
             raise e
 
@@ -144,48 +144,51 @@ class MicrosoftOauthProvider(OauthProvider):
         return self.get_user_props(request, None, oauth_user)
 
     def process_clazz(self, oauth_user):
-        if oauth_user.get_clazz() is not None:
-            return oauth_user.get_clazz()
+        if oauth_user.department == 'alumni' or oauth_user.job_title == 'absolvent':
+            return Clazz.objects.get_or_create(name='Ex-Gamča',
+                                               defaults={
+                                                   'name': 'Ex-Gamča',
+                                                   'grade': Grade.objects.get(name='Alumni'),
+                                                   'is_fake': True,
+                                                   'microsoft_department': 'alumni'
+                                               })[0]
+        elif oauth_user.department == 'zamestnanci' or 'učiteľ' in oauth_user.job_title:
+            return Clazz.objects.get_or_create(
+                name='Učitelia',
+                defaults={
+                    'name': 'Učitelia',
+                    'grade': Grade.objects.get(name='Učitelia'),
+                    'is_fake': True,
+                    'microsoft_department': 'zamestnanci'
+                }
+            )[0]
         else:
-            if oauth_user.department == 'alumni':
+            if oauth_user.get_clazz() is not None:
+                return oauth_user.get_clazz()
+            if '.' in oauth_user.department:
+                year, clazz = oauth_user.department.split('.')
                 return Clazz.objects.create(
-                    name='Alumni',
-                    grade=Grade.objects.get(name='Alumni'),
-                    is_fake=True,
-                    microsoft_department='alumni'
-                )
-            elif oauth_user.department == 'zamestnanci':
-                return Clazz.objects.create(
-                    name='Učitelia',
-                    grade=Grade.objects.get(name='Učitelia'),
-                    is_fake=True,
-                    microsoft_department='zamestnanci'
+                    name=year + ". " + clazz,
+                    grade=Grade.objects.get(name="3. Stupeň"),
+                    is_fake=False,
+                    microsoft_department=oauth_user.department
                 )
             else:
-                if '.' in oauth_user.department:
-                    year, clazz = oauth_user.department.split('.')
-                    return Clazz.objects.create(
-                        name=year + ". " + clazz,
-                        grade=Grade.objects.get(name="3. Stupeň"),
-                        is_fake=False,
-                        microsoft_department=oauth_user.department
-                    )
-                else:
-                    clazz = oauth_user.department
+                clazz = oauth_user.department
 
-                    grade = Grade.objects.get(name="3. Stupeň")
-                    if clazz[:-1] in ['Prima', 'Sekunda', 'Tercia', 'Kvarta']:
-                        grade = Grade.objects.get(name="2. Stupeň")
+                grade = Grade.objects.get(name="3. Stupeň")
+                if clazz[:-1] in ['Prima', 'Sekunda', 'Tercia', 'Kvarta']:
+                    grade = Grade.objects.get(name="2. Stupeň")
 
-                    if clazz[-1] == 'A' or clazz[-1] == 'B':
-                        clazz = clazz[:-1] + ' ' + clazz[-1]
+                if clazz[-1] == 'A' or clazz[-1] == 'B':
+                    clazz = clazz[:-1] + ' ' + clazz[-1]
 
-                    return Clazz.objects.create(
-                        name=clazz,
-                        grade=grade,
-                        is_fake=False,
-                        microsoft_department=oauth_user.department
-                    )
+                return Clazz.objects.create(
+                    name=clazz,
+                    grade=grade,
+                    is_fake=False,
+                    microsoft_department=oauth_user.department
+                )
 
     def get_check_params(self, request, user=None, oauth_user=None, user_props=None):
         if oauth_user is not None:
