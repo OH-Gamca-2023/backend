@@ -2,9 +2,12 @@ import functools
 
 from django.contrib import admin, messages
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.urls import path
 from django_object_actions import DjangoObjectActions, action
 
 from .models import *
+from .views.admin import CipherOverviewView
 from ..users.models import User
 
 
@@ -116,7 +119,19 @@ class CipherAdmin(DjangoObjectActions, admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename="results.csv"'
         return response
 
+    @action(label='Results and ratings')
+    def results_and_ratings(self, request, obj):
+        return redirect('admin:cipher_overview', pk=obj.pk)
+
+    def get_urls(self):
+        custom_urls = [
+            path('<int:pk>/overview/', admin.site.admin_view(CipherOverviewView.as_view()),
+                 name='cipher_overview')
+        ]
+        return custom_urls + super().get_urls()
+
     changelist_actions = ('results',)
+    change_actions = ('results_and_ratings',)
 
 
 @admin.register(Submission)

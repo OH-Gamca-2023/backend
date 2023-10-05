@@ -1,0 +1,113 @@
+{% extends 'admin/base_site.html' %}
+
+{% load static i18n admin_urls admin_modify %}
+
+{% block extrahead %}{{ block.super }}
+<script src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }}{% endblock %}
+
+{% block title %}Výsledky a hodnotenia šifry{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'change' object_id=cipher.pk %}">{{ cipher|truncatewords:"18" }}</a>
+&rsaquo; <span>Výsledky a hodnotenia</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Výsledky a hodnotenia šifry</h1>
+    <h2>
+        {{ cipher }} (#{{ cipher.pk }})
+    </h2>
+
+    <h4>Výsledky</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Účastník</th>
+                <th>Pokusy</th>
+                <th>Vyriešené</th>
+                <th>Vyriešené pred nápovedou</th>
+                <th>Čas vyriešenia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if results_no_perm %}
+                <tr>
+                    <td colspan="3">
+                        <p class="errornote">
+                            {% translate 'You do not have permission to view results.' %}
+                        </p>
+                    </td>
+                </tr>
+            {% else %}
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.submitter }}</td>
+                        <td>{{ result.attempts }}</td>
+                        <td>
+                            {% if result.solved %}
+                                <img src="{% static 'admin/img/icon-yes.svg' %}" alt="{% translate 'True' %}">
+                            {% else %}
+                                <img src="{% static 'admin/img/icon-no.svg' %}" alt="{% translate 'False' %}">
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if result.solved_before_hint %}
+                                <img src="{% static 'admin/img/icon-yes.svg' %}" alt="{% translate 'True' %}">
+                            {% else %}
+                                <img src="{% static 'admin/img/icon-no.svg' %}" alt="{% translate 'False' %}">
+                            {% endif %}
+                        </td>
+                        <td>{{ result.solved_at }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+
+    <h4>Hodnotenia</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Odosielateľ</th>
+                <th>Hviezdičky</th>
+                <th>Detail</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if ratings_no_perm %}
+                <tr>
+                    <td colspan="3">
+                        <p class="errornote">
+                            {% translate 'You do not have permission to view ratings.' %}
+                        </p>
+                    </td>
+                </tr>
+            {% else %}
+                {% for rating in ratings %}
+                    <tr>
+                        <td>{{ rating.submitter }}</td>
+                        <td>{{ rating.stars }}</td>
+                        <td>{{ rating.detail }}</td>
+                        <td>
+                            <a href="{% url 'admin:ciphers_rating_change' rating.pk %}" class="changelink">{% translate 'Change' %}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

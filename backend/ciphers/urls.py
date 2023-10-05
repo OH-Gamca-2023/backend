@@ -1,6 +1,6 @@
 from rest_framework.routers import SimpleRouter
 
-from backend.ciphers.views import CiphersViewSet, SubmissionViewSet
+from backend.ciphers.views.api import CiphersViewSet, SubmissionViewSet
 
 router = SimpleRouter()
 router.register('', CiphersViewSet, basename='ciphers')
