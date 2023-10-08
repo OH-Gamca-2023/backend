@@ -139,7 +139,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('pk', 'clazz', 'cipher', 'answer', 'correct', 'after_hint', 'time', 'submitted_by', 'competing')
     list_filter = ('cipher', 'clazz', 'after_hint', 'correct')
     search_fields = ('answer',)
-    ordering = ('time',)
+    ordering = ('-time',)
     autocomplete_fields = ('cipher', 'clazz', 'submitted_by')
 
     list_display_links = ('pk',)
