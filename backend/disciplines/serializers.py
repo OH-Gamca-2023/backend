@@ -55,7 +55,7 @@ class DisciplineSerializer(serializers.ModelSerializer):
 class PlacementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Placement
-        fields = ('clazz', 'place', 'participated')
+        fields = ('clazz', 'place', 'participated', 'detail')
 
 
 class ResultSerializer(serializers.ModelSerializer):

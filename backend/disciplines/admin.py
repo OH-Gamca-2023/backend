@@ -180,8 +180,7 @@ class DisciplineAdmin(DjangoObjectActions, admin.ModelAdmin):
 class PlacementInline(TabularInline):
     model = Placement
     extra = 0
-    fields = ('clazz', 'place')
-    autocomplete_fields = ('clazz',)
+    fields = ('clazz', 'place', 'detail')
 
     # limit choices to classes in the grade of the results or fake classes
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

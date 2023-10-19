@@ -133,6 +133,8 @@ class Placement(models.Model):
     clazz = models.ForeignKey('users.Clazz', on_delete=models.CASCADE, verbose_name="Trieda", related_name="placements")
     place = models.SmallIntegerField("Pozícia", default=-1, null=False, blank=False)
 
+    detail = models.CharField("Detaily", max_length=10, null=True, blank=True)
+
     def save(
             self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
