@@ -145,9 +145,8 @@ def serialize_discipline(discipline, categories, grades):
             'regular': discipline.name,
             'short': discipline.short_name if discipline.short_name else discipline.name,
         },
-        'start_date': discipline.date,
+        'date': discipline.date,
         'start_time': discipline.start_time,
-        'end_date': discipline.date,  # Disciplines don't have end date
         'end_time': discipline.end_time,
         'location': discipline.location,
         'category': {
@@ -165,9 +164,8 @@ def serialize_event(event):
             'regular': event.name,
             'short': event.name,  # Events don't have short name
         },
-        'start_date': event.start_date,
+        'date': event.start_date,
         'start_time': event.start_time,
-        'end_date': event.end_date if event.end_date else event.start_date,
         'end_time': event.end_time,
         'location': event.location,
         'category': {
@@ -188,10 +186,9 @@ def serialize_json_calendar(disciplines, cal_id, description="Kalendár discipl�
 
     for d in disciplines:
         d = d.copy()
-        d['date'] = d['start_date'].strftime("%Y-%m-%d")  # Compatibility with old format, TODO: remove
-        d['start_date'] = d['start_date'].strftime("%Y-%m-%d")
+        d['date'] = d['date'].strftime("%Y-%m-%d")
+        d['start_date'] = d['date'].strftime("%Y-%m-%d")  # Compatibility with old format, TODO: remove
         d['start_time'] = d['start_time'].strftime("%H:%M") if d['start_time'] is not None else None
-        d['end_date'] = d['end_date'].strftime("%Y-%m-%d") if d['end_date'] is not None else None
         d['end_time'] = d['end_time'].strftime("%H:%M") if d['end_time'] is not None else None
         d['category'] = d['category']['id']
         cal['events'].append(d)
@@ -215,13 +212,13 @@ def serialize_ical_calendar(events, cal_id, description="Kalendár disciplín"):
                      "DTSTAMP:" + timezone.now().strftime("%Y%m%dT%H%M%S") + "\n"
 
         if event['start_time'] is not None:
-            ical_event += "DTSTART:" + event['start_date'].strftime("%Y%m%d") + "T" + event['start_time'].strftime(
+            ical_event += "DTSTART:" + event['date'].strftime("%Y%m%d") + "T" + event['start_time'].strftime(
                 "%H%M%S") + "\n"
             if event['end_time'] is not None:
-                ical_event += "DTEND:" + event['end_date'].strftime("%Y%m%d") + "T" + event['end_time'].strftime(
+                ical_event += "DTEND:" + event['date'].strftime("%Y%m%d") + "T" + event['end_time'].strftime(
                     "%H%M%S") + "\n"
         else:
-            ical_event += "DTSTART:" + event['start_date'].strftime("%Y%m%d") + "T000000\n"
+            ical_event += "DTSTART:" + event['date'].strftime("%Y%m%d") + "T000000\n"
 
         if event['location'] is not None:
             ical_event += "LOCATION:" + event['location'] + "\n"

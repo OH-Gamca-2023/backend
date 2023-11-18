@@ -22,10 +22,10 @@ class CalendarAdmin(DjangoObjectActions, admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
-    list_display = ('name', 'start_date', 'start_time', 'end_date', 'end_time', 'location')
-    list_filter = ('start_date', 'end_date')
+    list_display = ('name', 'date', 'start_time', 'end_time', 'location')
+    list_filter = ('date',)
     search_fields = ('name', 'location')
-    ordering = ('start_date', 'start_time', 'end_date', 'end_time')
+    ordering = ('date', 'start_time', 'end_time')
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

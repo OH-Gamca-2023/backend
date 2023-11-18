@@ -30,10 +30,8 @@ def gen_id():
 class Event(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=gen_id)
     name = models.CharField("Názov", max_length=100)
-    start_date = models.DateField("Dátum začiatku", blank=False, null=False)
+    date = models.DateField("Dátum začiatku", blank=False, null=False)
     start_time = models.TimeField("Čas začiatku", blank=False, null=False)
-    end_date = models.DateField("Dátum konca", blank=True, null=True,
-                                help_text="Preferovane nepoužívať, nie je dobre podporované v kalendári.")
     end_time = models.TimeField("Čas konca", blank=True, null=True)
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
     category = models.ForeignKey("disciplines.Category", verbose_name="Kategória", on_delete=models.CASCADE)
@@ -41,18 +39,6 @@ class Event(models.Model):
 
     def __str__(self):
         return "Event: %s" % self.name
-
-    def clean(self):
-        if not self.end_date and not self.end_time:
-            raise ValidationError({
-                'end_date': "Musí byť vyplnený aspoň jeden z koncových údajov.",
-                'end_time': "Musí byť vyplnený aspoň jeden z koncových údajov."
-            })
-        if self.end_date and not self.end_time:
-            raise ValidationError({
-                'end_time': "Musí byť vyplnený, ak je vyplnený dátum konca."
-            })
-        return super().clean()
 
 
 class GenerationEvent(models.Model):
