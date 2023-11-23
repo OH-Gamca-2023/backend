@@ -50,7 +50,6 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ('-date',)
     search_fields = ('title', 'content', 'author__username')
     list_filter = ('date',)
-    readonly_fields = ('id',)
     autocomplete_fields = ('author', 'related_disciplines', 'tags')
 
     def has_change_permission(self, request, obj=None):
@@ -63,18 +62,15 @@ class PostAdmin(admin.ModelAdmin):
             return super().has_delete_permission(request, obj) and request.user.has_perm('posts.delete_others_post')
         return super().has_delete_permission(request, obj)
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change, **kwargs)
-        if 'author' not in form.base_fields:
-            if obj is None:
-                form.base_fields['author'].initial = request.user
-            if not request.user.has_perm('posts.post_as_other'):
-                form.base_fields['author'].required = True
-                form.base_fields['author'].queryset = form.base_fields['author'].queryset.filter(id=request.user.id)
-        return form
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
-        if obj is not None and not request.user.has_perm('posts.change_others_post'):
+        readonly_fields = ('id',)
+        if obj is None or not request.user.has_perm('posts.post_as_other'):
             readonly_fields += ('author',)
+        if not request.user.is_superuser:
+            readonly_fields += ('safe',)
         return readonly_fields

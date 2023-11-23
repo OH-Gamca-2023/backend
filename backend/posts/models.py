@@ -37,6 +37,8 @@ class Post(models.Model):
 
     title = models.CharField("Nadpis", max_length=100)
     content = MDTextField("Obsah", max_length=20000, blank=True, null=True)
+    safe = models.BooleanField("Bezpečné", default=False, help_text="Ak je zapnuté, v obsahu bude možné použiť "
+                                                                    "kompletné HTML. Iba admin vie meniť.")
     redirect = models.CharField("Presmerovanie", max_length=100, blank=True, null=True,
                                 help_text="Presmerovanie na inú stránku. Ak je vyplnené, obsah bude ignorovaný.")
     author = models.ForeignKey(
