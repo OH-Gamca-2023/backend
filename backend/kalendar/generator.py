@@ -41,11 +41,11 @@ def generate(request, cause):
 
         # sort disciplines by date and then by time
         serialized.sort(key=lambda event: (
-            event['start_date'], event['start_time'] if event['start_time'] else time(0, 0)))
+            event['date'], event['start_time'] if event['start_time'] else time(0, 0)))
         serialized_staff_only.sort(key=lambda event: (
-            event['start_date'], event['start_time'] if event['start_time'] else time(0, 0)))
+            event['date'], event['start_time'] if event['start_time'] else time(0, 0)))
         serialized_all.sort(key=lambda event: (
-            event['start_date'], event['start_time'] if event['start_time'] else time(0, 0)))
+            event['date'], event['start_time'] if event['start_time'] else time(0, 0)))
 
         # serialize the calendars into json
         json_serialized_disciplines = serialize_json_calendar(serialized, cal_id)
@@ -187,7 +187,7 @@ def serialize_json_calendar(disciplines, cal_id, description="KalendÃ¡r disciplÃ
     for d in disciplines:
         d = d.copy()
         d['date'] = d['date'].strftime("%Y-%m-%d")
-        d['start_date'] = d['date'].strftime("%Y-%m-%d")  # Compatibility with old format, TODO: remove
+        d['start_date'] = d['date']  # Compatibility with old format, TODO: remove
         d['start_time'] = d['start_time'].strftime("%H:%M") if d['start_time'] is not None else None
         d['end_time'] = d['end_time'].strftime("%H:%M") if d['end_time'] is not None else None
         d['category'] = d['category']['id']
