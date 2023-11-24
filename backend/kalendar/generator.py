@@ -164,7 +164,7 @@ def serialize_event(event):
             'regular': event.name,
             'short': event.name,  # Events don't have short name
         },
-        'date': event.start_date,
+        'date': event.date,
         'start_time': event.start_time,
         'end_time': event.end_time,
         'location': event.location,
