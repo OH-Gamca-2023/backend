@@ -193,7 +193,7 @@ class Rating(models.Model):
 
 
 class RatingHistory(models.Model):
-    rating = models.ForeignKey(Rating, on_delete=models.CASCADE)
+    rating = models.ForeignKey(Rating, on_delete=models.DO_NOTHING)
     stars = models.DecimalField(max_digits=3, decimal_places=1)
     detail = models.CharField(max_length=2000, blank=True, null=True)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
