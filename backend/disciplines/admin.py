@@ -28,6 +28,7 @@ class ResultInline(admin.TabularInline):
     model = Result
     extra = 0
     show_change_link = True
+    autocomplete_fields = ('categories', 'grades')
 
 
 @admin.register(Discipline)
@@ -196,7 +197,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'discipline', 'get_grades', 'autofill', 'get_placements')
     list_filter = ('discipline', 'grades')
     search_fields = ('discipline__name',)
-    autocomplete_fields = ('discipline',)
+    autocomplete_fields = ('discipline', 'categories', 'grades')
 
     @admin.display(description='Grades')
     def get_grades(self, obj):

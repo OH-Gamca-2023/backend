@@ -34,7 +34,7 @@ class Event(models.Model):
     start_time = models.TimeField("Čas začiatku", blank=False, null=False)
     end_time = models.TimeField("Čas konca", blank=True, null=True)
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
-    category = models.ForeignKey("disciplines.Category", verbose_name="Kategória", on_delete=models.CASCADE)
+    category = models.ForeignKey("disciplines.Category", verbose_name="Kategória", on_delete=models.CASCADE, blank=True, null=True)
     only_staff = models.BooleanField("Viditeľné len s dodatočným povolením", default=False)
 
     def __str__(self):

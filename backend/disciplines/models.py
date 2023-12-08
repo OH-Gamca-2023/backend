@@ -45,7 +45,7 @@ class Discipline(models.Model):
     end_time = models.TimeField("Čas konca", blank=True, null=True)
     location = models.CharField("Miesto", max_length=100, blank=True, null=True)
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategória", blank=True, null=True)
     target_grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Cielené stupne",
                                            limit_choices_to={'competing': True})
 
@@ -99,10 +99,16 @@ class Result(models.Model):
     grades = models.ManyToManyField('users.Grade', blank=True, verbose_name="Stupne",
                                     help_text="Stupne z ktorých triedy sa mali v disciplíne zúčastniť.",
                                     limit_choices_to={'competing': True})
-    autofill = models.BooleanField("Automatické vyplnenie", default=True, help_text="Automaticky doplní všetky "
-                                                                                    "triedy zo zvolených stupňov. "
-                                                                                    "Doplnené triedy budú považované "
-                                                                                    "za nezúčastnené.")
+    categories = models.ManyToManyField(Category, blank=True, verbose_name="Kategórie",
+                                        help_text="Kategórie, ktoré sa zobrazia pri výsledkoch. Nechajte prázdne "
+                                                  "ak si nie ste istý čo robíte.")
+    autofill = models.BooleanField("Automatické vyplnenie", default=True,
+                                   help_text="Automaticky doplní všetky triedy zo zvolených stupňov. Doplnené triedy "
+                                             "budú považované za nezúčastnené. Zároveň nedovolí pridať žiadnu súťažnú "
+                                             "triedu, ktorá nie je zo zvolených stupňov.")
+    group_identical = models.BooleanField("Zoskupiť rovnaké výsledky", default=True,
+                                          help_text="Výsledky s rovnakým počtom bodov budú zoskupené do jednej "
+                                                    "kolónky.")
 
     class Meta:
         verbose_name_plural = 'výsledkovky'

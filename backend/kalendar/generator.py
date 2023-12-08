@@ -152,7 +152,7 @@ def serialize_discipline(discipline, categories, grades):
         'category': {
             'id': discipline.category.id,
             'name': discipline.category.name,
-        },
+        } if discipline.category else None,
         'grades': [grades[grade.id] for grade in discipline.target_grades.all()],
     }
 
@@ -171,7 +171,7 @@ def serialize_event(event):
         'category': {
             'id': event.category.id,
             'name': event.category.name,
-        },
+        } if event.category else None,
         'grades': [],  # Events don't have grades
     }
 
@@ -190,7 +190,7 @@ def serialize_json_calendar(disciplines, cal_id, description="Kalendár discipl�
         d['start_date'] = d['date']  # Compatibility with old format, TODO: remove
         d['start_time'] = d['start_time'].strftime("%H:%M") if d['start_time'] is not None else None
         d['end_time'] = d['end_time'].strftime("%H:%M") if d['end_time'] is not None else None
-        d['category'] = d['category']['id']
+        d['category'] = d['category']['id'] if d['category'] is not None else -1
         cal['events'].append(d)
     return json.dumps(cal)
 
@@ -223,7 +223,7 @@ def serialize_ical_calendar(events, cal_id, description="Kalendár disciplín"):
         if event['location'] is not None:
             ical_event += "LOCATION:" + event['location'] + "\n"
 
-        ical_event += "CLASS:" + event['category']['name'] + "\n"
+        ical_event += "CLASS:" + (event['category']['name'] if event['category'] is not None else "Ostatné") + "\n"
         if len(event['grades']) > 0:
             ical_event += "CATEGORIES:" + ",".join(event['grades']) + "\n"
         ical_event += "END:VEVENT\n"
